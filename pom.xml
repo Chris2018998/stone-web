@@ -2,12 +2,12 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.github.chris2018998</groupId>
-    <artifactId>beecp-spring-boot-starter</artifactId>
+    <groupId>io.github.chris2018998</groupId>
+    <artifactId>stone-web</artifactId>
     <version>1.7.0</version>
-    <name>beecp-starter</name>
-    <url>https://github.com/Chris2018998/BeeCP-Starter https://gitee.com/Chris2018998/BeeCP-Starter</url>
-    <description>beecp starter on springboot</description>
+    <name>stone-web</name>
+    <url>https://github.com/Chris2018998/stone-web</url>
+    <description>stone web</description>
     <properties>
         <gpg.skip>false</gpg.skip>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -23,12 +23,12 @@
         <developer>
             <name>Chris2018998</name>
             <email>Chris2018998@tom.com</email>
-            <url>https://github.com/Chris2018998/BeeCP-Starter</url>
+            <url>https://github.com/Chris2018998/stone-web</url>
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:git@github.com:Chris2018998/BeeCP-Starter.git</connection>
-        <developerConnection>scm:git:git@github.com:Chris2018998/BeeCP-Starter.git</developerConnection>
+        <connection>scm:git:git@github.com:Chris2018998/stone-web.git</connection>
+        <developerConnection>scm:git:git@github.com:Chris2018998/stone-web.git</developerConnection>
         <url>https://github.com/Chris2018998/BeeCP-Starter</url>
     </scm>
 
