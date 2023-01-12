@@ -21,7 +21,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.Order;
-import org.stone.beecp.springboot.annotation.DsId;
+import org.stone.beecp.springboot.annotation.BeeDsId;
 
 import static org.stone.util.CommonUtil.isBlank;
 
@@ -43,7 +43,7 @@ public class CombineDataSourceAspect {
     }
 
     //*********************************aspect methods begin **********************************************************//
-    @Pointcut("@annotation(org.stone.beecp.springboot.annotation.DsId)")
+    @Pointcut("@annotation(org.stone.beecp.springboot.annotation.BeeDsId)")
     public void pointcut() {
         //do nothing
     }
@@ -51,7 +51,7 @@ public class CombineDataSourceAspect {
     @Around("pointcut()")
     public Object setDataSourceId(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        DsId annotation = methodSignature.getMethod().getAnnotation(DsId.class);
+        BeeDsId annotation = methodSignature.getMethod().getAnnotation(BeeDsId.class);
         String dsId = annotation.value();
 
         try {

@@ -21,9 +21,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.stone.beecp.springboot.SpringBootRestResponse;
-import org.stone.beecp.springboot.annotation.DsId;
-import org.stone.beecp.springboot.annotation.EnableBeeDsMonitor;
+import org.stone.beecp.springboot.annotation.BeeDsId;
 import org.stone.beecp.springboot.annotation.EnableBeeDs;
+import org.stone.beecp.springboot.annotation.EnableBeeDsMonitor;
 import org.stone.beecp.springboot.factory.SpringBootDataSourceException;
 import org.stone.beecp.test.util.ServerSideUtil;
 
@@ -90,7 +90,7 @@ public class MultiDsController {
     }
 
     @GetMapping("/testGetConnection1")
-    @DsId("ds1")
+    @BeeDsId("ds1")
     public SpringBootRestResponse testCombineDs1() throws Exception {
         try {
             return new SpringBootRestResponse(CODE_SUCCESS, ServerSideUtil.testGetConnection(combineDs), "OK");
@@ -100,7 +100,7 @@ public class MultiDsController {
     }
 
     @GetMapping("/testGetConnection2")
-    @DsId("ds2")
+    @BeeDsId("ds2")
     public SpringBootRestResponse testCombineDs2() throws Exception {
         try {
             return new SpringBootRestResponse(CODE_SUCCESS, ServerSideUtil.testGetConnection(combineDs), "OK");
@@ -110,7 +110,7 @@ public class MultiDsController {
     }
 
     @GetMapping("/testExecSQL1")
-    @DsId("ds1")
+    @BeeDsId("ds1")
     public SpringBootRestResponse testExecSQL1(String sql, String type, String slowInd) throws Exception {
         try {
             return new SpringBootRestResponse(CODE_SUCCESS, ServerSideUtil.testSQL(combineDs, sql, type, slowInd), "OK");
@@ -120,7 +120,7 @@ public class MultiDsController {
     }
 
     @GetMapping("/testExecSQL2")
-    @DsId("ds2")
+    @BeeDsId("ds2")
     public SpringBootRestResponse testExecSQL2(String sql, String type, String slowInd) throws Exception {
         try {
             return new SpringBootRestResponse(CODE_SUCCESS, ServerSideUtil.testSQL(combineDs, sql, type, slowInd), "OK");
