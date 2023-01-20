@@ -23,8 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.stone.springboot.annotation.DsId;
 import org.stone.springboot.annotation.EnableDs;
 import org.stone.springboot.annotation.EnableMonitor;
-import org.stone.springboot.factory.SpringBootDataSourceException;
 import org.stone.springboot.controller.RestResponse;
+import org.stone.springboot.factory.SpringBootDataSourceException;
 import org.stone.springboot.test.util.ServerSideUtil;
 
 import javax.sql.DataSource;
