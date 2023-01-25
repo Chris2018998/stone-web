@@ -42,7 +42,7 @@ public class StatementTrace {
     private boolean slowInd;
     private boolean successInd;
     private boolean alertedInd;
-    private Throwable failCause;
+    private String failCause;
     private String methodName;
 
     StatementTrace(String dsId, String dsUUID, String sql, String statementType) {
@@ -141,11 +141,11 @@ public class StatementTrace {
         this.alertedInd = alertedInd;
     }
 
-    public Throwable getFailCause() {
+    public String getFailCause() {
         return failCause;
     }
 
-    public void setFailCause(Throwable failCause) {
+    public void setFailCause(String failCause) {
         this.failCause = failCause;
     }
 
