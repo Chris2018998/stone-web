@@ -7,7 +7,7 @@
  *
  * Project Licensed under GNU Lesser General Public License v2.1.
  */
-package org.stone.beecp.boot.datasource.sqlWall;
+package org.stone.springboot.sqlWall;
 
 /**
  * DB Object access permit definition

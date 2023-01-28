@@ -15,6 +15,7 @@
  */
 package org.stone.springboot.sqlTrace;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.stone.springboot.SpringBootDataSourceUtil;
 
 import java.util.Date;
@@ -42,7 +43,8 @@ public class StatementTrace {
     private boolean slowInd;
     private boolean successInd;
     private boolean alertedInd;
-    private String failCause;
+    @JsonIgnore
+    private Throwable failedCause;
     private String methodName;
 
     StatementTrace(String dsId, String dsUUID, String sql, String statementType) {
@@ -141,12 +143,12 @@ public class StatementTrace {
         this.alertedInd = alertedInd;
     }
 
-    public String getFailCause() {
-        return failCause;
+    public Throwable getFailedCause() {
+        return failedCause;
     }
 
-    public void setFailCause(String failCause) {
-        this.failCause = failCause;
+    public void setFailedCause(Throwable failedCause) {
+        this.failedCause = failedCause;
     }
 
     public String getMethodName() {

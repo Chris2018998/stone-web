@@ -148,11 +148,11 @@ public class SpringBootDataSourceManager {
             vo.setSuccessInd(false);
             Throwable failedCause = e.getCause();
             if (failedCause == null) failedCause = e;
-            vo.setFailCause(failedCause.getClass() + ":" + failedCause.getMessage());
+            vo.setFailedCause(failedCause);
             throw failedCause;
         } catch (Throwable e) {
             vo.setSuccessInd(false);
-            vo.setFailCause(e.getClass() + ":" + e.getMessage());
+            vo.setFailedCause(e);
             throw e;
         } finally {
             Date endDate = new Date();
