@@ -28,10 +28,10 @@ import java.util.logging.Logger;
  * @author Chris Liao
  */
 public final class CombineDataSource implements DataSource {
-    private final ThreadLocal<RegisteredDataSource> dsLocal;
+    private final ThreadLocal<SpringDataSource> dsLocal;
     private boolean isClosed = false;
 
-    CombineDataSource(ThreadLocal<RegisteredDataSource> dsLocal) {
+    CombineDataSource(ThreadLocal<SpringDataSource> dsLocal) {
         this.dsLocal = dsLocal;
     }
 
@@ -51,9 +51,9 @@ public final class CombineDataSource implements DataSource {
         return getCurrentDataSource().getConnection(username, password);
     }
 
-    private RegisteredDataSource getCurrentDataSource() throws SQLException {
+    private SpringDataSource getCurrentDataSource() throws SQLException {
         if (isClosed) throw new SQLException("DataSource has closed");
-        RegisteredDataSource ds = dsLocal.get();
+        SpringDataSource ds = dsLocal.get();
         if (ds == null) throw new SQLException("DataSource not exists");
         return ds;
     }

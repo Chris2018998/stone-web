@@ -20,8 +20,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.stone.beecp.BeeDataSource;
-import org.stone.springboot.RegisteredDataSource;
-import org.stone.springboot.StoneSpringbootConfig;
+import org.stone.springboot.SpringDataSource;
+import org.stone.springboot.StoneMonitorConfig;
 import org.stone.springboot.datasource.factory.BeeDataSourceFactory;
 
 import javax.sql.DataSource;
@@ -53,14 +53,14 @@ public class SingleDataSourceRegister {
         if (isBlank(dsId)) dsId = "beeDataSource";//default ds Id
 
         //2:read datasource controller config
-        StoneSpringbootConfig dataSourceMonitorConfig = SpringBootDataSourceUtil.readMonitorConfig(environment);
+        StoneMonitorConfig dataSourceMonitorConfig = SpringBootDataSourceUtil.readMonitorConfig(environment);
 
         //3:setup controller config
         SpringBootDataSourceManager.getInstance().setupSqlTrace(dataSourceMonitorConfig);
 
         //4:create BeeDataSource
         DataSource ds = new BeeDataSourceFactory().createDataSource(SpringBootDataSourceUtil.Config_DS_Prefix, dsId, environment);
-        RegisteredDataSource springDs = new RegisteredDataSource(dsId, ds, false);
+        SpringDataSource springDs = new SpringDataSource(dsId, ds, false);
         SpringBootDataSourceManager.getInstance().addSpringBootDataSource(springDs);
 
         return springDs;

@@ -21,8 +21,8 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.env.Environment;
 import org.stone.beecp.BeeDataSource;
-import org.stone.springboot.RegisteredDataSource;
-import org.stone.springboot.StoneSpringbootConfig;
+import org.stone.springboot.SpringDataSource;
+import org.stone.springboot.StoneMonitorConfig;
 import org.stone.springboot.datasource.factory.BeeDataSourceFactory;
 import org.stone.springboot.datasource.factory.SpringBootDataSourceException;
 import org.stone.springboot.datasource.factory.SpringBootDataSourceFactory;
@@ -74,7 +74,7 @@ public class SpringBootDataSourceUtil {
     private static final Logger log = LoggerFactory.getLogger(SpringBootDataSourceUtil.class);
 
     private static SpringBootJsonTool jsonTool;
-    private static StoneSpringbootConfig monitorConfig;
+    private static StoneMonitorConfig monitorConfig;
     //***************************************************************************************************************//
     //                                1: spring register or base (3)                                                //
     //***************************************************************************************************************//
@@ -137,10 +137,10 @@ public class SpringBootDataSourceUtil {
     //***************************************************************************************************************//
     //                                2: Spring Boot dataSource create(5)                                            //
     //***************************************************************************************************************//
-    public synchronized static StoneSpringbootConfig readMonitorConfig(Environment environment) {
+    public synchronized static StoneMonitorConfig readMonitorConfig(Environment environment) {
         if (monitorConfig == null) {
             //1:create sql sqlTrace config instance
-            monitorConfig = new StoneSpringbootConfig();
+            monitorConfig = new StoneMonitorConfig();
             //2:set Properties
             setConfigPropertiesValue(monitorConfig, Config_DS_Prefix, null, environment);
             //3:create global json tool()
@@ -149,9 +149,9 @@ public class SpringBootDataSourceUtil {
         return monitorConfig;
     }
 
-    static RegisteredDataSource createSpringBootDataSource(String dsPrefix, String dsId, Environment environment) {
+    static SpringDataSource createSpringBootDataSource(String dsPrefix, String dsId, Environment environment) {
         String jndiNameTex = getConfigValue(dsPrefix, Config_DS_Jndi, environment);
-        RegisteredDataSource ds;
+        SpringDataSource ds;
         if (!isBlank(jndiNameTex)) {//jndi dataSource
             ds = lookupJndiDataSource(dsId, jndiNameTex);
         } else {//independent type
@@ -163,11 +163,11 @@ public class SpringBootDataSourceUtil {
         return ds;
     }
 
-    private static RegisteredDataSource lookupJndiDataSource(String dsId, String jndiName) {
+    private static SpringDataSource lookupJndiDataSource(String dsId, String jndiName) {
         try {
             Object namingObj = new InitialContext().lookup(jndiName);
             if (namingObj instanceof DataSource) {
-                return new RegisteredDataSource(dsId, (DataSource) namingObj, true);
+                return new SpringDataSource(dsId, (DataSource) namingObj, true);
             } else {
                 throw new SpringBootDataSourceException("DataSource(" + dsId + ")-Jndi Name(" + jndiName + ") is not a data source object");
             }
@@ -176,7 +176,7 @@ public class SpringBootDataSourceUtil {
         }
     }
 
-    private static RegisteredDataSource createDataSourceByDsType(String dsPrefix, String dsId, Environment environment) {
+    private static SpringDataSource createDataSourceByDsType(String dsPrefix, String dsId, Environment environment) {
         //1:load dataSource class
         String dsClassName = getConfigValue(dsPrefix, Config_DS_Type, environment);
         dsClassName = isBlank(dsClassName) ? BeeCP_DS_Class_Name : dsClassName.trim();
@@ -209,7 +209,7 @@ public class SpringBootDataSourceUtil {
             throw new SpringBootDataSourceException("DataSource(" + dsId + ")-target type is not a valid data source type");
         }
 
-        return new RegisteredDataSource(dsId, ds, false);
+        return new SpringDataSource(dsId, ds, false);
     }
 
     private static Object createInstanceByClassName(String dsId, Class objClass) {

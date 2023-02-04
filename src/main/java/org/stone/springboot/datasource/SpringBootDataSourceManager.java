@@ -18,8 +18,8 @@ package org.stone.springboot.datasource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.stone.beecp.pool.ConnectionPoolMonitorVo;
-import org.stone.springboot.RegisteredDataSource;
-import org.stone.springboot.StoneSpringbootConfig;
+import org.stone.springboot.SpringDataSource;
+import org.stone.springboot.StoneMonitorConfig;
 import org.stone.springboot.sqlTrace.StatementTrace;
 import org.stone.springboot.sqlTrace.StatementTraceAlert;
 import org.stone.springboot.storage.RedisPushTask;
@@ -43,7 +43,7 @@ import static org.stone.util.CommonUtil.isBlank;
  */
 public class SpringBootDataSourceManager {
     private final static SpringBootDataSourceManager instance = new SpringBootDataSourceManager();
-    private final Map<String, RegisteredDataSource> dsMap;
+    private final Map<String, SpringDataSource> dsMap;
     private final ScheduledThreadPoolExecutor timerExecutor;
     private final Logger Log = LoggerFactory.getLogger(SpringBootDataSourceManager.class);
 
@@ -67,17 +67,17 @@ public class SpringBootDataSourceManager {
         return instance;
     }
 
-    RegisteredDataSource getSpringBootDataSource(String dsId) {
+    SpringDataSource getSpringBootDataSource(String dsId) {
         return dsMap.get(dsId);
     }
 
-    void addSpringBootDataSource(RegisteredDataSource ds) {
+    void addSpringBootDataSource(SpringDataSource ds) {
         dsMap.put(ds.getDsId(), ds);
         ds.setTraceSql(sqlTrace);
     }
 
     //create sql sqlTrace pool
-    void setupSqlTrace(StoneSpringbootConfig config) {
+    void setupSqlTrace(StoneMonitorConfig config) {
         if (sqlTrace = config.isSqlTrace()) {
             this.sqlShow = config.isSqlShow();
             this.sqlExecSlowTime = config.getSqlExecSlowTime();
@@ -104,7 +104,7 @@ public class SpringBootDataSourceManager {
 
     //clear pool
     public void clearDsConnections(String dsId) {
-        RegisteredDataSource ds = dsMap.get(dsId);
+        SpringDataSource ds = dsMap.get(dsId);
         if (ds != null) ds.clearAllConnections();
     }
 
@@ -116,10 +116,10 @@ public class SpringBootDataSourceManager {
     //get pool connection controller
     public List<ConnectionPoolMonitorVo> getPoolMonitorVoList() {
         List<ConnectionPoolMonitorVo> poolMonitorVoList = new ArrayList<>(dsMap.size());
-        Iterator<RegisteredDataSource> iterator = dsMap.values().iterator();
+        Iterator<SpringDataSource> iterator = dsMap.values().iterator();
 
         while (iterator.hasNext()) {
-            RegisteredDataSource ds = iterator.next();
+            SpringDataSource ds = iterator.next();
             ConnectionPoolMonitorVo vo = ds.getPoolMonitorVo();
             if (vo == null) continue;
             if (vo.getPoolState() == 3) {//POOL_CLOSED

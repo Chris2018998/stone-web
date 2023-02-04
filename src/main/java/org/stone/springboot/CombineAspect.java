@@ -36,23 +36,23 @@ import static org.stone.util.CommonUtil.isBlank;
 public final class CombineAspect {
     private String primaryDsId;
     private String primaryOsId;
-    private RegisteredTraceManager registeredManager;
-    private ThreadLocal<RegisteredDataSource> dsLocal;
-    private ThreadLocal<RegisteredObjectSource> osLocal;
+    private StoneMonitorManager registeredManager;
+    private ThreadLocal<SpringDataSource> dsLocal;
+    private ThreadLocal<SpringObjectSource> osLocal;
 
     //***************************************************************************************************************//
     //                                     1: properties set(3)                                                      //
     //***************************************************************************************************************/
-    void setStoneRegisteredManager(RegisteredTraceManager registeredManager) {
+    void setStoneRegisteredManager(StoneMonitorManager registeredManager) {
         this.registeredManager = registeredManager;
     }
 
-    void setDsThreadLocal(String primaryDsId, ThreadLocal<RegisteredDataSource> dsLocal) {
+    void setDsThreadLocal(String primaryDsId, ThreadLocal<SpringDataSource> dsLocal) {
         this.dsLocal = dsLocal;
         this.primaryDsId = primaryDsId;
     }
 
-    void setOsThreadLocal(String primaryOsId, ThreadLocal<RegisteredObjectSource> osLocal) {
+    void setOsThreadLocal(String primaryOsId, ThreadLocal<SpringObjectSource> osLocal) {
         this.osLocal = osLocal;
         this.primaryOsId = primaryOsId;
     }

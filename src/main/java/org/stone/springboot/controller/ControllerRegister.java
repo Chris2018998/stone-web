@@ -24,7 +24,7 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
-import org.stone.springboot.StoneSpringbootConfig;
+import org.stone.springboot.StoneMonitorConfig;
 import org.stone.springboot.datasource.SpringBootDataSourceUtil;
 
 import javax.servlet.Filter;
@@ -49,7 +49,7 @@ public class ControllerRegister implements EnvironmentAware, ImportBeanDefinitio
     //Register controller bean to ioc
     public final void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         //1:read datasource controller
-        StoneSpringbootConfig config = SpringBootDataSourceUtil.readMonitorConfig(environment);
+        StoneMonitorConfig config = SpringBootDataSourceUtil.readMonitorConfig(environment);
 
         //2:register controller controller
         String resetControllerRegName = ConsoleController.class.getName();

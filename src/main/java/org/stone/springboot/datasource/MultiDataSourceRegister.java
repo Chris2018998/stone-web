@@ -25,8 +25,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.stone.springboot.CombineAspect;
 import org.stone.springboot.CombineDataSource;
-import org.stone.springboot.RegisteredDataSource;
-import org.stone.springboot.StoneSpringbootConfig;
+import org.stone.springboot.SpringDataSource;
+import org.stone.springboot.StoneMonitorConfig;
 import org.stone.springboot.datasource.factory.SpringBootDataSourceException;
 
 import java.util.*;
@@ -72,13 +72,13 @@ public class MultiDataSourceRegister implements EnvironmentAware, ImportBeanDefi
         List<String> dsIdList = getDsIdList(environment, registry);
 
         //2:read datasource controller config
-        StoneSpringbootConfig dataSourceMonitorConfig = SpringBootDataSourceUtil.readMonitorConfig(environment);
+        StoneMonitorConfig dataSourceMonitorConfig = SpringBootDataSourceUtil.readMonitorConfig(environment);
 
         //3:read combine-ds config
         Properties combineProperties = getCombineDsInfo(dsIdList, environment, registry);
 
         //4:create dataSources by id list
-        Map<String, RegisteredDataSource> dsMap = createDataSources(dsIdList, environment);
+        Map<String, SpringDataSource> dsMap = createDataSources(dsIdList, environment);
 
         //5:read sql sqlTrace config
         SpringBootDataSourceManager.getInstance().setupSqlTrace(dataSourceMonitorConfig);
@@ -157,8 +157,8 @@ public class MultiDataSourceRegister implements EnvironmentAware, ImportBeanDefi
      * @param environment springboot environment
      * @return dataSource holder map
      */
-    private Map<String, RegisteredDataSource> createDataSources(List<String> dsIdList, Environment environment) {
-        Map<String, RegisteredDataSource> dsMap = new LinkedHashMap<>(dsIdList.size());
+    private Map<String, SpringDataSource> createDataSources(List<String> dsIdList, Environment environment) {
+        Map<String, SpringDataSource> dsMap = new LinkedHashMap<>(dsIdList.size());
         try {
             for (String dsId : dsIdList) {
                 String dsPrefix = SpringBootDataSourceUtil.Config_DS_Prefix + "." + dsId;
@@ -166,7 +166,7 @@ public class MultiDataSourceRegister implements EnvironmentAware, ImportBeanDefi
             }
             return dsMap;
         } catch (Throwable e) {//failed then close all created dataSource
-            for (RegisteredDataSource ds : dsMap.values())
+            for (SpringDataSource ds : dsMap.values())
                 ds.close();
             throw new SpringBootDataSourceException("multi-DataSource created failed", e);
         }
@@ -177,16 +177,16 @@ public class MultiDataSourceRegister implements EnvironmentAware, ImportBeanDefi
      *
      * @param dsMap datasource list
      */
-    private void registerDataSources(Map<String, RegisteredDataSource> dsMap, Properties combineProperties, BeanDefinitionRegistry registry) {
+    private void registerDataSources(Map<String, SpringDataSource> dsMap, Properties combineProperties, BeanDefinitionRegistry registry) {
         String combineDsId = combineProperties.getProperty(SpringBootDataSourceUtil.Config_DS_CombineId);
         String primaryDsId = combineProperties.getProperty(SpringBootDataSourceUtil.Config_DS_Combine_PrimaryDs);
 
-        for (RegisteredDataSource ds : dsMap.values())
+        for (SpringDataSource ds : dsMap.values())
             registerDataSourceBean(ds, registry);
 
         //register combine DataSource
         if (!isBlank(combineDsId) && !isBlank(primaryDsId)) {
-            ThreadLocal<RegisteredDataSource> dsThreadLocal = new ThreadLocal<>();
+            ThreadLocal<SpringDataSource> dsThreadLocal = new ThreadLocal<>();
 
             GenericBeanDefinition define = new GenericBeanDefinition();
             define.setBeanClass(CombineDataSource.class);
@@ -204,7 +204,7 @@ public class MultiDataSourceRegister implements EnvironmentAware, ImportBeanDefi
     }
 
     //4.1:register dataSource to Spring bean container
-    private void registerDataSourceBean(RegisteredDataSource springDs, BeanDefinitionRegistry registry) {
+    private void registerDataSourceBean(SpringDataSource springDs, BeanDefinitionRegistry registry) {
         GenericBeanDefinition define = new GenericBeanDefinition();
         define.setPrimary(springDs.isPrimary());
         define.setBeanClass(springDs.getClass());
