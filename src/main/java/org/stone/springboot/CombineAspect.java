@@ -26,7 +26,7 @@ import org.stone.springboot.annotation.BeeDsId;
 import static org.stone.util.CommonUtil.isBlank;
 
 /*
- *  combine Aspect
+ * combine Aspect
  *
  *  @author Chris Liao
  */

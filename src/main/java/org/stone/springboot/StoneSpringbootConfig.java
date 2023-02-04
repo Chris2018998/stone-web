@@ -25,24 +25,24 @@ import static org.stone.util.CommonUtil.isBlank;
 /*
  * stone springboot config
  *
- * spring.datasource.consoleUserId=admin
- * spring.datasource.consolePassword=admin
+ * spring.stone.consoleUserId=admin
+ * spring.stone.consolePassword=admin
  *
- * spring.datasource.sql-trace=true
- * spring.datasource.sql-show=true
- * spring.datasource.sql-trace-max-size=100
- * spring.datasource.sql-exec-slow-time=5000
- * spring.datasource.sql-trace-timeout=60000
- * spring.datasource.sql-exec-alert-action=xxxxx
- * spring.datasource.sql-trace-timeout-scan-period=18000
+ * spring.stone.sql-trace=true
+ * spring.stone.sql-show=true
+ * spring.stone.sql-trace-max-size=100
+ * spring.stone.sql-exec-slow-time=5000
+ * spring.stone.sql-trace-timeout=60000
+ * spring.stone.sql-exec-alert-action=xxxxx
+ * spring.stone.sql-trace-timeout-scan-period=18000
  *
- * spring.datasource.redis-host=192.168.1.1
- * spring.datasource.redis-port=6379
- * spring.datasource.redis-password=redis
- * spring.datasource.redis-send-period=18000
- * spring.datasource.redis-read-period=18000
+ * spring.stone.redis-host=192.168.1.1
+ * spring.stone.redis-port=6379
+ * spring.stone.redis-password=redis
+ * spring.stone.redis-send-period=18000
+ * spring.stone.redis-read-period=18000
  *
- * spring.datasource.jsonToolClassName=JackSonTool
+ * spring.stone.jsonToolClassName=JackSonTool
  *
  * @author Chris Liao
  */
@@ -51,15 +51,15 @@ public final class StoneSpringbootConfig {
     //***************************************************************************************************************//
     //                                             1: console userId config                                          //
     //***************************************************************************************************************//
-    private String consoleUserId;
-    private String consolePassword;
+    private String consoleUserId = "admin";
+    private String consolePassword = "admin";
     private String loggedInSuccessTagName = ConsoleController.class.getName();
 
     //***************************************************************************************************************//
     //                                             2: sql trace config                                               //
     //***************************************************************************************************************//
-    private boolean sqlShow;
-    private boolean sqlTrace;
+    private boolean sqlShow = true;
+    private boolean sqlTrace = true;
     private int sqlTraceMaxSize = 100;
     private long sqlExecSlowTime = TimeUnit.SECONDS.toMillis(6);
     private long sqlTraceTimeout = TimeUnit.MINUTES.toMillis(3);
