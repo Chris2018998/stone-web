@@ -25,8 +25,8 @@ import static org.stone.util.CommonUtil.isBlank;
 /*
  * stone springboot config
  *
- * spring.datasource.monitorUserId=admin
- * spring.datasource.monitorPassword=admin
+ * spring.datasource.consoleUserId=admin
+ * spring.datasource.consolePassword=admin
  *
  * spring.datasource.sql-trace=true
  * spring.datasource.sql-show=true
@@ -51,9 +51,9 @@ public final class StoneSpringbootConfig {
     //***************************************************************************************************************//
     //                                             1: console userId config                                          //
     //***************************************************************************************************************//
-    private String monitorUserId;
-    private String monitorPassword;
-    private String monitorLoggedInTagName = ConsoleController.class.getName();
+    private String consoleUserId;
+    private String consolePassword;
+    private String loggedInSuccessTagName = ConsoleController.class.getName();
 
     //***************************************************************************************************************//
     //                                             2: sql trace config                                               //
@@ -142,29 +142,29 @@ public final class StoneSpringbootConfig {
         if (sqlExecAlertAction != null) this.sqlExecAlertAction = sqlExecAlertAction;
     }
 
-    public String getMonitorUserId() {
-        return monitorUserId;
+    public String getConsoleUserId() {
+        return consoleUserId;
     }
 
-    public void setMonitorUserId(String monitorUserId) {
-        this.monitorUserId = monitorUserId;
+    public void setConsoleUserId(String consoleUserId) {
+        this.consoleUserId = consoleUserId;
     }
 
-    public String getMonitorPassword() {
-        return monitorPassword;
+    public String getConsolePassword() {
+        return consolePassword;
     }
 
-    public void setMonitorPassword(String monitorPassword) {
-        this.monitorPassword = monitorPassword;
+    public void setConsolePassword(String consolePassword) {
+        this.consolePassword = consolePassword;
     }
 
-    public String getMonitorLoggedInTagName() {
-        return monitorLoggedInTagName;
+    public String getLoggedInSuccessTagName() {
+        return loggedInSuccessTagName;
     }
 
-    public void setMonitorLoggedInTagName(String monitorLoggedInTagName) {
-        if (!isBlank(monitorLoggedInTagName))
-            this.monitorLoggedInTagName = monitorLoggedInTagName;
+    public void setLoggedInSuccessTagName(String loggedInSuccessTagName) {
+        if (!isBlank(loggedInSuccessTagName))
+            this.loggedInSuccessTagName = loggedInSuccessTagName;
     }
 
     public String getRedisHost() {

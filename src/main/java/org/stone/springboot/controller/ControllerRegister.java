@@ -58,9 +58,9 @@ public class ControllerRegister implements EnvironmentAware, ImportBeanDefinitio
             define.setBeanClass(ConsoleController.class);
             define.setPrimary(true);
             define.setInstanceSupplier(SpringBootDataSourceUtil.createSpringSupplier(new ConsoleController(
-                    config.getMonitorUserId(),
-                    config.getMonitorPassword(),
-                    config.getMonitorLoggedInTagName())));
+                    config.getConsoleUserId(),
+                    config.getConsolePassword(),
+                    config.getLoggedInSuccessTagName())));
             registry.registerBeanDefinition(resetControllerRegName, define);
             log.info("Register DataSource-restController({}) with id:{}", define.getBeanClassName(), resetControllerRegName);
         } else {
@@ -69,8 +69,8 @@ public class ControllerRegister implements EnvironmentAware, ImportBeanDefinitio
 
         //3: register controller controller filter
         String resetControllerFilterRegName = LoginedCheckFilter.class.getName();
-        if (isBlank(config.getMonitorUserId()) && !SpringBootDataSourceUtil.existsBeanDefinition(resetControllerFilterRegName, registry)) {
-            LoginedCheckFilter dsFilter = new LoginedCheckFilter(config.getMonitorUserId(), config.getMonitorLoggedInTagName());
+        if (isBlank(config.getConsoleUserId()) && !SpringBootDataSourceUtil.existsBeanDefinition(resetControllerFilterRegName, registry)) {
+            LoginedCheckFilter dsFilter = new LoginedCheckFilter(config.getConsoleUserId(), config.getLoggedInSuccessTagName());
             FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>(dsFilter);
             registration.setName(resetControllerFilterRegName);
             registration.addUrlPatterns("/stone/*");

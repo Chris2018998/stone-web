@@ -36,14 +36,14 @@ import static org.stone.util.CommonUtil.isBlank;
 public final class CombineAspect {
     private String primaryDsId;
     private String primaryOsId;
-    private StoneRegisteredManager registeredManager;
+    private RegisteredTraceManager registeredManager;
     private ThreadLocal<RegisteredDataSource> dsLocal;
     private ThreadLocal<RegisteredObjectSource> osLocal;
 
     //***************************************************************************************************************//
     //                                     1: properties set(3)                                                      //
     //***************************************************************************************************************/
-    void setStoneRegisteredManager(StoneRegisteredManager registeredManager) {
+    void setStoneRegisteredManager(RegisteredTraceManager registeredManager) {
         this.registeredManager = registeredManager;
     }
 
