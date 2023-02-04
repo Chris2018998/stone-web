@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.stone.beecp.pool.ConnectionPoolMonitorVo;
 import org.stone.beeop.pool.ObjectPoolMonitorVo;
-import org.stone.springboot.datasource.SpringBootDataSourceManager;
 import org.stone.springboot.datasource.SpringBootDataSourceUtil;
 import org.stone.springboot.sqlTrace.StatementTrace;
 import org.stone.springboot.sqlTrace.StatementTraceAlert;
@@ -45,7 +44,7 @@ import static org.stone.util.CommonUtil.isBlank;
 public final class StoneMonitorManager {
     private final Map<String, SpringDataSource> dsMap;
     private final Map<String, SpringObjectSource> osMap;
-    private final Logger Log = LoggerFactory.getLogger(SpringBootDataSourceManager.class);
+    private final Logger Log = LoggerFactory.getLogger(StoneMonitorManager.class);
     //private StoneSpringbootConfig traceConfig;
 
     private boolean sqlTrace;

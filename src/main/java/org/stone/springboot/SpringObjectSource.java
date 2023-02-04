@@ -28,7 +28,7 @@ import java.util.UUID;
 import static org.stone.springboot.datasource.SpringBootDataSourceUtil.tryToCloseDataSource;
 
 /**
- * sqlTrace datasource
+ * object source(only support beeop)
  *
  * @author Chris Liao
  */
@@ -65,11 +65,11 @@ public final class SpringObjectSource {
         return os.getObject();
     }
 
-    void close() {
+    public void close() {
         tryToCloseDataSource(os);
     }
 
-    void restartPool() {
+    public void restartPool() {
         if (poolRestartMethod != null) {
             try {
                 poolRestartMethod.invoke(os, false);

@@ -15,8 +15,6 @@
  */
 package org.stone.springboot.sqlTrace;
 
-import org.stone.springboot.datasource.SpringBootDataSourceManager;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.sql.Statement;

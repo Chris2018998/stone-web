@@ -13,22 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.annotation;
+package org.stone.springboot.factory;
 
-import org.springframework.context.annotation.Import;
-import org.stone.springboot.assembly.MultiDataSourceRegister;
+import org.springframework.core.env.Environment;
 
-import java.lang.annotation.*;
+import javax.sql.DataSource;
 
 /*
- *  Multi-DataSource annotation
+ *  Spring Boot DataSource Factory
  *
  *  @author Chris Liao
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Target(ElementType.TYPE)
-@Import(value = {MultiDataSourceRegister.class})
-public @interface EnableStone {
+public interface SpringBootDataSourceFactory {
+
+    /**
+     * create datasource by configuration
+     *
+     * @param environment SpringBoot environment
+     * @param dsId        configured data source id
+     * @param dsPrefix    configured prefix name
+     * @return data source instance
+     * @throws Exception when fail to set
+     */
+    DataSource createDataSource(String dsPrefix, String dsId, Environment environment) throws Exception;
 
 }

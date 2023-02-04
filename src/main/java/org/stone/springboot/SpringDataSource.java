@@ -119,11 +119,11 @@ public final class SpringDataSource implements DataSource {
             throw new SQLException("Wrapped object was not an instance of " + clazz);
     }
 
-    void close() {
+    public void close() {
         if (!jndiDs) tryToCloseDataSource(ds);
     }
 
-    void restartPool() {
+    public void restartPool() {
         if (poolRestartMethod != null) {
             try {
                 poolRestartMethod.invoke(ds, false);

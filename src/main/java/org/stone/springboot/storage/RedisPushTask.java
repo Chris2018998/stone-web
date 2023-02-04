@@ -15,7 +15,6 @@
  */
 package org.stone.springboot.storage;
 
-import org.stone.springboot.datasource.SpringBootDataSourceManager;
 import org.stone.springboot.datasource.SpringBootDataSourceUtil;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;

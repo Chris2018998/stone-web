@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.annotation;
-
-import org.springframework.context.annotation.Import;
-import org.stone.springboot.assembly.MultiDataSourceRegister;
-
-import java.lang.annotation.*;
+package org.stone.springboot.factory;
 
 /*
- *  Multi-DataSource annotation
+ *  Config Exception
  *
  *  @author Chris Liao
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Target(ElementType.TYPE)
-@Import(value = {MultiDataSourceRegister.class})
-public @interface EnableStone {
+public class SpringBootDataSourceException extends RuntimeException {
 
+    public SpringBootDataSourceException(String message) {
+        super(message);
+    }
+
+    public SpringBootDataSourceException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

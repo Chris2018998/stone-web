@@ -51,7 +51,7 @@ public class ControllerRegister implements EnvironmentAware, ImportBeanDefinitio
         //1:read datasource controller
         StoneMonitorConfig config = SpringBootDataSourceUtil.readMonitorConfig(environment);
 
-        //2:register controller controller
+        //2:assembly controller controller
         String resetControllerRegName = ConsoleController.class.getName();
         if (!SpringBootDataSourceUtil.existsBeanDefinition(resetControllerRegName, registry)) {
             GenericBeanDefinition define = new GenericBeanDefinition();
@@ -67,7 +67,7 @@ public class ControllerRegister implements EnvironmentAware, ImportBeanDefinitio
             log.error("BeanDefinition id {} already exists in spring context", resetControllerRegName);
         }
 
-        //3: register controller controller filter
+        //3: assembly controller controller filter
         String resetControllerFilterRegName = LoginedCheckFilter.class.getName();
         if (isBlank(config.getConsoleUserId()) && !SpringBootDataSourceUtil.existsBeanDefinition(resetControllerFilterRegName, registry)) {
             LoginedCheckFilter dsFilter = new LoginedCheckFilter(config.getConsoleUserId(), config.getLoggedInSuccessTagName());

@@ -18,7 +18,7 @@ package org.stone.springboot;
 import org.stone.beeop.BeeObjectHandle;
 
 /**
- * Combine object Source for Multi-ObjectSource
+ * Combine object Source(only support beeop)
  *
  * @author Chris Liao
  */
