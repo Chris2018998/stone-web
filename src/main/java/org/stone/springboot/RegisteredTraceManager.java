@@ -253,7 +253,7 @@ public final class RegisteredTraceManager {
         private final RegisteredTraceManager manager;
         private final LinkedList<StatementTrace> sqlAlertTempList;
 
-        public SqlTraceTimeoutTask(RegisteredTraceManager manager, long sqlTraceTimeout) {
+        SqlTraceTimeoutTask(RegisteredTraceManager manager, long sqlTraceTimeout) {
             this.manager = manager;
             this.sqlTraceTimeout = sqlTraceTimeout;
             this.sqlAlertTempList = new LinkedList<>();
