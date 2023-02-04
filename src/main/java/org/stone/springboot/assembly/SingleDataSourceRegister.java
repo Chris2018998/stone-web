@@ -22,7 +22,6 @@ import org.springframework.core.env.Environment;
 import org.stone.beecp.BeeDataSource;
 import org.stone.springboot.SpringDataSource;
 import org.stone.springboot.StoneMonitorConfig;
-import org.stone.springboot.datasource.SpringBootDataSourceUtil;
 import org.stone.springboot.factory.BeeDataSourceFactory;
 
 import javax.sql.DataSource;
@@ -40,7 +39,7 @@ import static org.stone.util.CommonUtil.isBlank;
  * spring.datasource.driverClassName=com.mysql.jdbc.Driver
  * spring.datasource.fairMode=true
  * spring.datasource.initialSize=10
- * spring.datasource.maxActive =10
+ * spring.datasource.maxActive=10
  *
  * @author Chris Liao
  */
@@ -54,10 +53,10 @@ public class SingleDataSourceRegister {
         if (isBlank(dsId)) dsId = "beeDataSource";//default ds Id
 
         //2:read datasource controller config
-        StoneMonitorConfig dataSourceMonitorConfig = SpringBootDataSourceUtil.readMonitorConfig(environment);
+        StoneMonitorConfig monitorConfig = SpringBootDataSourceUtil.readMonitorConfig(environment);
 
         //3:setup controller config
-        SpringBootDataSourceManager.getInstance().setupSqlTrace(dataSourceMonitorConfig);
+        SpringBootDataSourceManager.getInstance().setupSqlTrace(monitorConfig);
 
         //4:create BeeDataSource
         DataSource ds = new BeeDataSourceFactory().createDataSource(SpringBootDataSourceUtil.Config_DS_Prefix, dsId, environment);

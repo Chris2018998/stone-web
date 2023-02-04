@@ -28,17 +28,17 @@ public class StatementTraceUtil {
     private static final Class[] INTF_CallableStatement = new Class[]{CallableStatement.class};
     private static final ClassLoader classLoader = StatementTraceUtil.class.getClassLoader();
 
-    public static Connection createConnection(Connection delegate, String dsId, String dsUUID) {
+    public static Connection createConnection(Connection delegate, String dsId, String dsUUID, StatementTracePool statementPool) {
         return (Connection) Proxy.newProxyInstance(
                 classLoader,
                 INTF_Connection,
-                new ConnectionHandler(delegate, dsId, dsUUID));
+                new ConnectionHandler(delegate, dsId, dsUUID, statementPool));
     }
 
-    static Statement createStatementProxy(Statement delegate, String statementType, String dsId, String dsUUID, StatementTrace trace) {
+    static Statement createStatementProxy(Statement delegate, String statementType, String dsId, String dsUUID, StatementTrace trace, StatementTracePool statementPool) {
         return (Statement) Proxy.newProxyInstance(
                 classLoader,
                 INTF_CallableStatement,
-                new StatementHandler(delegate, statementType, dsId, dsUUID, trace));
+                new StatementHandler(delegate, statementType, dsId, dsUUID, trace, statementPool));
     }
 }

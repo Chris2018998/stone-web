@@ -20,12 +20,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.stone.springboot.datasource.SpringBootDataSourceUtil;
+import org.stone.springboot.StoneMonitorConfig;
+import org.stone.springboot.StoneMonitorManager;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 
+import static org.stone.springboot.assembly.SpringBootDataSourceUtil.stringEquals;
 import static org.stone.util.CommonUtil.isBlank;
 
 /**
@@ -36,19 +38,12 @@ import static org.stone.util.CommonUtil.isBlank;
 @Controller
 public class ConsoleController {
     private final static String consolePage = "/stone/console.html";
-    //configured login userId
-    private final String userId;
-    //configured login password
-    private final String password;
-    //session tag name of success login
-    private final String loggedInTagName;
-    //registered ds/os manager
-    private final SpringBootDataSourceManager dsManager = SpringBootDataSourceManager.getInstance();
+    private final StoneMonitorConfig monitorConfig;
+    private final StoneMonitorManager stoneMonitorManager;
 
-    ConsoleController(String userId, String password, String loggedInTagName) {
-        this.userId = userId;
-        this.password = password;
-        this.loggedInTagName = loggedInTagName;
+    public ConsoleController(StoneMonitorConfig monitorConfig, StoneMonitorManager stoneMonitorManager) {
+        this.monitorConfig = monitorConfig;
+        this.stoneMonitorManager = stoneMonitorManager;
     }
 
     //***************************************************************************************************************//
@@ -71,16 +66,16 @@ public class ConsoleController {
     @PostMapping("/stone/login")
     public RestfulResponse login(@RequestBody Map<String, String> paramMap, HttpServletRequest req) {
         HttpSession session = req.getSession();
-        if ("Y".equals(session.getAttribute(loggedInTagName)))//has login
+        if ("Y".equals(session.getAttribute(monitorConfig.getLoggedInSuccessTagName())))//has login
             return new RestfulResponse(RestfulResponse.CODE_SUCCESS, null, "Login Success");
-        if (isBlank(userId))
+        if (isBlank(monitorConfig.getConsoleUserId()))
             return new RestfulResponse(RestfulResponse.CODE_SUCCESS, null, "Login Success");
 
         try {
             String userId = paramMap.get("userId");
             String password = paramMap.get("password");
-            if (this.userId.equals(userId) && SpringBootDataSourceUtil.stringEquals(this.password, password)) {//checked pass
-                session.setAttribute(loggedInTagName, "Y");
+            if (stringEquals(monitorConfig.getConsoleUserId(), userId) && stringEquals(monitorConfig.getConsolePassword(), password)) {//checked pass
+                session.setAttribute(monitorConfig.getLoggedInSuccessTagName(), "Y");
                 return new RestfulResponse(RestfulResponse.CODE_SUCCESS, null, "Login Success");
             } else
                 return new RestfulResponse(RestfulResponse.CODE_FAILED, null, "Login Failed");
@@ -96,7 +91,7 @@ public class ConsoleController {
     @PostMapping("/stone/getDsPoolList")
     public RestfulResponse getDataSourceList() {
         try {
-            return new RestfulResponse(RestfulResponse.CODE_SUCCESS, dsManager.getPoolMonitorVoList(), "OK");
+            return new RestfulResponse(RestfulResponse.CODE_SUCCESS, stoneMonitorManager.getDsPoolMonitorVoList(), "OK");
         } catch (Throwable e) {
             return new RestfulResponse(RestfulResponse.CODE_FAILED, e, "Failed to get datasource pool info");
         }
@@ -106,7 +101,7 @@ public class ConsoleController {
     @PostMapping("/stone/getSqlTraceList")
     public RestfulResponse getSqTraceList() {
         try {
-            return new RestfulResponse(RestfulResponse.CODE_SUCCESS, dsManager.getSqlExecutionList(), "OK");
+            return new RestfulResponse(RestfulResponse.CODE_SUCCESS, stoneMonitorManager.getSqlExecutionList(), "OK");
         } catch (Throwable e) {
             return new RestfulResponse(RestfulResponse.CODE_FAILED, e, "Failed to get traced sql list");
         }
@@ -117,7 +112,7 @@ public class ConsoleController {
     public RestfulResponse clearDsConnections(@RequestBody Map<String, String> parameterMap) {
         try {
             String dsId = parameterMap != null ? parameterMap.get("dsId") : null;
-            dsManager.clearDsConnections(dsId);
+            stoneMonitorManager.restartDataSourcePool(dsId);
             return new RestfulResponse(RestfulResponse.CODE_SUCCESS, null, "OK");
         } catch (Throwable e) {
             return new RestfulResponse(RestfulResponse.CODE_FAILED, e, "Failed to restart datasource pool");
@@ -131,7 +126,7 @@ public class ConsoleController {
     @PostMapping("/stone/getOsPoolList")
     public RestfulResponse getObjectSourceList() {
         try {
-            return new RestfulResponse(RestfulResponse.CODE_SUCCESS, dsManager.getPoolMonitorVoList(), "OK");
+            return new RestfulResponse(RestfulResponse.CODE_SUCCESS, stoneMonitorManager.getOsPoolMonitorVoList(), "OK");
         } catch (Throwable e) {
             return new RestfulResponse(RestfulResponse.CODE_FAILED, e, "Failed to get object source pool info");
         }
@@ -142,7 +137,7 @@ public class ConsoleController {
     public RestfulResponse clearOsConnections(@RequestBody Map<String, String> parameterMap) {
         try {
             String osId = parameterMap != null ? parameterMap.get("osId") : null;
-            dsManager.clearDsConnections(osId);
+            stoneMonitorManager.restartObjectSourcePool(osId);
             return new RestfulResponse(RestfulResponse.CODE_SUCCESS, null, "OK");
         } catch (Throwable e) {
             return new RestfulResponse(RestfulResponse.CODE_FAILED, e, "Failed to restart objectsource pool");

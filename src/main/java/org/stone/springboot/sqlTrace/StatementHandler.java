@@ -28,27 +28,28 @@ class StatementHandler implements InvocationHandler {
     private final String dsUUID;
     private final Statement statement;
     private final String statementType;
-    private final SpringBootDataSourceManager dsManager = SpringBootDataSourceManager.getInstance();
+    private final StatementTracePool statementPool;
     private StatementTrace traceVo;
 
-    StatementHandler(Statement statement, String statementType, String dsId, String dsUUID, StatementTrace traceVo) {
+    StatementHandler(Statement statement, String statementType, String dsId, String dsUUID, StatementTrace traceVo, StatementTracePool statementPool) {
         this.dsId = dsId;
         this.dsUUID = dsUUID;
         this.statement = statement;
         this.statementType = statementType;
         this.traceVo = traceVo;
+        this.statementPool = statementPool;
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (method.getName().startsWith(Execute)) {//execute method
             if (args == null || args.length == 0) {//PreparedStatement.executeXXX();
                 if (traceVo != null)
-                    return dsManager.traceSqlExecution(traceVo, statement, method, args);
+                    return statementPool.traceSqlExecution(traceVo, statement, method, args);
                 else
                     return method.invoke(statement, args);
             } else {//Statement.executeXXXX(sql)
                 StatementTrace traceVo = new StatementTrace(dsId, dsUUID, (String) args[0], statementType);
-                return dsManager.traceSqlExecution(traceVo, statement, method, args);
+                return statementPool.traceSqlExecution(traceVo, statement, method, args);
             }
         } else {
             return method.invoke(statement, args);

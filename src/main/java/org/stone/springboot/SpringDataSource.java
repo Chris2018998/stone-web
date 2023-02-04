@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.stone.beecp.BeeDataSource;
 import org.stone.beecp.jta.BeeJtaDataSource;
 import org.stone.beecp.pool.ConnectionPoolMonitorVo;
+import org.stone.springboot.sqlTrace.StatementTracePool;
 import org.stone.springboot.sqlTrace.StatementTraceUtil;
 
 import javax.sql.DataSource;
@@ -31,7 +32,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.UUID;
 
-import static org.stone.springboot.datasource.SpringBootDataSourceUtil.tryToCloseDataSource;
+import static org.stone.springboot.assembly.SpringBootDataSourceUtil.tryToCloseDataSource;
 
 /**
  * springboot registered datasource
@@ -47,12 +48,12 @@ public final class SpringDataSource implements DataSource {
     private final boolean isBeeDs;
 
     private boolean primary;
-    private boolean traceSql;
+    private StatementTracePool statementPool;
     private Method poolRestartMethod;
     private Method poolMonitorVoMethod;
     private boolean notSetBeeDsId = true;
 
-    SpringDataSource(String dsId, DataSource ds, boolean jndiDs) {
+    public SpringDataSource(String dsId, DataSource ds, boolean jndiDs) {
         this.dsId = dsId;
         this.ds = ds;
         this.jndiDs = jndiDs;
@@ -70,22 +71,22 @@ public final class SpringDataSource implements DataSource {
         return primary;
     }
 
-    void setPrimary(boolean primary) {
+    public void setPrimary(boolean primary) {
         this.primary = primary;
     }
 
-    void setTraceSql(boolean traceSql) {
-        this.traceSql = traceSql;
+    public void setStatementPool(StatementTracePool statementPool) {
+        this.statementPool = statementPool;
     }
 
     public Connection getConnection() throws SQLException {
         Connection con = ds.getConnection();
-        return traceSql ? StatementTraceUtil.createConnection(con, dsId, dsUUID) : con;
+        return statementPool.isSqlTrace() ? StatementTraceUtil.createConnection(con, dsId, dsUUID, statementPool) : con;
     }
 
     public Connection getConnection(String username, String password) throws SQLException {
         Connection con = ds.getConnection(username, password);
-        return traceSql ? StatementTraceUtil.createConnection(con, dsId, dsUUID) : con;
+        return statementPool.isSqlTrace() ? StatementTraceUtil.createConnection(con, dsId, dsUUID, statementPool) : con;
     }
 
     public PrintWriter getLogWriter() throws SQLException {

@@ -20,36 +20,36 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
-import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.stone.springboot.StoneMonitorConfig;
-import org.stone.springboot.datasource.SpringBootDataSourceUtil;
+import org.stone.springboot.StoneMonitorManager;
+import org.stone.springboot.assembly.SpringBootDataSourceUtil;
 
 import javax.servlet.Filter;
 
 import static org.stone.util.CommonUtil.isBlank;
 
 /**
- * Register Monitor to springboot
+ * Register controller to springboot
  *
  * @author Chris Liao
  */
-public class ControllerRegister implements EnvironmentAware, ImportBeanDefinitionRegistrar {
+public class ControllerRegister implements ImportBeanDefinitionRegistrar {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private StoneMonitorConfig monitorConfig;
+    private StoneMonitorManager monitorManager;
 
-    //springboot environment
-    private Environment environment;
+    public void setMonitorConfig(StoneMonitorConfig monitorConfig) {
+        this.monitorConfig = monitorConfig;
+    }
 
-    public final void setEnvironment(Environment environment) {
-        this.environment = environment;
+    public final void setMonitorManager(StoneMonitorManager monitorManager) {
+        this.monitorManager = monitorManager;
     }
 
     //Register controller bean to ioc
     public final void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        //1:read datasource controller
-        StoneMonitorConfig config = SpringBootDataSourceUtil.readMonitorConfig(environment);
 
         //2:assembly controller controller
         String resetControllerRegName = ConsoleController.class.getName();
@@ -57,10 +57,8 @@ public class ControllerRegister implements EnvironmentAware, ImportBeanDefinitio
             GenericBeanDefinition define = new GenericBeanDefinition();
             define.setBeanClass(ConsoleController.class);
             define.setPrimary(true);
-            define.setInstanceSupplier(SpringBootDataSourceUtil.createSpringSupplier(new ConsoleController(
-                    config.getConsoleUserId(),
-                    config.getConsolePassword(),
-                    config.getLoggedInSuccessTagName())));
+            define.setInstanceSupplier(SpringBootDataSourceUtil.createSpringSupplier(
+                    new ConsoleController(monitorConfig, monitorManager)));
             registry.registerBeanDefinition(resetControllerRegName, define);
             log.info("Register DataSource-restController({}) with id:{}", define.getBeanClassName(), resetControllerRegName);
         } else {
@@ -69,8 +67,8 @@ public class ControllerRegister implements EnvironmentAware, ImportBeanDefinitio
 
         //3: assembly controller controller filter
         String resetControllerFilterRegName = LoginedCheckFilter.class.getName();
-        if (isBlank(config.getConsoleUserId()) && !SpringBootDataSourceUtil.existsBeanDefinition(resetControllerFilterRegName, registry)) {
-            LoginedCheckFilter dsFilter = new LoginedCheckFilter(config.getConsoleUserId(), config.getLoggedInSuccessTagName());
+        if (isBlank(monitorConfig.getConsoleUserId()) && !SpringBootDataSourceUtil.existsBeanDefinition(resetControllerFilterRegName, registry)) {
+            LoginedCheckFilter dsFilter = new LoginedCheckFilter(monitorConfig.getConsoleUserId(), monitorConfig.getLoggedInSuccessTagName());
             FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>(dsFilter);
             registration.setName(resetControllerFilterRegName);
             registration.addUrlPatterns("/stone/*");

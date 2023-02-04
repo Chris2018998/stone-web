@@ -16,7 +16,7 @@
 package org.stone.springboot.sqlTrace;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.stone.springboot.datasource.SpringBootDataSourceUtil;
+import org.stone.springboot.assembly.SpringBootDataSourceUtil;
 
 import java.util.Date;
 import java.util.Objects;

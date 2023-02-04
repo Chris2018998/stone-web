@@ -25,7 +25,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
-import static org.stone.springboot.datasource.SpringBootDataSourceUtil.tryToCloseDataSource;
+import static org.stone.springboot.assembly.SpringBootDataSourceUtil.tryToCloseDataSource;
 
 /**
  * object source(only support beeop)

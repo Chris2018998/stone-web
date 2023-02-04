@@ -34,11 +34,13 @@ class ConnectionHandler implements InvocationHandler {
     private final String dsId;
     private final String dsUUID;
     private final Connection connection;
+    private final StatementTracePool statementPool;
 
-    ConnectionHandler(Connection connection, String dsId, String dsUUID) {
+    ConnectionHandler(Connection connection, String dsId, String dsUUID, StatementTracePool statementPool) {
         this.connection = connection;
         this.dsId = dsId;
         this.dsUUID = dsUUID;
+        this.statementPool = statementPool;
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -56,11 +58,11 @@ class ConnectionHandler implements InvocationHandler {
 
         //3:create sqlTrace proxy
         if (Method_Statement.equals(methodName)) {
-            return StatementTraceUtil.createStatementProxy((Statement) re, Type_Statement, dsId, dsUUID, null);
+            return StatementTraceUtil.createStatementProxy((Statement) re, Type_Statement, dsId, dsUUID, null, statementPool);
         } else if (Method_PreparedStatement.equals(methodName)) {
-            return StatementTraceUtil.createStatementProxy((Statement) re, Type_PreparedStatement, dsId, dsUUID, trace);
+            return StatementTraceUtil.createStatementProxy((Statement) re, Type_PreparedStatement, dsId, dsUUID, trace, statementPool);
         } else if (Method_CallableStatement.equals(methodName)) {
-            return StatementTraceUtil.createStatementProxy((Statement) re, Type_CallableStatement, dsId, dsUUID, trace);
+            return StatementTraceUtil.createStatementProxy((Statement) re, Type_CallableStatement, dsId, dsUUID, trace, statementPool);
         } else {
             return re;
         }

@@ -19,7 +19,7 @@ import org.springframework.core.env.Environment;
 import org.stone.beecp.BeeDataSource;
 import org.stone.beecp.BeeDataSourceConfig;
 import org.stone.beecp.jta.BeeJtaDataSource;
-import org.stone.springboot.datasource.SpringBootDataSourceUtil;
+import org.stone.springboot.assembly.SpringBootDataSourceUtil;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;

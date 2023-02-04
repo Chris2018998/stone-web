@@ -15,14 +15,13 @@
  */
 package org.stone.springboot.controller;
 
-import org.stone.springboot.datasource.SpringBootDataSourceUtil;
-
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
+import static org.stone.springboot.assembly.SpringBootDataSourceUtil.object2String;
 import static org.stone.util.CommonUtil.isBlank;
 
 /**
@@ -63,7 +62,7 @@ public class LoginedCheckFilter implements Filter {
                 res.setContentType("application/json");
                 OutputStream ps = res.getOutputStream();
                 RestfulResponse restResponse = new RestfulResponse(RestfulResponse.CODE_SECURITY, null, "unauthorized");
-                ps.write(SpringBootDataSourceUtil.object2String(restResponse).getBytes(StandardCharsets.UTF_8));
+                ps.write(object2String(restResponse).getBytes(StandardCharsets.UTF_8));
             } else {
                 req.getRequestDispatcher("/stone/login.html").forward(req, res);
             }
