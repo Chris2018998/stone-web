@@ -24,41 +24,28 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * springboot registered manager
+ * springboot monitor manager
  *
  * @author Chris Liao
  */
 public final class StoneMonitorManager {
-    private final StatementTracePool statementPool;
     private final Map<String, SpringDataSource> dsMap;
     private final Map<String, SpringObjectSource> osMap;
+    private StatementTracePool sqlStatementPool;
 
     public StoneMonitorManager() {
-        this.statementPool = new StatementTracePool();
         this.dsMap = new ConcurrentHashMap<>(1);
         this.osMap = new ConcurrentHashMap<>(1);
     }
 
     //***************************************************************************************************************//
-    //                                     2: init statement monitor pool(1)                                         //
-    //***************************************************************************************************************//
-    public void initStatementPool(StoneMonitorConfig config) {
-        statementPool.initPool(config);
-    }
-
-    //***************************************************************************************************************//
     //                                     2: ds maintenance(4)                                                      //
     //***************************************************************************************************************//
-    public int getDataSourceSize() {
-        return dsMap.size();
-    }
-
     public void addDataSource(SpringDataSource ds) {
         dsMap.put(ds.getDsId(), ds);
-        ds.setStatementPool(statementPool);
     }
 
-    SpringDataSource getDataSource(String dsId) {
+    public SpringDataSource getDataSource(String dsId) {
         return dsMap.get(dsId);
     }
 
@@ -67,18 +54,20 @@ public final class StoneMonitorManager {
         if (ds != null) ds.restartPool();
     }
 
+    public void setStatementTracePool(StatementTracePool statementPool) {
+        this.sqlStatementPool = statementPool;
+        for (SpringDataSource ds : dsMap.values())
+            ds.setStatementPool(sqlStatementPool);
+    }
+
     //***************************************************************************************************************//
     //                                     2: os maintenance(4)                                                      //
     //***************************************************************************************************************//
-    public int getObjectSourceSize() {
-        return osMap.size();
-    }
-
     public void addObjectSource(SpringObjectSource os) {
         osMap.put(os.getOsId(), os);
     }
 
-    SpringObjectSource getObjectSource(String osId) {
+    public SpringObjectSource getObjectSource(String osId) {
         return osMap.get(osId);
     }
 
@@ -128,7 +117,6 @@ public final class StoneMonitorManager {
     //                                     4: sql-trace (1)                                                          //
     //***************************************************************************************************************//
     public Collection<StatementTrace> getSqlExecutionList() {
-        return statementPool.getSqlTraceQueue();
+        return sqlStatementPool != null ? sqlStatementPool.getSqlTraceQueue() : null;
     }
-
 }

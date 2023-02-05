@@ -22,7 +22,6 @@ import org.stone.beeop.BeeObjectSource;
 import org.stone.beeop.pool.ObjectPoolMonitorVo;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.UUID;
 
 import static org.stone.springboot.assembly.SpringBootDataSourceUtil.tryToCloseDataSource;
@@ -37,11 +36,7 @@ public final class SpringObjectSource {
     private final String osId;
     private final String osUUID;
     private final BeeObjectSource os;
-
     private boolean primary;
-    private Method poolRestartMethod;
-    private Method poolMonitorVoMethod;
-    private boolean notSetBeeDsId = true;
 
     SpringObjectSource(String osId, BeeObjectSource os) {
         this.osId = osId;
@@ -62,7 +57,7 @@ public final class SpringObjectSource {
     }
 
     public BeeObjectHandle getObject() throws Exception {
-        return os.getObject();
+        return os.getObjectHandle();
     }
 
     public void close() {
@@ -70,32 +65,27 @@ public final class SpringObjectSource {
     }
 
     public void restartPool() {
-        if (poolRestartMethod != null) {
-            try {
-                poolRestartMethod.invoke(os, false);
-            } catch (Throwable e) {
-                Log.warn("Failed to execute dataSource 'clear' method", e);
-            }
+        try {
+            os.restartPool(false);
+        } catch (Throwable e) {
+            Log.warn("Failed to execute restart object source pool", e);
         }
     }
 
-    ObjectPoolMonitorVo getPoolMonitorVo() {
-        if (poolMonitorVoMethod != null) {
-            try {
-                ObjectPoolMonitorVo vo = (ObjectPoolMonitorVo) poolMonitorVoMethod.invoke(os);
-                if (notSetBeeDsId) setBeeOsIdToMonitorSingletonVo(vo);
-                return vo;
-            } catch (Throwable e) {
-                Log.warn("Failed to execute dataSource 'getPoolMonitorVo' method", e);
-            }
+    public ObjectPoolMonitorVo getPoolMonitorVo() {
+        try {
+            ObjectPoolMonitorVo vo = os.getPoolMonitorVo();
+            setBeeOsIdToMonitorSingletonVo(vo);
+            return vo;
+        } catch (Throwable e) {
+            Log.warn("Failed to get pool monitor Vo", e);
+            return null;
         }
-        return null;
     }
 
     private synchronized void setBeeOsIdToMonitorSingletonVo(ObjectPoolMonitorVo vo) {
         setValueToField(vo, "osId", osId);
         setValueToField(vo, "osUUID", osUUID);
-        notSetBeeDsId = false;
     }
 
     private void setValueToField(ObjectPoolMonitorVo vo, String fieldId, String value) {
@@ -109,20 +99,6 @@ public final class SpringObjectSource {
             //do nothing
         } finally {
             if (field != null) field.setAccessible(false);
-        }
-    }
-
-    private void readBeeDsMethods() {
-        Class dsClass = os.getClass();
-        try {
-            poolMonitorVoMethod = dsClass.getMethod("getPoolMonitorVo");
-        } catch (NoSuchMethodException e) {
-            Log.warn("ObjectSource method(getPoolMonitorVo) not found", e);
-        }
-        try {
-            poolRestartMethod = dsClass.getMethod("restartPool", Boolean.TYPE);
-        } catch (NoSuchMethodException e) {
-            Log.warn("ObjectSource method(restartPool) not found", e);
         }
     }
 }

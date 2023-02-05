@@ -36,15 +36,15 @@ import static org.stone.util.CommonUtil.isBlank;
 public final class CombineAspect {
     private String primaryDsId;
     private String primaryOsId;
-    private StoneMonitorManager registeredManager;
+    private StoneMonitorManager monitorManager;
     private ThreadLocal<SpringDataSource> dsLocal;
     private ThreadLocal<SpringObjectSource> osLocal;
 
     //***************************************************************************************************************//
     //                                     1: properties set(3)                                                      //
     //***************************************************************************************************************/
-    void setStoneRegisteredManager(StoneMonitorManager registeredManager) {
-        this.registeredManager = registeredManager;
+    void setStoneRegisteredManager(StoneMonitorManager monitorManager) {
+        this.monitorManager = monitorManager;
     }
 
     void setDsThreadLocal(String primaryDsId, ThreadLocal<SpringDataSource> dsLocal) {
@@ -73,7 +73,7 @@ public final class CombineAspect {
 
         try {
             if (isBlank(dsId)) dsId = primaryDsId;
-            dsLocal.set(registeredManager.getDataSource(dsId));
+            dsLocal.set(monitorManager.getDataSource(dsId));
             return joinPoint.proceed();
         } finally {
             if (!isBlank(dsId)) dsLocal.remove();
@@ -96,7 +96,7 @@ public final class CombineAspect {
 
         try {
             if (isBlank(osId)) osId = primaryOsId;
-            osLocal.set(registeredManager.getObjectSource(osId));
+            osLocal.set(monitorManager.getObjectSource(osId));
             return joinPoint.proceed();
         } finally {
             if (!isBlank(osId)) osLocal.remove();

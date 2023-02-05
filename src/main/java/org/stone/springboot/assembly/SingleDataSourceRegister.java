@@ -56,12 +56,12 @@ public class SingleDataSourceRegister {
         StoneMonitorConfig monitorConfig = SpringBootDataSourceUtil.readMonitorConfig(environment);
 
         //3:setup controller config
-        SpringBootDataSourceManager.getInstance().setupSqlTrace(monitorConfig);
+        //SpringBootDataSourceManager.getInstance().setupSqlTrace(monitorConfig);
 
         //4:create BeeDataSource
         DataSource ds = new BeeDataSourceFactory().createDataSource(SpringBootDataSourceUtil.Config_DS_Prefix, dsId, environment);
         SpringDataSource springDs = new SpringDataSource(dsId, ds, false);
-        SpringBootDataSourceManager.getInstance().addSpringBootDataSource(springDs);
+        //SpringBootDataSourceManager.getInstance().addSpringBootDataSource(springDs);
 
         return springDs;
     }
