@@ -65,6 +65,7 @@ public final class SpringDataSource implements DataSource {
     private final DataSource ds;
     private final boolean jndiDs;
     private boolean primary;
+    private boolean isBeeDs;
     private StatementTracePool statementPool;
 
     public SpringDataSource(String dsId, DataSource ds, boolean jndiDs) {
@@ -73,7 +74,7 @@ public final class SpringDataSource implements DataSource {
         this.jndiDs = jndiDs;
 
         this.dsUUID = "SpringDs_" + UUID.randomUUID().toString();
-        boolean isBeeDs = ds instanceof BeeDataSource || ds instanceof BeeJtaDataSource;
+        this.isBeeDs = ds instanceof BeeDataSource || ds instanceof BeeJtaDataSource;
     }
 
     //***************************************************************************************************************//
@@ -116,7 +117,7 @@ public final class SpringDataSource implements DataSource {
     }
 
     public void restartPool() {
-        if (poolRestartMethod != null) {
+        if (isBeeDs && poolRestartMethod != null) {
             try {
                 poolRestartMethod.invoke(ds, false);
             } catch (Throwable e) {
@@ -126,7 +127,7 @@ public final class SpringDataSource implements DataSource {
     }
 
     ConnectionPoolMonitorVo getPoolMonitorVo() {
-        if (poolMonitorVoMethod != null) {
+        if (isBeeDs && poolMonitorVoMethod != null) {
             try {
                 ConnectionPoolMonitorVo vo = (ConnectionPoolMonitorVo) poolMonitorVoMethod.invoke(ds);
                 if (dsIdField != null) dsIdField.set(vo, dsId);
