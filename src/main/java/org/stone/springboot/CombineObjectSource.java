@@ -26,7 +26,7 @@ public final class CombineObjectSource {
     private final ThreadLocal<SpringObjectSource> osLocal;
     private boolean isClosed = false;
 
-    CombineObjectSource(ThreadLocal<SpringObjectSource> osLocal) {
+    public CombineObjectSource(ThreadLocal<SpringObjectSource> osLocal) {
         this.osLocal = osLocal;
     }
 

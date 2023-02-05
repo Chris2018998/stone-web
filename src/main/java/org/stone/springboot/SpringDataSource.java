@@ -40,9 +40,25 @@ import static org.stone.springboot.assembly.SpringBootDataSourceUtil.tryToCloseD
  * @author Chris Liao
  */
 public final class SpringDataSource implements DataSource {
-    private final static Logger Log = LoggerFactory.getLogger(SpringDataSource.class);
-    private static Method poolRestartMethod;
-    private static Method poolMonitorVoMethod;
+    private static final Logger Log = LoggerFactory.getLogger(SpringDataSource.class);
+    private static final Field dsIdField;
+    private static final Field dsUUIDField;
+    private static final Method poolRestartMethod;
+    private static final Method poolMonitorVoMethod;
+
+    static {//read monitor field
+        try {
+            dsIdField = ConnectionPoolMonitorVo.class.getDeclaredField("dsId");
+            if (!dsIdField.isAccessible()) dsIdField.setAccessible(true);
+            dsUUIDField = ConnectionPoolMonitorVo.class.getDeclaredField("dsUUID");
+            if (!dsUUIDField.isAccessible()) dsUUIDField.setAccessible(true);
+
+            poolMonitorVoMethod = BeeDataSource.class.getMethod("getPoolMonitorVo");
+            poolRestartMethod = BeeDataSource.class.getMethod("restartPool", Boolean.TYPE);
+        } catch (Exception e) {
+            throw new Error(e);
+        }
+    }
 
     private final String dsId;
     private final String dsUUID;
@@ -58,44 +74,16 @@ public final class SpringDataSource implements DataSource {
 
         this.dsUUID = "SpringDs_" + UUID.randomUUID().toString();
         boolean isBeeDs = ds instanceof BeeDataSource || ds instanceof BeeJtaDataSource;
-        if (isBeeDs && poolRestartMethod == null) readBeeDsMethods(ds.getClass());
     }
 
-    private synchronized static void readBeeDsMethods(Class beeDsClass) {
-        try {
-            if (poolRestartMethod == null)
-                poolMonitorVoMethod = beeDsClass.getMethod("getPoolMonitorVo");
-        } catch (NoSuchMethodException e) {
-            Log.warn("DataSource method(getPoolMonitorVo) not found", e);
-        }
-
-        try {
-            if (poolRestartMethod == null)
-                poolRestartMethod = beeDsClass.getMethod("restartPool", Boolean.TYPE);
-        } catch (NoSuchMethodException e) {
-            Log.warn("DataSource method(clear) not found", e);
-        }
-    }
-
-    private static void setValueToField(ConnectionPoolMonitorVo vo, String fieldId, String value) {
-        Field field = null;
-        try {
-            Class monitorVoClass = ConnectionPoolMonitorVo.class;
-            field = monitorVoClass.getDeclaredField(fieldId);
-            field.setAccessible(true);
-            field.set(vo, value);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            //do nothing
-        } finally {
-            if (field != null) field.setAccessible(false);
-        }
-    }
-
-    String getDsId() {
+    //***************************************************************************************************************//
+    //                                     1: base properties (4)                                                    //
+    //***************************************************************************************************************//
+    public String getDsId() {
         return dsId;
     }
 
-    boolean isPrimary() {
+    public boolean isPrimary() {
         return primary;
     }
 
@@ -107,6 +95,9 @@ public final class SpringDataSource implements DataSource {
         this.statementPool = statementPool;
     }
 
+    //***************************************************************************************************************//
+    //                                     2: connection(2)                                                          //
+    //***************************************************************************************************************//
     public Connection getConnection() throws SQLException {
         Connection con = ds.getConnection();
         return statementPool.isSqlTrace() ? StatementTraceUtil.createConnection(con, dsId, dsUUID, statementPool) : con;
@@ -117,6 +108,40 @@ public final class SpringDataSource implements DataSource {
         return statementPool.isSqlTrace() ? StatementTraceUtil.createConnection(con, dsId, dsUUID, statementPool) : con;
     }
 
+    //***************************************************************************************************************//
+    //                                     3: Pool Monitor (4)                                                       //
+    //***************************************************************************************************************//
+    public void close() {
+        if (!jndiDs) tryToCloseDataSource(ds);
+    }
+
+    public void restartPool() {
+        if (poolRestartMethod != null) {
+            try {
+                poolRestartMethod.invoke(ds, false);
+            } catch (Throwable e) {
+                Log.warn("Failed to execute dataSource 'clear' method", e);
+            }
+        }
+    }
+
+    ConnectionPoolMonitorVo getPoolMonitorVo() {
+        if (poolMonitorVoMethod != null) {
+            try {
+                ConnectionPoolMonitorVo vo = (ConnectionPoolMonitorVo) poolMonitorVoMethod.invoke(ds);
+                if (dsIdField != null) dsIdField.set(vo, dsId);
+                if (dsUUIDField != null) dsUUIDField.set(vo, dsUUID);
+                return vo;
+            } catch (Throwable e) {
+                Log.warn("Failed to execute dataSource 'getPoolMonitorVo' method", e);
+            }
+        }
+        return null;
+    }
+
+    //***************************************************************************************************************//
+    //                                    5: dataSource other (7)                                                   //
+    //***************************************************************************************************************//
     public PrintWriter getLogWriter() throws SQLException {
         return ds.getLogWriter();
     }
@@ -146,37 +171,5 @@ public final class SpringDataSource implements DataSource {
             return clazz.cast(this);
         else
             throw new SQLException("Wrapped object was not an instance of " + clazz);
-    }
-
-    public void close() {
-        if (!jndiDs) tryToCloseDataSource(ds);
-    }
-
-    public void restartPool() {
-        if (poolRestartMethod != null) {
-            try {
-                poolRestartMethod.invoke(ds, false);
-            } catch (Throwable e) {
-                Log.warn("Failed to execute dataSource 'clear' method", e);
-            }
-        }
-    }
-
-    ConnectionPoolMonitorVo getPoolMonitorVo() {
-        if (poolMonitorVoMethod != null) {
-            try {
-                ConnectionPoolMonitorVo vo = (ConnectionPoolMonitorVo) poolMonitorVoMethod.invoke(ds);
-                setBeeDsIdToMonitorSingletonVo(vo);
-                return vo;
-            } catch (Throwable e) {
-                Log.warn("Failed to execute dataSource 'getPoolMonitorVo' method", e);
-            }
-        }
-        return null;
-    }
-
-    private synchronized void setBeeDsIdToMonitorSingletonVo(ConnectionPoolMonitorVo vo) {
-        setValueToField(vo, "dsId", dsId);
-        setValueToField(vo, "dsUUID", dsUUID);
     }
 }

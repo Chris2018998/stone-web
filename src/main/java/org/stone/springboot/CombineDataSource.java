@@ -31,7 +31,7 @@ public final class CombineDataSource implements DataSource {
     private final ThreadLocal<SpringDataSource> dsLocal;
     private boolean isClosed = false;
 
-    CombineDataSource(ThreadLocal<SpringDataSource> dsLocal) {
+    public CombineDataSource(ThreadLocal<SpringDataSource> dsLocal) {
         this.dsLocal = dsLocal;
     }
 

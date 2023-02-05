@@ -32,73 +32,76 @@ import static org.stone.springboot.assembly.SpringBootDataSourceUtil.tryToCloseD
  * @author Chris Liao
  */
 public final class SpringObjectSource {
-    private final static Logger Log = LoggerFactory.getLogger(SpringObjectSource.class);
+    private static final Logger Log = LoggerFactory.getLogger(SpringObjectSource.class);
+    private static final Field osIdField;
+    private static final Field osUUIDField;
+
+    static {//read monitor field
+        try {
+            osIdField = ObjectPoolMonitorVo.class.getDeclaredField("osId");
+            if (!osIdField.isAccessible()) osIdField.setAccessible(true);
+
+            osUUIDField = ObjectPoolMonitorVo.class.getDeclaredField("osUUID");
+            if (!osUUIDField.isAccessible()) osUUIDField.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new Error(e);
+        }
+    }
+
     private final String osId;
     private final String osUUID;
     private final BeeObjectSource os;
     private boolean primary;
 
-    SpringObjectSource(String osId, BeeObjectSource os) {
+    public SpringObjectSource(String osId, BeeObjectSource os) {
         this.osId = osId;
         this.os = os;
         this.osUUID = "SpringOs_" + UUID.randomUUID().toString();
     }
 
-    String getOsId() {
+    //***************************************************************************************************************//
+    //                                     1: base properties (3)                                                    //
+    //***************************************************************************************************************//
+    public String getOsId() {
         return osId;
     }
 
-    boolean isPrimary() {
+    public boolean isPrimary() {
         return primary;
     }
 
-    void setPrimary(boolean primary) {
+    public void setPrimary(boolean primary) {
         this.primary = primary;
+    }
+
+    //***************************************************************************************************************//
+    //                                     2: Pool Monitor (4)                                                       //
+    //***************************************************************************************************************//
+    public void close() {
+        tryToCloseDataSource(os);
     }
 
     public BeeObjectHandle getObject() throws Exception {
         return os.getObjectHandle();
     }
 
-    public void close() {
-        tryToCloseDataSource(os);
-    }
-
     public void restartPool() {
         try {
             os.restartPool(false);
         } catch (Throwable e) {
-            Log.warn("Failed to execute restart object source pool", e);
+            Log.warn("Failed to restart object pool", e);
         }
     }
 
     public ObjectPoolMonitorVo getPoolMonitorVo() {
         try {
             ObjectPoolMonitorVo vo = os.getPoolMonitorVo();
-            setBeeOsIdToMonitorSingletonVo(vo);
+            if (osIdField != null) osIdField.set(vo, osId);
+            if (osUUIDField != null) osUUIDField.set(vo, osUUID);
             return vo;
         } catch (Throwable e) {
             Log.warn("Failed to get pool monitor Vo", e);
             return null;
-        }
-    }
-
-    private synchronized void setBeeOsIdToMonitorSingletonVo(ObjectPoolMonitorVo vo) {
-        setValueToField(vo, "osId", osId);
-        setValueToField(vo, "osUUID", osUUID);
-    }
-
-    private void setValueToField(ObjectPoolMonitorVo vo, String fieldId, String value) {
-        Field field = null;
-        try {
-            Class monitorVoClass = ObjectPoolMonitorVo.class;
-            field = monitorVoClass.getDeclaredField(fieldId);
-            field.setAccessible(true);
-            field.set(vo, value);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            //do nothing
-        } finally {
-            if (field != null) field.setAccessible(false);
         }
     }
 }
