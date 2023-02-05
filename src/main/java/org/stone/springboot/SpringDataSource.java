@@ -101,12 +101,12 @@ public final class SpringDataSource implements DataSource {
     //***************************************************************************************************************//
     public Connection getConnection() throws SQLException {
         Connection con = ds.getConnection();
-        return statementPool.isSqlTrace() ? StatementTraceUtil.createConnection(con, dsId, dsUUID, statementPool) : con;
+        return statementPool != null ? StatementTraceUtil.createConnection(con, dsId, dsUUID, statementPool) : con;
     }
 
     public Connection getConnection(String username, String password) throws SQLException {
         Connection con = ds.getConnection(username, password);
-        return statementPool.isSqlTrace() ? StatementTraceUtil.createConnection(con, dsId, dsUUID, statementPool) : con;
+        return statementPool != null ? StatementTraceUtil.createConnection(con, dsId, dsUUID, statementPool) : con;
     }
 
     //***************************************************************************************************************//

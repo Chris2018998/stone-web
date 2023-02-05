@@ -22,6 +22,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.Order;
 import org.stone.springboot.annotation.BeeDsId;
+import org.stone.springboot.annotation.BeeOsId;
 
 import static org.stone.util.CommonUtil.isBlank;
 
@@ -43,7 +44,7 @@ public final class CombineAspect {
     //***************************************************************************************************************//
     //                                     1: properties set(3)                                                      //
     //***************************************************************************************************************/
-    void setStoneRegisteredManager(StoneMonitorManager monitorManager) {
+    void setMonitorManager(StoneMonitorManager monitorManager) {
         this.monitorManager = monitorManager;
     }
 
@@ -91,7 +92,7 @@ public final class CombineAspect {
     @Around("osPointcut()")
     public Object setObjectSourceId(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        BeeDsId annotation = methodSignature.getMethod().getAnnotation(BeeDsId.class);
+        BeeOsId annotation = methodSignature.getMethod().getAnnotation(BeeOsId.class);
         String osId = annotation.value();
 
         try {

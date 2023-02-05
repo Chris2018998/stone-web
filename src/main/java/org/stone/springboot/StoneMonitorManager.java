@@ -43,6 +43,7 @@ public final class StoneMonitorManager {
     //***************************************************************************************************************//
     public void addDataSource(SpringDataSource ds) {
         dsMap.put(ds.getDsId(), ds);
+        if (sqlStatementPool != null) ds.setStatementPool(sqlStatementPool);
     }
 
     public SpringDataSource getDataSource(String dsId) {
