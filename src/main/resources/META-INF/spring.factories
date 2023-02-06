@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.stone.springboot.datasource.SingleDataSourceRegister
+org.stone.springboot.assembly.SingleDataSourceRegister,org.stone.springboot.assembly.SingleObjectSourceRegister
