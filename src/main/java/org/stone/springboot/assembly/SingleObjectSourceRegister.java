@@ -20,13 +20,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.stone.beecp.BeeDataSource;
-import org.stone.springboot.SpringDataSource;
-import org.stone.springboot.StoneMonitorConfig;
-import org.stone.springboot.factory.BeeDataSourceFactory;
-
-import javax.sql.DataSource;
-
-import static org.stone.util.CommonUtil.isBlank;
 
 /*
  * config example
@@ -44,25 +37,27 @@ import static org.stone.util.CommonUtil.isBlank;
  * @author Chris Liao
  */
 @ConditionalOnClass({BeeDataSource.class})
-@ConditionalOnProperty(name = "spring.datasource.type", havingValue = "org.stone.beecp.BeeDataSource")
-public class SingleDataSourceRegister {
+@ConditionalOnProperty(name = "spring.objectsource.type", havingValue = "org.stone.beeop.BeeObjectSource")
+public class SingleObjectSourceRegister {
     @Bean
-    public DataSource beeDataSource(Environment environment) throws Exception {
-        //1:read ds Id
-        String dsId = SpringBootDataSourceUtil.getConfigValue(SpringBootDataSourceUtil.Config_DS_Prefix, SpringBootDataSourceUtil.Config_DS_Id, environment);
-        if (isBlank(dsId)) dsId = "beeDataSource";//default ds Id
+    public BeeDataSource beeDataSource(Environment environment) throws Exception {
+//        //1:read ds Id
+//        String dsId = SpringBootDataSourceUtil.getConfigValue(SpringBootDataSourceUtil.Config_DS_Prefix, SpringBootDataSourceUtil.Config_DS_Id, environment);
+//        if (isBlank(dsId)) dsId = "beeObjectSource";//default os Id
+//
+//        //2:read datasource controller config
+//        StoneMonitorConfig monitorConfig = SpringBootDataSourceUtil.readMonitorConfig(environment);
+//
+//        //3:setup controller config
+//        //SpringBootDataSourceManager.getInstance().setupSqlTrace(monitorConfig);
+//
+//        //4:create BeeDataSource
+//        DataSource ds = new BeeDataSourceFactory().createDataSource(SpringBootDataSourceUtil.Config_DS_Prefix, dsId, environment);
+//        SpringDataSource springDs = new SpringDataSource(dsId, ds, false);
+//        //SpringBootDataSourceManager.getInstance().addSpringBootDataSource(springDs);
+//
+//        return springDs;
 
-        //2:read datasource controller config
-        StoneMonitorConfig monitorConfig = SpringBootDataSourceUtil.readMonitorConfig(environment);
-
-        //3:setup controller config
-        //SpringBootDataSourceManager.getInstance().setupSqlTrace(monitorConfig);
-
-        //4:create BeeDataSource
-        DataSource ds = new BeeDataSourceFactory().createDataSource(SpringBootDataSourceUtil.Config_DS_Prefix, dsId, environment);
-        SpringDataSource springDs = new SpringDataSource(dsId, ds, false);
-        //SpringBootDataSourceManager.getInstance().addSpringBootDataSource(springDs);
-
-        return springDs;
+        return null;
     }
 }
