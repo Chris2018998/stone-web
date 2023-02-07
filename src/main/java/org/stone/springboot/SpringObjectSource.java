@@ -85,7 +85,7 @@ public class SpringObjectSource {
         return os.getObjectHandle();
     }
 
-    public void restartPool() {
+    void restartPool() {
         try {
             os.restartPool(false);
         } catch (Throwable e) {

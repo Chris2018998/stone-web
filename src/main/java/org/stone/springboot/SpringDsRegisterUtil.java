@@ -25,7 +25,7 @@ import org.stone.springboot.factory.BeeDataSourceFactory;
 import org.stone.springboot.factory.SpringDataSourceException;
 import org.stone.springboot.factory.SpringDataSourceFactory;
 import org.stone.springboot.util.JackSonTool;
-import org.stone.springboot.util.SpringBootJsonTool;
+import org.stone.springboot.util.SpringJsonTool;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -71,7 +71,7 @@ public class SpringDsRegisterUtil {
     private static final Map<Class, SpringDataSourceFactory> DataSourceFactoryMap = new HashMap<>(1);
     private static final Logger log = LoggerFactory.getLogger(SpringDsRegisterUtil.class);
 
-    private static SpringBootJsonTool jsonTool;
+    private static SpringJsonTool jsonTool;
     private static SpringSourceMonitorConfig monitorConfig;
     //***************************************************************************************************************//
     //                                1: spring assembly or base (3)                                                //
@@ -99,7 +99,7 @@ public class SpringDsRegisterUtil {
         if (!isBlank(jsonClassName)) {
             try {
                 Class jsonToolClass = Class.forName(jsonClassName);
-                SpringBootJsonTool tool = (SpringBootJsonTool) jsonToolClass.newInstance();
+                SpringJsonTool tool = (SpringJsonTool) jsonToolClass.newInstance();
                 tool.init();
                 jsonTool = tool;
             } catch (Throwable e) {

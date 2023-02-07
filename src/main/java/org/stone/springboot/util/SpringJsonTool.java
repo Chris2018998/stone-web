@@ -15,27 +15,19 @@
  */
 package org.stone.springboot.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 
 /**
- * Json tool implementation by Jackson tool
+ * json tool interface
  *
  * @author Chris Liao
  */
-public class JackSonTool<T> implements SpringJsonTool {
+public interface SpringJsonTool {
 
-    private final ObjectMapper JacksonObjectMapper = new ObjectMapper();
+    void init() throws IOException;
 
-    public void init() {
-    }
+    String object2String(Object obj) throws IOException;
 
-    public String object2String(Object obj) throws IOException {
-        return JacksonObjectMapper.writeValueAsString(obj);
-    }
+    <T> T string2Object(String str, Class<T> clazz) throws IOException;
 
-    public <T> T string2Object(String str, Class<T> clazz) throws IOException {
-        return JacksonObjectMapper.readerFor(clazz).readValue(str);
-    }
 }

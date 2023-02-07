@@ -84,15 +84,15 @@ public final class SpringDataSource implements DataSource {
         return dsId;
     }
 
-    public boolean isPrimary() {
+    boolean isPrimary() {
         return primary;
     }
 
-    public void setPrimary(boolean primary) {
+    void setPrimary(boolean primary) {
         this.primary = primary;
     }
 
-    public void setStatementPool(StatementTracePool statementPool) {
+    void setStatementPool(StatementTracePool statementPool) {
         this.statementPool = statementPool;
     }
 
@@ -112,11 +112,11 @@ public final class SpringDataSource implements DataSource {
     //***************************************************************************************************************//
     //                                     3: Pool Monitor (4)                                                       //
     //***************************************************************************************************************//
-    public void close() {
+    void close() {
         if (!jndiDs) tryToCloseDataSource(ds);
     }
 
-    public void restartPool() {
+    void restartPool() {
         if (isBeeDs && poolRestartMethod != null) {
             try {
                 poolRestartMethod.invoke(ds, false);
@@ -126,7 +126,7 @@ public final class SpringDataSource implements DataSource {
         }
     }
 
-    public ConnectionPoolMonitorVo getPoolMonitorVo() {
+    ConnectionPoolMonitorVo getPoolMonitorVo() {
         if (isBeeDs && poolMonitorVoMethod != null) {
             try {
                 ConnectionPoolMonitorVo vo = (ConnectionPoolMonitorVo) poolMonitorVoMethod.invoke(ds);

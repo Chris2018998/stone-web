@@ -109,7 +109,7 @@ public class ConsoleController {
 
     @ResponseBody
     @PostMapping("/stone/restartDsPool")
-    public RestfulResponse clearDsConnections(@RequestBody Map<String, String> parameterMap) {
+    public RestfulResponse restartDataSourcePool(@RequestBody Map<String, String> parameterMap) {
         try {
             String dsId = parameterMap != null ? parameterMap.get("dsId") : null;
             stoneMonitorManager.restartDataSourcePool(dsId);
@@ -134,7 +134,7 @@ public class ConsoleController {
 
     @ResponseBody
     @PostMapping("/stone/restartOsPool")
-    public RestfulResponse clearOsConnections(@RequestBody Map<String, String> parameterMap) {
+    public RestfulResponse restartObjectSourcePool(@RequestBody Map<String, String> parameterMap) {
         try {
             String osId = parameterMap != null ? parameterMap.get("osId") : null;
             stoneMonitorManager.restartObjectSourcePool(osId);
