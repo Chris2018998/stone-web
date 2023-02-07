@@ -22,11 +22,12 @@ import org.stone.beeop.BeeObjectHandle;
  *
  * @author Chris Liao
  */
-public final class CombineObjectSource {
+public final class CombineObjectSource extends SpringObjectSource {
     private final ThreadLocal<SpringObjectSource> osLocal;
     private boolean isClosed = false;
 
     CombineObjectSource(ThreadLocal<SpringObjectSource> osLocal) {
+        super(null, null);
         this.osLocal = osLocal;
     }
 
@@ -38,8 +39,8 @@ public final class CombineObjectSource {
         this.isClosed = true;
     }
 
-    public BeeObjectHandle getObject() throws Exception {
-        return getCurrentObjectSource().getObject();
+    public BeeObjectHandle getObjectHandle() throws Exception {
+        return getCurrentObjectSource().getObjectHandle();
     }
 
     private SpringObjectSource getCurrentObjectSource() throws Exception {

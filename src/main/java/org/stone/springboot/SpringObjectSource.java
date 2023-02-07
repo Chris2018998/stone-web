@@ -31,7 +31,7 @@ import static org.stone.springboot.SpringDsRegisterUtil.tryToCloseDataSource;
  *
  * @author Chris Liao
  */
-public final class SpringObjectSource {
+public class SpringObjectSource {
     private static final Logger Log = LoggerFactory.getLogger(SpringObjectSource.class);
     private static final Field osIdField;
     private static final Field osUUIDField;
@@ -81,7 +81,7 @@ public final class SpringObjectSource {
         tryToCloseDataSource(os);
     }
 
-    public BeeObjectHandle getObject() throws Exception {
+    public BeeObjectHandle getObjectHandle() throws Exception {
         return os.getObjectHandle();
     }
 
