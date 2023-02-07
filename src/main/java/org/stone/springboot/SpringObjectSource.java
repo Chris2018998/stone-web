@@ -53,7 +53,7 @@ public class SpringObjectSource {
     private final BeeObjectSource os;
     private boolean primary;
 
-    SpringObjectSource(String osId, BeeObjectSource os) {
+    public SpringObjectSource(String osId, BeeObjectSource os) {
         this.osId = osId;
         this.os = os;
         this.osUUID = "SpringOs_" + UUID.randomUUID().toString();
