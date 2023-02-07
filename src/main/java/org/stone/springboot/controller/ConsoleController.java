@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 
-import static org.stone.springboot.SpringRegisterUtil.stringEquals;
+import static org.stone.springboot.SpringDsRegisterUtil.stringEquals;
 import static org.stone.util.CommonUtil.isBlank;
 
 /**

@@ -15,7 +15,7 @@
  */
 package org.stone.springboot.storage;
 
-import org.stone.springboot.SpringRegisterUtil;
+import org.stone.springboot.SpringDsRegisterUtil;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -43,7 +43,7 @@ public class RedisPushTask extends RedisBaseTask {
         try {
             dataPackage.setDsList(dsManager.getPoolMonitorVoList());
             dataPackage.setSqlList(dsManager.getSqlExecutionList());
-            String jsonPackage = SpringRegisterUtil.object2String(dataPackage);
+            String jsonPackage = SpringDsRegisterUtil.object2String(dataPackage);
             jedis = pool.getResource();
             jedis.setex(dataPackage.getPackageUUID(), expireSeconds, jsonPackage);
         } catch (Throwable e) {

@@ -22,7 +22,7 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
-import org.stone.springboot.SpringRegisterUtil;
+import org.stone.springboot.SpringDsRegisterUtil;
 import org.stone.springboot.SpringSourceMonitorConfig;
 import org.stone.springboot.SpringSourceMonitorManager;
 
@@ -53,11 +53,11 @@ public class ControllerRegister implements ImportBeanDefinitionRegistrar {
 
         //2:assembly controller controller
         String resetControllerRegName = ConsoleController.class.getName();
-        if (!SpringRegisterUtil.existsBeanDefinition(resetControllerRegName, registry)) {
+        if (!SpringDsRegisterUtil.existsBeanDefinition(resetControllerRegName, registry)) {
             GenericBeanDefinition define = new GenericBeanDefinition();
             define.setBeanClass(ConsoleController.class);
             define.setPrimary(true);
-            define.setInstanceSupplier(SpringRegisterUtil.createSpringSupplier(
+            define.setInstanceSupplier(SpringDsRegisterUtil.createSpringSupplier(
                     new ConsoleController(monitorConfig, monitorManager)));
             registry.registerBeanDefinition(resetControllerRegName, define);
             log.info("Register DataSource-restController({}) with id:{}", define.getBeanClassName(), resetControllerRegName);
@@ -67,7 +67,7 @@ public class ControllerRegister implements ImportBeanDefinitionRegistrar {
 
         //3: assembly controller controller filter
         String resetControllerFilterRegName = LoginedCheckFilter.class.getName();
-        if (isBlank(monitorConfig.getConsoleUserId()) && !SpringRegisterUtil.existsBeanDefinition(resetControllerFilterRegName, registry)) {
+        if (isBlank(monitorConfig.getConsoleUserId()) && !SpringDsRegisterUtil.existsBeanDefinition(resetControllerFilterRegName, registry)) {
             LoginedCheckFilter dsFilter = new LoginedCheckFilter(monitorConfig.getConsoleUserId(), monitorConfig.getLoggedInSuccessTagName());
             FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>(dsFilter);
             registration.setName(resetControllerFilterRegName);
@@ -76,7 +76,7 @@ public class ControllerRegister implements ImportBeanDefinitionRegistrar {
             GenericBeanDefinition define = new GenericBeanDefinition();
             define.setBeanClass(FilterRegistrationBean.class);
             define.setPrimary(true);
-            define.setInstanceSupplier(SpringRegisterUtil.createSpringSupplier(registration));
+            define.setInstanceSupplier(SpringDsRegisterUtil.createSpringSupplier(registration));
             registry.registerBeanDefinition(resetControllerFilterRegName, define);
             log.info("Register stone-login-filter({}) with id:{}", define.getBeanClassName(), resetControllerFilterRegName);
         } else {

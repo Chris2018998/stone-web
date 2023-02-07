@@ -20,6 +20,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.stone.beecp.BeeDataSource;
+import org.stone.beeop.BeeObjectSource;
+
+import static org.stone.util.CommonUtil.isBlank;
 
 /*
  * config example
@@ -40,24 +43,21 @@ import org.stone.beecp.BeeDataSource;
 @ConditionalOnProperty(name = "spring.objectsource.type", havingValue = "org.stone.beeop.BeeObjectSource")
 public class SpringSingleOsRegister {
     @Bean
-    public BeeDataSource beeDataSource(Environment environment) throws Exception {
-//        //1:read ds Id
-//        String dsId = SpringBootDataSourceUtil.getConfigValue(SpringBootDataSourceUtil.Config_DS_Prefix, SpringBootDataSourceUtil.Config_DS_Id, environment);
-//        if (isBlank(dsId)) dsId = "beeObjectSource";//default os Id
-//
-//        //2:read datasource controller config
-//        StoneMonitorConfig monitorConfig = SpringBootDataSourceUtil.readMonitorConfig(environment);
-//
-//        //3:setup controller config
-//        //SpringBootDataSourceManager.getInstance().setupSqlTrace(monitorConfig);
-//
-//        //4:create BeeDataSource
-//        DataSource ds = new BeeDataSourceFactory().createDataSource(SpringBootDataSourceUtil.Config_DS_Prefix, dsId, environment);
-//        SpringDataSource springDs = new SpringDataSource(dsId, ds, false);
-//        //SpringBootDataSourceManager.getInstance().addSpringBootDataSource(springDs);
-//
-//        return springDs;
+    public SpringObjectSource beeObjectSource(Environment environment) throws Exception {
+        //1:read ds Id
+        String osId = SpringDsRegisterUtil.getConfigValue(SpringDsRegisterUtil.Config_DS_Prefix, SpringDsRegisterUtil.Config_DS_Id, environment);
+        if (isBlank(osId)) osId = "beeObjectSource";//default os Id
 
-        return null;
+        //2:read datasource controller config
+        SpringSourceMonitorConfig monitorConfig = SpringDsRegisterUtil.readMonitorConfig(environment);
+
+        //3:setup controller config
+        //SpringSourceMonitorManager.getInstance().setupSqlTrace(monitorConfig);
+
+        //4:create BeeDataSource
+        BeeObjectSource os = null; //SpringDsRegisterUtil.createSpringBootDataSource(SpringDsRegisterUtil.Config_DS_Prefix, osId, environment);
+        SpringObjectSource springOs = new SpringObjectSource(osId, os);
+        SpringSourceMonitorManager.getInstance().addObjectSource(springOs);
+        return springOs;
     }
 }

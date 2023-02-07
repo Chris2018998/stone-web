@@ -19,7 +19,7 @@ import org.springframework.core.env.Environment;
 import org.stone.beecp.BeeDataSource;
 import org.stone.beecp.BeeDataSourceConfig;
 import org.stone.beecp.jta.BeeJtaDataSource;
-import org.stone.springboot.SpringRegisterUtil;
+import org.stone.springboot.SpringDsRegisterUtil;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -43,24 +43,24 @@ import static org.stone.util.CommonUtil.isBlank;
 public class BeeDataSourceFactory implements SpringBootDataSourceFactory {
 
     private static void setConnectPropertiesConfig(BeeDataSourceConfig config, String dsPrefix, Environment environment) {
-        config.addConnectProperty(SpringRegisterUtil.getConfigValue(dsPrefix, CONFIG_CONNECT_PROP, environment));
-        String connectPropertiesCount = SpringRegisterUtil.getConfigValue(dsPrefix, CONFIG_CONNECT_PROP_SIZE, environment);
+        config.addConnectProperty(SpringDsRegisterUtil.getConfigValue(dsPrefix, CONFIG_CONNECT_PROP, environment));
+        String connectPropertiesCount = SpringDsRegisterUtil.getConfigValue(dsPrefix, CONFIG_CONNECT_PROP_SIZE, environment);
         if (!isBlank(connectPropertiesCount)) {
             int count = Integer.parseInt(connectPropertiesCount.trim());
             for (int i = 1; i <= count; i++)
-                config.addConnectProperty(SpringRegisterUtil.getConfigValue(dsPrefix, CONFIG_CONNECT_PROP_KEY_PREFIX + i, environment));
+                config.addConnectProperty(SpringDsRegisterUtil.getConfigValue(dsPrefix, CONFIG_CONNECT_PROP_KEY_PREFIX + i, environment));
         }
     }
 
     public DataSource createDataSource(String dsPrefix, String dsId, Environment environment) throws Exception {
         //1:read spring configuration and inject to datasource's config object
         BeeDataSourceConfig config = new BeeDataSourceConfig();
-        SpringRegisterUtil.setConfigPropertiesValue(config, dsPrefix, dsId, environment);
+        SpringDsRegisterUtil.setConfigPropertiesValue(config, dsPrefix, dsId, environment);
         setConnectPropertiesConfig(config, dsPrefix, environment);
 
         //2:try to lookup TransactionManager by jndi
         TransactionManager tm = null;
-        String tmJndiName = SpringRegisterUtil.getConfigValue(dsPrefix, CONFIG_TM_JNDI, environment);
+        String tmJndiName = SpringDsRegisterUtil.getConfigValue(dsPrefix, CONFIG_TM_JNDI, environment);
         if (!isBlank(tmJndiName)) {
             Context nameCtx = new InitialContext();
             tm = (TransactionManager) nameCtx.lookup(tmJndiName);

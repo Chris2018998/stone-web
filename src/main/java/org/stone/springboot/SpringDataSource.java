@@ -32,7 +32,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.UUID;
 
-import static org.stone.springboot.SpringRegisterUtil.tryToCloseDataSource;
+import static org.stone.springboot.SpringDsRegisterUtil.tryToCloseDataSource;
 
 /**
  * springboot registered datasource

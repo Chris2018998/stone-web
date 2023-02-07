@@ -15,11 +15,25 @@
  */
 package org.stone.springboot;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.env.Environment;
+
 /*
  * Spring Multi-source Register
  *
  *  @author Chris Liao
  */
-public class SpringMultiRegister {
+public class SpringMultiRegister implements EnvironmentAware, ImportBeanDefinitionRegistrar {
+    //logger
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
+    //springboot environment
+    private Environment environment;
+
+    public final void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
 }

@@ -16,7 +16,7 @@
 package org.stone.springboot.sqlTrace;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.stone.springboot.SpringRegisterUtil;
+import org.stone.springboot.SpringDsRegisterUtil;
 
 import java.util.Date;
 import java.util.Objects;
@@ -56,7 +56,7 @@ public class StatementTrace {
 
         Date startTime = new Date();
         this.startTimeMs = startTime.getTime();
-        this.startTime = SpringRegisterUtil.formatDate(startTime);
+        this.startTime = SpringDsRegisterUtil.formatDate(startTime);
     }
 
     public String getSql() {

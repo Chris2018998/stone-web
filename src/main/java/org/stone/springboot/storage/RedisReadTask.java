@@ -15,7 +15,7 @@
  */
 package org.stone.springboot.storage;
 
-import org.stone.springboot.SpringRegisterUtil;
+import org.stone.springboot.SpringDsRegisterUtil;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -43,7 +43,7 @@ public class RedisReadTask extends RedisBaseTask {
             for (String redisKey : jedis.keys(RedisKeyPrefix)) {
                 String monitorJson = jedis.get(redisKey);
                 if (!isBlank(monitorJson)) {
-                    redisPackageList.add(SpringRegisterUtil.string2Object(monitorJson, RedisPackage.class));
+                    redisPackageList.add(SpringDsRegisterUtil.string2Object(monitorJson, RedisPackage.class));
                 }
             }
 

@@ -47,17 +47,17 @@ public class SpringSingleDsRegister {
     @Bean
     public DataSource beeDataSource(Environment environment) throws Exception {
         //1:read ds Id
-        String dsId = SpringRegisterUtil.getConfigValue(SpringRegisterUtil.Config_DS_Prefix, SpringRegisterUtil.Config_DS_Id, environment);
+        String dsId = SpringDsRegisterUtil.getConfigValue(SpringDsRegisterUtil.Config_DS_Prefix, SpringDsRegisterUtil.Config_DS_Id, environment);
         if (isBlank(dsId)) dsId = "beeDataSource";//default ds Id
 
         //2:read datasource controller config
-        SpringSourceMonitorConfig monitorConfig = SpringRegisterUtil.readMonitorConfig(environment);
+        SpringSourceMonitorConfig monitorConfig = SpringDsRegisterUtil.readMonitorConfig(environment);
 
         //3:setup controller config
         //SpringBootDataSourceManager.getInstance().setupSqlTrace(monitorConfig);
 
         //4:create BeeDataSource
-        DataSource ds = new BeeDataSourceFactory().createDataSource(SpringRegisterUtil.Config_DS_Prefix, dsId, environment);
+        DataSource ds = new BeeDataSourceFactory().createDataSource(SpringDsRegisterUtil.Config_DS_Prefix, dsId, environment);
         SpringDataSource springDs = new SpringDataSource(dsId, ds, false);
         //SpringBootDataSourceManager.getInstance().addSpringBootDataSource(springDs);
 

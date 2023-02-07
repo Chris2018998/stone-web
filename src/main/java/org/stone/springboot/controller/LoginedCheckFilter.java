@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-import static org.stone.springboot.SpringRegisterUtil.object2String;
+import static org.stone.springboot.SpringDsRegisterUtil.object2String;
 import static org.stone.util.CommonUtil.isBlank;
 
 /**

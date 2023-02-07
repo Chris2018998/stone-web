@@ -17,7 +17,7 @@ package org.stone.springboot.sqlTrace;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.stone.springboot.SpringRegisterUtil;
+import org.stone.springboot.SpringDsRegisterUtil;
 import org.stone.springboot.SpringSourceMonitorConfig;
 import org.stone.springboot.SpringSourceMonitorManager;
 import org.stone.springboot.storage.RedisPushTask;
@@ -148,7 +148,7 @@ public class StatementTracePool {
         } finally {
             Date endDate = new Date();
             vo.setEndTimeMs(endDate.getTime());
-            vo.setEndTime(SpringRegisterUtil.formatDate(endDate));
+            vo.setEndTime(SpringDsRegisterUtil.formatDate(endDate));
             vo.setTookTimeMs(vo.getEndTimeMs() - vo.getStartTimeMs());
             if (vo.isSuccessInd() && vo.getTookTimeMs() >= sqlExecSlowTime)//alert
                 vo.setSlowInd(true);

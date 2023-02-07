@@ -32,7 +32,7 @@ public class SpringMultiDsRegister {
 
 }
 
-//public class MultiDataSourceRegister implements EnvironmentAware, ImportBeanDefinitionRegistrar {
+//public class SpringMultiDsRegister implements EnvironmentAware, ImportBeanDefinitionRegistrar {
 //    //logger
 //    private final Logger log = LoggerFactory.getLogger(this.getClass());
 //

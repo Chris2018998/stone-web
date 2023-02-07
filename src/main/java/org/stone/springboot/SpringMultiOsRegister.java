@@ -15,6 +15,7 @@
  */
 package org.stone.springboot;
 
+
 /*
  *  SpringBoot objectSource config example
  *

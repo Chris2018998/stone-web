@@ -24,7 +24,7 @@ import org.stone.beeop.pool.ObjectPoolMonitorVo;
 import java.lang.reflect.Field;
 import java.util.UUID;
 
-import static org.stone.springboot.SpringRegisterUtil.tryToCloseDataSource;
+import static org.stone.springboot.SpringDsRegisterUtil.tryToCloseDataSource;
 
 /**
  * object source(only support beeop)
