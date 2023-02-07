@@ -25,7 +25,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.stone.springboot.combination.CombineAspect;
 import org.stone.springboot.combination.CombineDataSource;
-import org.stone.springboot.factory.SpringBootDataSourceException;
+import org.stone.springboot.factory.SpringDataSourceException;
 
 import java.util.*;
 
@@ -95,7 +95,7 @@ public class SpringMultiDsRegister implements EnvironmentAware, ImportBeanDefini
     private List<String> getDsIdList(Environment environment, BeanDefinitionRegistry registry) {
         String dsIdsText = SpringDsRegisterUtil.getConfigValue(SpringDsRegisterUtil.Config_DS_Prefix, SpringDsRegisterUtil.Config_DS_Id, environment);
         if (isBlank(dsIdsText))
-            throw new SpringBootDataSourceException("Missed or not found config item:" + SpringDsRegisterUtil.Config_DS_Prefix + "." + SpringDsRegisterUtil.Config_DS_Id);
+            throw new SpringDataSourceException("Missed or not found config item:" + SpringDsRegisterUtil.Config_DS_Prefix + "." + SpringDsRegisterUtil.Config_DS_Id);
 
         String[] dsIds = dsIdsText.trim().split(",");
         ArrayList<String> dsIdList = new ArrayList<>(dsIds.length);
@@ -104,14 +104,14 @@ public class SpringMultiDsRegister implements EnvironmentAware, ImportBeanDefini
 
             id = id.trim();
             if (dsIdList.contains(id))
-                throw new SpringBootDataSourceException("Duplicated id(" + id + ")in multi-datasource id list");
+                throw new SpringDataSourceException("Duplicated id(" + id + ")in multi-datasource id list");
             if (SpringDsRegisterUtil.existsBeanDefinition(id, registry))
-                throw new SpringBootDataSourceException("DataSource id(" + id + ")has been registered by another bean");
+                throw new SpringDataSourceException("DataSource id(" + id + ")has been registered by another bean");
 
             dsIdList.add(id);
         }
         if (dsIdList.isEmpty())
-            throw new SpringBootDataSourceException("Missed or not found config item:" + SpringDsRegisterUtil.Config_DS_Prefix + "." + SpringDsRegisterUtil.Config_DS_Id);
+            throw new SpringDataSourceException("Missed or not found config item:" + SpringDsRegisterUtil.Config_DS_Prefix + "." + SpringDsRegisterUtil.Config_DS_Id);
 
         return dsIdList;
     }
@@ -132,14 +132,14 @@ public class SpringMultiDsRegister implements EnvironmentAware, ImportBeanDefini
 
         if (!isBlank(combineId)) {
             if (dsIdList.contains(combineId))
-                throw new SpringBootDataSourceException("Combine-dataSource id (" + combineId + ")can't be in ds-id list");
+                throw new SpringDataSourceException("Combine-dataSource id (" + combineId + ")can't be in ds-id list");
             if (SpringDsRegisterUtil.existsBeanDefinition(combineId, registry))
-                throw new SpringBootDataSourceException("Combine-dataSource id(" + combineId + ")has been registered by another bean");
+                throw new SpringDataSourceException("Combine-dataSource id(" + combineId + ")has been registered by another bean");
 
             if (isBlank(primaryDs))
-                throw new SpringBootDataSourceException("Missed or not found config item:" + SpringDsRegisterUtil.Config_DS_Prefix + "." + SpringDsRegisterUtil.Config_DS_Combine_PrimaryDs);
+                throw new SpringDataSourceException("Missed or not found config item:" + SpringDsRegisterUtil.Config_DS_Prefix + "." + SpringDsRegisterUtil.Config_DS_Combine_PrimaryDs);
             if (!dsIdList.contains(primaryDs.trim()))
-                throw new SpringBootDataSourceException("Combine-primaryDs(" + primaryDs + "not found in ds-id list");
+                throw new SpringDataSourceException("Combine-primaryDs(" + primaryDs + "not found in ds-id list");
         }
 
         Properties combineProperties = new Properties();
@@ -166,7 +166,7 @@ public class SpringMultiDsRegister implements EnvironmentAware, ImportBeanDefini
         } catch (Throwable e) {//failed then close all created dataSource
             for (SpringDataSource ds : dsMap.values())
                 ds.close();
-            throw new SpringBootDataSourceException("multi-DataSource created failed", e);
+            throw new SpringDataSourceException("multi-DataSource created failed", e);
         }
     }
 

@@ -40,7 +40,7 @@ import static org.stone.util.CommonUtil.isBlank;
  *
  *  @author Chris liao
  */
-public class BeeDataSourceFactory implements SpringBootDataSourceFactory {
+public class BeeDataSourceFactory implements SpringDataSourceFactory {
 
     private static void setConnectPropertiesConfig(BeeDataSourceConfig config, String dsPrefix, Environment environment) {
         config.addConnectProperty(SpringDsRegisterUtil.getConfigValue(dsPrefix, CONFIG_CONNECT_PROP, environment));

@@ -22,8 +22,8 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.env.Environment;
 import org.stone.beecp.BeeDataSource;
 import org.stone.springboot.factory.BeeDataSourceFactory;
-import org.stone.springboot.factory.SpringBootDataSourceException;
-import org.stone.springboot.factory.SpringBootDataSourceFactory;
+import org.stone.springboot.factory.SpringDataSourceException;
+import org.stone.springboot.factory.SpringDataSourceFactory;
 import org.stone.springboot.util.JackSonTool;
 import org.stone.springboot.util.SpringBootJsonTool;
 
@@ -68,7 +68,7 @@ public class SpringDsRegisterUtil {
     //BeeCP DataSource class name
     private static final String BeeCP_DS_Class_Name = BeeDataSource.class.getName();
     private static final ThreadLocal<WeakReference<DateFormat>> DateFormatThreadLocal = new ThreadLocal<WeakReference<DateFormat>>();
-    private static final Map<Class, SpringBootDataSourceFactory> DataSourceFactoryMap = new HashMap<>(1);
+    private static final Map<Class, SpringDataSourceFactory> DataSourceFactoryMap = new HashMap<>(1);
     private static final Logger log = LoggerFactory.getLogger(SpringDsRegisterUtil.class);
 
     private static SpringBootJsonTool jsonTool;
@@ -167,10 +167,10 @@ public class SpringDsRegisterUtil {
             if (namingObj instanceof DataSource) {
                 return new SpringDataSource(dsId, (DataSource) namingObj, true);
             } else {
-                throw new SpringBootDataSourceException("DataSource(" + dsId + ")-Jndi Name(" + jndiName + ") is not a data source object");
+                throw new SpringDataSourceException("DataSource(" + dsId + ")-Jndi Name(" + jndiName + ") is not a data source object");
             }
         } catch (NamingException e) {
-            throw new SpringBootDataSourceException("DataSource(" + dsId + ")-Failed to lookup data source by jndi-name:" + jndiName);
+            throw new SpringDataSourceException("DataSource(" + dsId + ")-Failed to lookup data source by jndi-name:" + jndiName);
         }
     }
 
@@ -184,27 +184,27 @@ public class SpringDsRegisterUtil {
         try {
             dsClass = Class.forName(dsClassName);
         } catch (ClassNotFoundException e) {
-            throw new SpringBootDataSourceException("DataSource(" + dsId + ")-Not found class:" + dsClassName);
+            throw new SpringDataSourceException("DataSource(" + dsId + ")-Not found class:" + dsClassName);
         }
 
         //3:create dataSource
         DataSource ds;
-        SpringBootDataSourceFactory dsFactory = DataSourceFactoryMap.get(dsClass);
-        if (dsFactory == null && SpringBootDataSourceFactory.class.isAssignableFrom(dsClass))
-            dsFactory = (SpringBootDataSourceFactory) createInstanceByClassName(dsId, dsClass);
+        SpringDataSourceFactory dsFactory = DataSourceFactoryMap.get(dsClass);
+        if (dsFactory == null && SpringDataSourceFactory.class.isAssignableFrom(dsClass))
+            dsFactory = (SpringDataSourceFactory) createInstanceByClassName(dsId, dsClass);
         if (dsFactory != null) {//create by factory
             try {
                 ds = dsFactory.createDataSource(dsPrefix, dsId, environment);
-            } catch (SpringBootDataSourceException e) {
+            } catch (SpringDataSourceException e) {
                 throw e;
             } catch (Exception e) {
-                throw new SpringBootDataSourceException("DataSource(" + dsId + ")-Failed to get instance from dataSource factory", e);
+                throw new SpringDataSourceException("DataSource(" + dsId + ")-Failed to get instance from dataSource factory", e);
             }
         } else if (DataSource.class.isAssignableFrom(dsClass)) {
             ds = (DataSource) createInstanceByClassName(dsId, dsClass);
             setConfigPropertiesValue(ds, dsPrefix, dsId, environment);
         } else {
-            throw new SpringBootDataSourceException("DataSource(" + dsId + ")-target type is not a valid data source type");
+            throw new SpringDataSourceException("DataSource(" + dsId + ")-target type is not a valid data source type");
         }
 
         return new SpringDataSource(dsId, ds, false);
@@ -214,14 +214,14 @@ public class SpringDsRegisterUtil {
         try {
             return objClass.newInstance();
         } catch (Exception e) {
-            throw new SpringBootDataSourceException("DataSource(" + dsId + ")-Failed to instantiated the class:" + objClass.getName(), e);
+            throw new SpringDataSourceException("DataSource(" + dsId + ")-Failed to instantiated the class:" + objClass.getName(), e);
         }
     }
 
     //***************************************************************************************************************//
     //                                3: Spring Boot configuration set(3)                                            //
     //***************************************************************************************************************//
-    public static void setConfigPropertiesValue(Object bean, String dsPrefix, String dsId, Environment environment) throws SpringBootDataSourceException {
+    public static void setConfigPropertiesValue(Object bean, String dsPrefix, String dsId, Environment environment) throws SpringDataSourceException {
         try {
             //1:get all set methods
             Map<String, Method> setMethodMap = getClassSetMethodMap(bean.getClass());
@@ -237,7 +237,7 @@ public class SpringDsRegisterUtil {
             //4:inject found config value to ds config object
             setPropertiesValue(bean, setMethodMap, setValueMap);
         } catch (Throwable e) {
-            throw new SpringBootDataSourceException("DataSource(" + dsId + ")-Failed to set properties", e);
+            throw new SpringDataSourceException("DataSource(" + dsId + ")-Failed to set properties", e);
         }
     }
 
