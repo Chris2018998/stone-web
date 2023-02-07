@@ -16,7 +16,7 @@
 package org.stone.springboot.annotation;
 
 import org.springframework.context.annotation.Import;
-import org.stone.springboot.assembly.MultiDataSourceRegister;
+import org.stone.springboot.SpringMultiRegister;
 
 import java.lang.annotation.*;
 
@@ -24,12 +24,11 @@ import java.lang.annotation.*;
  *  Multi-DataSource annotation
  *  @author Chris Liao
  */
- *
 
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Target(ElementType.TYPE)
-@Import(value = {MultiDataSourceRegister.class})
+@Import(value = {SpringMultiRegister.class})
 public @interface EnableStone {
 
 }
