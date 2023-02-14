@@ -26,6 +26,7 @@ import org.stone.springboot.SpringObjectSource;
 import org.stone.springboot.SpringSourceMonitorManager;
 import org.stone.springboot.annotation.BeeDsId;
 import org.stone.springboot.annotation.BeeOsId;
+import org.stone.springboot.factory.SpringDataSourceException;
 
 import static org.stone.util.CommonUtil.isBlank;
 
@@ -71,6 +72,9 @@ public final class CombineAspect {
 
     @Around("dsPointcut()")
     public Object setDataSourceId(ProceedingJoinPoint joinPoint) throws Throwable {
+        if (dsLocal == null) throw new SpringDataSourceException("Combine datasource not be enable");
+        if (isBlank(primaryDsId)) throw new SpringDataSourceException("Combine primary datasource id not set");
+
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         BeeDsId annotation = methodSignature.getMethod().getAnnotation(BeeDsId.class);
         String dsId = annotation.value();
@@ -94,6 +98,9 @@ public final class CombineAspect {
 
     @Around("osPointcut()")
     public Object setObjectSourceId(ProceedingJoinPoint joinPoint) throws Throwable {
+        if (dsLocal == null) throw new SpringDataSourceException("Combine object-source not be enable");
+        if (isBlank(primaryDsId)) throw new SpringDataSourceException("Combine primary object-source id not set");
+
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         BeeOsId annotation = methodSignature.getMethod().getAnnotation(BeeOsId.class);
         String osId = annotation.value();
