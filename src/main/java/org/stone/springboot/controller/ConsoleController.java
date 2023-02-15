@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.stone.springboot.SpringSourceMonitorConfig;
-import org.stone.springboot.SpringSourceMonitorManager;
+import org.stone.springboot.SpringStoneMonitorConfig;
+import org.stone.springboot.SpringStoneObjectsManager;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -38,10 +38,10 @@ import static org.stone.util.CommonUtil.isBlank;
 @Controller
 public class ConsoleController {
     private final static String consolePage = "/stone/console.html";
-    private final SpringSourceMonitorConfig monitorConfig;
-    private final SpringSourceMonitorManager stoneMonitorManager;
+    private final SpringStoneMonitorConfig monitorConfig;
+    private final SpringStoneObjectsManager stoneMonitorManager;
 
-    public ConsoleController(SpringSourceMonitorConfig monitorConfig, SpringSourceMonitorManager stoneMonitorManager) {
+    public ConsoleController(SpringStoneMonitorConfig monitorConfig, SpringStoneObjectsManager stoneMonitorManager) {
         this.monitorConfig = monitorConfig;
         this.stoneMonitorManager = stoneMonitorManager;
     }

@@ -16,7 +16,7 @@
 package org.stone.springboot.annotation;
 
 import org.springframework.context.annotation.Import;
-import org.stone.springboot.SpringMultiRegister;
+import org.stone.springboot.SpringStoneObjectsRegister;
 
 import java.lang.annotation.*;
 
@@ -28,7 +28,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Target(ElementType.TYPE)
-@Import(value = {SpringMultiRegister.class})
+@Import(value = {SpringStoneObjectsRegister.class})
 public @interface EnableStone {
 
 }

@@ -20,7 +20,7 @@ package org.stone.springboot;
  *  SpringBoot objectSource config example
  *
  *  spring.objectsource.osId=os1,os2
- *  spring.objectsource.os1.type=cn.stone.BeeDataSoruce
+ *  spring.objectsource.os1.type=cn.beecp.BeeDataSoruce
  *  spring.objectsource.os1.primary=true
  *
  *  spring.datasource.os2.primary=false

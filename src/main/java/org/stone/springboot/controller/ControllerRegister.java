@@ -23,8 +23,8 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 import org.stone.springboot.SpringDsRegisterUtil;
-import org.stone.springboot.SpringSourceMonitorConfig;
-import org.stone.springboot.SpringSourceMonitorManager;
+import org.stone.springboot.SpringStoneMonitorConfig;
+import org.stone.springboot.SpringStoneObjectsManager;
 
 import javax.servlet.Filter;
 
@@ -37,14 +37,14 @@ import static org.stone.util.CommonUtil.isBlank;
  */
 public class ControllerRegister implements ImportBeanDefinitionRegistrar {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private SpringSourceMonitorConfig monitorConfig;
-    private SpringSourceMonitorManager monitorManager;
+    private SpringStoneMonitorConfig monitorConfig;
+    private SpringStoneObjectsManager monitorManager;
 
-    public void setMonitorConfig(SpringSourceMonitorConfig monitorConfig) {
+    public void setMonitorConfig(SpringStoneMonitorConfig monitorConfig) {
         this.monitorConfig = monitorConfig;
     }
 
-    public final void setMonitorManager(SpringSourceMonitorManager monitorManager) {
+    public final void setMonitorManager(SpringStoneObjectsManager monitorManager) {
         this.monitorManager = monitorManager;
     }
 

@@ -18,8 +18,8 @@ package org.stone.springboot.sqlTrace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.stone.springboot.SpringDsRegisterUtil;
-import org.stone.springboot.SpringSourceMonitorConfig;
-import org.stone.springboot.SpringSourceMonitorManager;
+import org.stone.springboot.SpringStoneMonitorConfig;
+import org.stone.springboot.SpringStoneObjectsManager;
 import org.stone.springboot.storage.RedisPushTask;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -45,7 +45,7 @@ import static org.stone.util.CommonUtil.isBlank;
  * @author Chris Liao
  */
 public class StatementTracePool {
-    private final Logger Log = LoggerFactory.getLogger(SpringSourceMonitorManager.class);
+    private final Logger Log = LoggerFactory.getLogger(SpringStoneObjectsManager.class);
 
     private boolean sqlTrace;
     private boolean sqlShow;
@@ -63,7 +63,7 @@ public class StatementTracePool {
         return sqlTrace;
     }
 
-    public void initPool(SpringSourceMonitorConfig config) {
+    public void initPool(SpringStoneMonitorConfig config) {
         if (sqlTrace = config.isSqlTrace()) {
             this.sqlShow = config.isSqlShow();
             this.sqlExecSlowTime = config.getSqlExecSlowTime();

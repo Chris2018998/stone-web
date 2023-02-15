@@ -72,7 +72,7 @@ public class SpringDsRegisterUtil {
     private static final Logger log = LoggerFactory.getLogger(SpringDsRegisterUtil.class);
 
     private static SpringJsonTool jsonTool;
-    private static SpringSourceMonitorConfig monitorConfig;
+    private static SpringStoneMonitorConfig monitorConfig;
     //***************************************************************************************************************//
     //                                1: spring assembly or base (3)                                                //
     //***************************************************************************************************************//
@@ -135,10 +135,10 @@ public class SpringDsRegisterUtil {
     //***************************************************************************************************************//
     //                                2: Spring Boot dataSource create(5)                                            //
     //***************************************************************************************************************//
-    public synchronized static SpringSourceMonitorConfig readMonitorConfig(Environment environment) {
+    public synchronized static SpringStoneMonitorConfig readMonitorConfig(Environment environment) {
         if (monitorConfig == null) {
             //1:create sql sqlTrace config instance
-            monitorConfig = new SpringSourceMonitorConfig();
+            monitorConfig = new SpringStoneMonitorConfig();
             //2:set Properties
             setConfigPropertiesValue(monitorConfig, Config_DS_Prefix, null, environment);
             //3:create global json tool()

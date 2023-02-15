@@ -70,7 +70,7 @@ public class SpringMultiDsRegister implements EnvironmentAware, ImportBeanDefini
         List<String> dsIdList = getDsIdList(environment, registry);
 
         //2:read datasource controller config
-        SpringSourceMonitorConfig dataSourceSpringSourceMonitorConfig = SpringDsRegisterUtil.readMonitorConfig(environment);
+        SpringStoneMonitorConfig dataSourceSpringSourceMonitorConfig = SpringDsRegisterUtil.readMonitorConfig(environment);
 
         //3:read combine-ds config
         Properties combineProperties = getCombineDsInfo(dsIdList, environment, registry);
@@ -79,7 +79,7 @@ public class SpringMultiDsRegister implements EnvironmentAware, ImportBeanDefini
         Map<String, SpringDataSource> dsMap = createDataSources(dsIdList, environment);
 
         //5:read sql sqlTrace config
-        SpringSourceMonitorManager.getInstance().setupSqlTrace(dataSourceSpringSourceMonitorConfig);
+        SpringStoneObjectsManager.getInstance().setupSqlTrace(dataSourceSpringSourceMonitorConfig);
 
         //6:register datasource to spring container
         this.registerDataSources(dsMap, combineProperties, registry);
@@ -210,7 +210,7 @@ public class SpringMultiDsRegister implements EnvironmentAware, ImportBeanDefini
         define.setInstanceSupplier(SpringDsRegisterUtil.createSpringSupplier(springDs));
         registry.registerBeanDefinition(springDs.getDsId(), define);
         log.info("Registered DataSource({})with id:{}", define.getBeanClassName(), springDs.getDsId());
-        SpringSourceMonitorManager.getInstance().addDataSource(springDs);
+        SpringStoneObjectsManager.getInstance().addDataSource(springDs);
     }
 }
 

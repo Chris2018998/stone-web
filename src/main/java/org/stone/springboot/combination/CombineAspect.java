@@ -23,7 +23,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.Order;
 import org.stone.springboot.SpringDataSource;
 import org.stone.springboot.SpringObjectSource;
-import org.stone.springboot.SpringSourceMonitorManager;
+import org.stone.springboot.SpringStoneObjectsManager;
 import org.stone.springboot.annotation.BeeDsId;
 import org.stone.springboot.annotation.BeeOsId;
 import org.stone.springboot.factory.SpringDataSourceException;
@@ -43,7 +43,7 @@ public final class CombineAspect {
     private String primaryOsId;
     private ThreadLocal<SpringDataSource> dsLocal;
     private ThreadLocal<SpringObjectSource> osLocal;
-    private SpringSourceMonitorManager monitorManager;
+    private SpringStoneObjectsManager monitorManager;
 
     //***************************************************************************************************************//
     //                                     1: properties set(3)                                                      //
@@ -58,7 +58,7 @@ public final class CombineAspect {
         this.primaryOsId = primaryOsId;
     }
 
-    void setMonitorManager(SpringSourceMonitorManager monitorManager) {
+    void setMonitorManager(SpringStoneObjectsManager monitorManager) {
         this.monitorManager = monitorManager;
     }
 
