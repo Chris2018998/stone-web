@@ -1,2 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.stone.springboot.SpringSingleDsRegister,org.stone.springboot.SpringSingleOsRegister
