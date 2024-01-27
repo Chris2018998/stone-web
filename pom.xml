@@ -29,7 +29,7 @@
     <scm>
         <connection>scm:git:git@github.com:Chris2018998/stone-web.git</connection>
         <developerConnection>scm:git:git@github.com:Chris2018998/stone-web.git</developerConnection>
-        <url>https://github.com/Chris2018998/BeeCP-Starter</url>
+        <url>https://github.com/Chris2018998/stone-web</url>
     </scm>
 
     <distributionManagement>
@@ -47,7 +47,7 @@
         <dependency>
             <groupId>io.github.chris2018998</groupId>
             <artifactId>stone</artifactId>
-            <version>1.0.3</version>
+            <version>1.2.6</version>
         </dependency>
         <dependency>
             <groupId>javax.transaction</groupId>
@@ -61,6 +61,7 @@
             <version>1.7.36</version>
             <scope>provided</scope>
         </dependency>
+
         <!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
         <dependency>
             <groupId>redis.clients</groupId>
