@@ -13,23 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.annotation;
+package org.stone.springboot.sql;
 
-import org.springframework.context.annotation.Import;
-import org.stone.springboot.DataSourceBeansRegister;
+import java.util.List;
 
-import java.lang.annotation.*;
-
-/*
- * Multi-DataSource annotation
+/**
+ * when SQL execution time greater than alert time,then trigger it
  *
- *  @author Chris Liao
+ * @author Chris Liao
  */
+public class StatementSqlAlert {
 
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Target(ElementType.TYPE)
-@Import(value = {DataSourceBeansRegister.class})
-public @interface EnableBeeDs {
-
+    public void slowRun(List<StatementExecution> slowList) {
+        //do nothing
+    }
 }

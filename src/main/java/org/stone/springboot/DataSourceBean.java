@@ -18,10 +18,13 @@ package org.stone.springboot;
 import org.stone.beecp.BeeConnectionPoolMonitorVo;
 import org.stone.beecp.BeeDataSource;
 import org.stone.beecp.jta.BeeJtaDataSource;
-import org.stone.springboot.sql.SqlExecutionJdbcUtil;
-import org.stone.springboot.sql.SqlExecutionWorkshop;
+import org.stone.springboot.sql.StatementExecutionCollector;
+import org.stone.springboot.sql.StatementJdbcUtil;
+import org.stone.springboot.sql.XAConnectionImpl;
 
 import javax.sql.DataSource;
+import javax.sql.XAConnection;
+import javax.sql.XADataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -32,21 +35,25 @@ import java.sql.SQLFeatureNotSupportedException;
  *
  * @author Chris Liao
  */
-public final class DataSourceBean implements DataSource {
+public final class DataSourceBean implements DataSource, XADataSource {
     private final DataSource ds;
+    private final XADataSource xaDs;
+
     private final String dsId;
     private final boolean jndiDs;
     private final boolean primary;
     private final boolean isBeeDs;
     private final boolean isBeeJtaDs;
+    private StatementExecutionCollector statementExecutionCollector;
 
-    private SqlExecutionWorkshop workshop;
-
-    public DataSourceBean(String dsId, boolean jndiDs, boolean primary, DataSource ds) {
-        this.ds = ds;
+    public DataSourceBean(String dsId, boolean jndiDs, boolean primary, Object ds) {
+        if (ds == null) throw new java.lang.IllegalArgumentException("Data source can't be null");
         this.dsId = dsId;
         this.jndiDs = jndiDs;
         this.primary = primary;
+
+        this.ds = ds instanceof DataSource ? (DataSource) ds : null;
+        this.xaDs = ds instanceof XADataSource ? (XADataSource) ds : null;
         this.isBeeDs = ds instanceof BeeDataSource;
         this.isBeeJtaDs = ds instanceof BeeJtaDataSource;
     }
@@ -62,21 +69,40 @@ public final class DataSourceBean implements DataSource {
         return primary;
     }
 
-    void setWorkshop(SqlExecutionWorkshop workshop) {
-        this.workshop = workshop;
+    public boolean isBeeDs() {
+        return isBeeDs || isBeeJtaDs;
+    }
+
+    void setStatementExecutionCollector(StatementExecutionCollector statementExecutionCollector) {
+        this.statementExecutionCollector = statementExecutionCollector;
     }
 
     //***************************************************************************************************************//
-    //                                     2: methods of getting connection(2)                                       //
+    //                                     2: methods of getting connection(4)                                       //
     //***************************************************************************************************************//
     public Connection getConnection() throws SQLException {
+        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide features of dataSource");
         Connection con = ds.getConnection();
-        return workshop != null ? SqlExecutionJdbcUtil.createConnection(con, dsId, workshop) : con;
+        return statementExecutionCollector != null ? StatementJdbcUtil.createConnection(dsId, false, con, statementExecutionCollector) : con;
     }
 
     public Connection getConnection(String username, String password) throws SQLException {
+        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide features of dataSource");
+
         Connection con = ds.getConnection(username, password);
-        return workshop != null ? SqlExecutionJdbcUtil.createConnection(con, dsId, workshop) : con;
+        return statementExecutionCollector != null ? StatementJdbcUtil.createConnection(dsId, false, con, statementExecutionCollector) : con;
+    }
+
+    public XAConnection getXAConnection() throws SQLException {
+        if (xaDs == null) throw new SQLFeatureNotSupportedException("Not provide features of XADataSource");
+        XAConnection xaCon = xaDs.getXAConnection();
+        return new XAConnectionImpl(dsId, xaCon, statementExecutionCollector);
+    }
+
+    public XAConnection getXAConnection(String username, String password) throws SQLException {
+        if (xaDs == null) throw new SQLFeatureNotSupportedException("Not provide features of XADataSource");
+        XAConnection xaCon = xaDs.getXAConnection(username, password);
+        return new XAConnectionImpl(dsId, xaCon, statementExecutionCollector);
     }
 
     //***************************************************************************************************************//
@@ -84,6 +110,8 @@ public final class DataSourceBean implements DataSource {
     //***************************************************************************************************************//
     void close() throws SQLException {
         if (jndiDs) return;
+        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide features of dataSource");
+
         if (isBeeDs) {
             ((BeeDataSource) ds).close();
         } else if (isBeeJtaDs) {
@@ -92,6 +120,7 @@ public final class DataSourceBean implements DataSource {
     }
 
     void clear(boolean force) throws SQLException {
+        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide features of dataSource");
         if (isBeeDs) {
             ((BeeDataSource) ds).clear(force);
         } else if (isBeeJtaDs) {
@@ -100,6 +129,7 @@ public final class DataSourceBean implements DataSource {
     }
 
     BeeConnectionPoolMonitorVo getPoolMonitorVo() throws SQLException {
+        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide features of dataSource");
         if (isBeeDs) {
             return ((BeeDataSource) ds).getPoolMonitorVo();
         } else if (isBeeJtaDs) {
@@ -113,23 +143,31 @@ public final class DataSourceBean implements DataSource {
     //                                    4: Other implementation methods (7)                                        //
     //***************************************************************************************************************//
     public PrintWriter getLogWriter() throws SQLException {
-        return ds.getLogWriter();
+        return ds != null ? ds.getLogWriter() : xaDs.getLogWriter();
     }
 
     public void setLogWriter(PrintWriter out) throws SQLException {
-        ds.setLogWriter(out);
+        if (ds != null) {
+            ds.setLogWriter(out);
+        } else {
+            xaDs.setLogWriter(out);
+        }
     }
 
     public int getLoginTimeout() throws SQLException {
-        return ds.getLoginTimeout();
+        return ds != null ? ds.getLoginTimeout() : xaDs.getLoginTimeout();
     }
 
     public void setLoginTimeout(int seconds) throws SQLException {
-        ds.setLoginTimeout(seconds);
+        if (ds != null) {
+            ds.setLoginTimeout(seconds);
+        } else {
+            xaDs.setLoginTimeout(seconds);
+        }
     }
 
     public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return ds.getParentLogger();
+        return ds != null ? ds.getParentLogger() : xaDs.getParentLogger();
     }
 
     public boolean isWrapperFor(Class<?> clazz) {

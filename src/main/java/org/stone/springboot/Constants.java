@@ -27,19 +27,20 @@ public class Constants {
     //***************************************************************************************************************//
     //prefix of configuration of spring data source
     public static final String Config_DS_Prefix = "spring.datasource";
+    //Configuration class name of datasource class type
+    public static final String Config_DS_Type = "type";
+    //Configuration class name of data Source factory
+    public static final String Config_Factory_Type = "factory";
+    //Configuration name of jndi name of datasource
+    public static final String Config_DS_Jndi = "jndiName";
     //Configuration name of a data source id
     public static final String Config_DS_Id = "dsId";
+    //Configuration name of primary value
+    public static final String Config_DS_Primary = "primary";
     //Configuration name of id of dynamic data source
     public static final String Config_Dyn_DS_Id = "dynDsId";
     //Configuration name of primary id of dynamic data source
     public static final String Config_Dyn_DS_PrimaryId = "dynDsPrimaryId";
-    //Configuration name of primary value
-    public static final String Config_DS_Primary = "primary";
-    //Configuration name of datasource class type
-    public static final String Config_DS_Type = "type";
-    //Configuration name of jndi name of datasource
-    public static final String Config_DS_Jndi = "jndiName";
-
     //***************************************************************************************************************//
     //                                     2: Object Source                                                          //
     //***************************************************************************************************************//

@@ -18,7 +18,7 @@ package org.stone.springboot.annotation;
 import java.lang.annotation.*;
 
 /*
- * dataSourceId annotation
+ * dataSourceId annotation to support dynamic source
  *
  * @author Chris Liao
  * @version 1.0

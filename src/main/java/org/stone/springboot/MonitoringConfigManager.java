@@ -25,8 +25,8 @@ import org.stone.springboot.datacache.MonitoringVo;
 import org.stone.springboot.datacache.MonitoringVoTimerTask;
 import org.stone.springboot.extension.JackSonImpl;
 import org.stone.springboot.extension.LocalJsonUtil;
-import org.stone.springboot.sql.SqlExecutionSlowAction;
-import org.stone.springboot.sql.SqlExecutionWorkshop;
+import org.stone.springboot.sql.StatementExecutionCollector;
+import org.stone.springboot.sql.StatementSqlAlert;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -80,13 +80,14 @@ public final class MonitoringConfigManager extends SpringConfigurationLoader {
     private long sqlSlowTime = TimeUnit.SECONDS.toMillis(6);
     private long sqlTimeoutInQueue = TimeUnit.MINUTES.toMillis(3);
     private long sqlQueueScanPeriod = TimeUnit.MINUTES.toMillis(3);
-    private SqlExecutionSlowAction sqlSlowAction;
+    private StatementSqlAlert sqlSlowAction;
     //***************************************************************************************************************//
     //                                             5: other config                                                   //
     //***************************************************************************************************************//
     private LocalJsonUtil jsonUtil;
     private String jsonUtilClassName;
 
+    private String cacheKeyPrefix;
     private CacheClient cacheClient;
     private String cacheClientProviderClassName;
 
@@ -134,6 +135,14 @@ public final class MonitoringConfigManager extends SpringConfigurationLoader {
         this.sqlTimeoutInQueue = sqlTimeoutInQueue;
     }
 
+    public String getCacheKeyPrefix() {
+        return cacheKeyPrefix;
+    }
+
+    public void setCacheKeyPrefix(String cacheKeyPrefix) {
+        this.cacheKeyPrefix = cacheKeyPrefix;
+    }
+
     public CacheClient getCacheClient() {
         return cacheClient;
     }
@@ -154,11 +163,11 @@ public final class MonitoringConfigManager extends SpringConfigurationLoader {
         this.sqlQueueScanPeriod = sqlQueueScanPeriod;
     }
 
-    public SqlExecutionSlowAction getSqlSlowAction() {
+    public StatementSqlAlert getSqlSlowAction() {
         return sqlSlowAction;
     }
 
-    public void setSqlSlowAction(SqlExecutionSlowAction sqlSlowAction) {
+    public void setSqlSlowAction(StatementSqlAlert sqlSlowAction) {
         this.sqlSlowAction = sqlSlowAction;
     }
 
@@ -219,7 +228,7 @@ public final class MonitoringConfigManager extends SpringConfigurationLoader {
         //5: set SqlExecutionCache to data source manager
         if (sqlTrace) {
             DataSourceBeanManager.getInstance()
-                    .setSqlExecutionWorkshop(new SqlExecutionWorkshop(this));
+                    .setStatementExecutionCollector(new StatementExecutionCollector(this));
         }
     }
 
@@ -248,7 +257,7 @@ public final class MonitoringConfigManager extends SpringConfigurationLoader {
 
                 //3: schedule task
                 InternalScheduledService.getInstance().
-                        scheduleAtFixedRate(new MonitoringVoTimerTask(cacheClient, jsonUtil, new MonitoringVo(appContextBaseUrl)), 0, 15000L, MILLISECONDS);
+                        scheduleAtFixedRate(new MonitoringVoTimerTask(cacheClient, jsonUtil, this.cacheKeyPrefix, new MonitoringVo(appContextBaseUrl)), 0, 15000L, MILLISECONDS);
             } catch (Throwable e) {
                 log.warn("Failed to create cache client provider with class:{}", providerClassName);
             }

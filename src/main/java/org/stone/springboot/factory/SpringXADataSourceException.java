@@ -13,18 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.sql;
+package org.stone.springboot.factory;
 
-import java.util.List;
-
-/**
- * when SQL execution time greater than alert time,then trigger it
+/*
+/*
+ * Throws this exception when {@link SpringXADataSourceFactory} fail to a XA data source.
  *
- * @author Chris Liao
+ *  @author Chris Liao
  */
-public class SqlExecutionSlowAction {
 
-    public void alert(List<SqlExecution> alertList) {
-        //do nothing
+public final class SpringXADataSourceException extends RuntimeException {
+
+    public SpringXADataSourceException(String message) {
+        super(message);
+    }
+
+    public SpringXADataSourceException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

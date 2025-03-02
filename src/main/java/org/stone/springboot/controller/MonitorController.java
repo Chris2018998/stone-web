@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.stone.springboot.DataSourceBeanManager;
 import org.stone.springboot.MonitoringConfigManager;
 
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.Objects;
 
@@ -40,11 +39,11 @@ import static org.stone.tools.CommonUtil.isBlank;
 public class MonitorController {
     private final static String consolePage = "/stone/monitor.html";
     private final MonitoringConfigManager monitorConfig;
-    private final DataSourceBeanManager stoneMonitorManager;
+    private final DataSourceBeanManager dsManager;
 
     public MonitorController(MonitoringConfigManager monitorConfig, DataSourceBeanManager stoneMonitorManager) {
         this.monitorConfig = monitorConfig;
-        this.stoneMonitorManager = stoneMonitorManager;
+        this.dsManager = stoneMonitorManager;
     }
 
     //***************************************************************************************************************//
@@ -92,7 +91,7 @@ public class MonitorController {
     @PostMapping("/stone/getLocalDataSourceList")
     public ControllerResponse getDataSourceList() {
         try {
-            return new ControllerResponse(ControllerResponse.CODE_SUCCESS, stoneMonitorManager.getDataSourceMonitoringVoList(), "OK");
+            return new ControllerResponse(ControllerResponse.CODE_SUCCESS, dsManager.getDataSourceMonitoringVoList(), "OK");
         } catch (Throwable e) {
             return new ControllerResponse(ControllerResponse.CODE_FAILED, e, "Failed to get datasource pool info");
         }
@@ -102,7 +101,7 @@ public class MonitorController {
     @PostMapping("/stone/getLocalSqlList")
     public ControllerResponse getSqTraceList() {
         try {
-            return new ControllerResponse(ControllerResponse.CODE_SUCCESS, stoneMonitorManager.getSqlExecutionList(), "OK");
+            return new ControllerResponse(ControllerResponse.CODE_SUCCESS, dsManager.getSqlExecutionList(), "OK");
         } catch (Throwable e) {
             return new ControllerResponse(ControllerResponse.CODE_FAILED, e, "Failed to get traced sql list");
         }
@@ -110,13 +109,25 @@ public class MonitorController {
 
     @ResponseBody
     @PostMapping("/stone/clearLocalDataSourcePool")
-    public ControllerResponse clearDataSourcePool(@RequestBody Map<String, String> parameterMap) throws SQLException {
+    public ControllerResponse clearDataSourcePool(@RequestBody Map<String, String> parameterMap) {
         try {
             String dsId = parameterMap != null ? parameterMap.get("dsId") : null;
-            stoneMonitorManager.clearDataSourcePool(dsId, false);
+            dsManager.clearDataSourcePool(dsId, false);
             return new ControllerResponse(ControllerResponse.CODE_SUCCESS, null, "OK");
         } catch (Throwable e) {
-            return new ControllerResponse(ControllerResponse.CODE_FAILED, e, "Failed to restart datasource pool");
+            return new ControllerResponse(ControllerResponse.CODE_FAILED, e, "Failed to clear datasource pool");
+        }
+    }
+
+    @ResponseBody
+    @PostMapping("/stone/cancelStatementExecution")
+    public ControllerResponse cancelStatementExecution(@RequestBody Map<String, String> parameterMap) {
+        try {
+            String statementUUID = parameterMap != null ? parameterMap.get("uuid") : null;
+            dsManager.cancelStatementExecution(statementUUID);
+            return new ControllerResponse(ControllerResponse.CODE_SUCCESS, null, "OK");
+        } catch (Throwable e) {
+            return new ControllerResponse(ControllerResponse.CODE_FAILED, e, "Failed to cancel statement");
         }
     }
 
@@ -127,7 +138,7 @@ public class MonitorController {
     @PostMapping("/stone/getLocalObjectSourceList")
     public ControllerResponse getObjectSourceList() {
         try {
-            return new ControllerResponse(ControllerResponse.CODE_SUCCESS, stoneMonitorManager.getDataSourceMonitoringVoList(), "OK");
+            return new ControllerResponse(ControllerResponse.CODE_SUCCESS, dsManager.getDataSourceMonitoringVoList(), "OK");
         } catch (Throwable e) {
             return new ControllerResponse(ControllerResponse.CODE_FAILED, e, "Failed to get object source pool info");
         }
@@ -138,7 +149,7 @@ public class MonitorController {
     public ControllerResponse clearObjectSourcePool(@RequestBody Map<String, String> parameterMap) {
         try {
             String osId = parameterMap != null ? parameterMap.get("osId") : null;
-            stoneMonitorManager.clearDataSourcePool(osId, false);
+            dsManager.clearDataSourcePool(osId, false);
             return new ControllerResponse(ControllerResponse.CODE_SUCCESS, null, "OK");
         } catch (Throwable e) {
             return new ControllerResponse(ControllerResponse.CODE_FAILED, e, "Failed to restart objectsource pool");

@@ -27,24 +27,26 @@ import java.util.Date;
 /**
  * @author Chris Liao
  */
-public class SqlExecutionJdbcUtil {
+public class StatementJdbcUtil {
     private static final Class[] INTF_Connection = new Class[]{Connection.class};
     private static final Class[] INTF_CallableStatement = new Class[]{CallableStatement.class};
-    private static final ClassLoader classLoader = SqlExecutionJdbcUtil.class.getClassLoader();
+    private static final ClassLoader classLoader = StatementJdbcUtil.class.getClassLoader();
     private static final ThreadLocal<WeakReference<DateFormat>> DateFormatThreadLocal = new ThreadLocal<WeakReference<DateFormat>>();
 
-    public static Connection createConnection(Connection delegate, String dsId, SqlExecutionWorkshop statementPool) {
+    public static Connection createConnection(String dsId, boolean fromXA, Connection delegate,
+                                              StatementExecutionCollector collector) {
         return (Connection) Proxy.newProxyInstance(
                 classLoader,
                 INTF_Connection,
-                new ConnectionHandler(delegate, dsId, statementPool));
+                new ConnectionHandler(dsId, fromXA, delegate, collector));
     }
 
-    static Statement createStatement(Statement delegate, String statementType, String dsId, SqlExecution trace, SqlExecutionWorkshop statementPool) {
+    static Statement createStatement(String dsId, boolean fromXA, Statement delegate, String statementType,
+                                     String prepareSql, long prepareStartTime, long prepareEndTime, StatementExecutionCollector collector) {
         return (Statement) Proxy.newProxyInstance(
                 classLoader,
                 INTF_CallableStatement,
-                new SqlStatementHandler(delegate, statementType, dsId, trace, statementPool));
+                new StatementHandler(dsId, fromXA, delegate, statementType, prepareSql, prepareStartTime, prepareEndTime, collector));
     }
 
     public static String formatDate(Date date) {

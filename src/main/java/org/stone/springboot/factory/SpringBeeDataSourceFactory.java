@@ -23,6 +23,7 @@ import org.stone.springboot.DataSourceBeanManager;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
@@ -54,7 +55,7 @@ public class SpringBeeDataSourceFactory implements SpringDataSourceFactory {
         }
     }
 
-    public DataSource createDataSource(String prefix, String dsId, Environment environment) throws Exception {
+    public DataSource createDataSource(String prefix, String dsId, Environment environment) throws SpringDataSourceException {
         DataSourceBeanManager manager = DataSourceBeanManager.getInstance();
 
         //1:read spring configuration and inject to datasource's config object
@@ -62,12 +63,16 @@ public class SpringBeeDataSourceFactory implements SpringDataSourceFactory {
         manager.setConfigPropertiesValue(config, prefix, dsId, environment);
         setConnectPropertiesConfig(config, prefix, environment);
 
-        //2:try to lookup TransactionManager by jndi
+        //2:try to lookup TransactionManager with jndi name
         TransactionManager tm = null;
         String tmJndiName = manager.getConfigValue(prefix, CONFIG_TM_JNDI, environment);
         if (!isBlank(tmJndiName)) {
-            Context nameCtx = new InitialContext();
-            tm = (TransactionManager) nameCtx.lookup(tmJndiName);
+            try {
+                Context nameCtx = new InitialContext();
+                tm = (TransactionManager) nameCtx.lookup(tmJndiName);
+            } catch (NamingException e) {
+                throw new SpringDataSourceException("Failed to look transaction manager with jndi name:" + tmJndiName, e);
+            }
         }
 
         //3:create dataSource instance

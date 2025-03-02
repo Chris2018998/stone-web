@@ -17,7 +17,7 @@ package org.stone.springboot.datacache;
 
 import org.stone.beecp.BeeConnectionPoolMonitorVo;
 import org.stone.beeop.BeeObjectPoolMonitorVo;
-import org.stone.springboot.sql.SqlExecution;
+import org.stone.springboot.sql.StatementExecution;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -34,7 +34,7 @@ public final class MonitoringVo implements Serializable {
     private final String appContextUrl;
     private String cacheTime;
     private Collection<BeeConnectionPoolMonitorVo> dsList;
-    private Collection<SqlExecution> sqlList;
+    private Collection<StatementExecution> sqlList;
     private Collection<BeeObjectPoolMonitorVo> osList;
 
     public MonitoringVo(String appContextUrl) {
@@ -61,11 +61,11 @@ public final class MonitoringVo implements Serializable {
         this.dsList = dsList;
     }
 
-    public Collection<SqlExecution> getSqlList() {
+    public Collection<StatementExecution> getSqlList() {
         return sqlList;
     }
 
-    public void setSqlList(Collection<SqlExecution> sqlList) {
+    public void setSqlList(Collection<StatementExecution> sqlList) {
         this.sqlList = sqlList;
     }
 

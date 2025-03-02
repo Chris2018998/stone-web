@@ -15,7 +15,6 @@
  */
 package org.stone.springboot;
 
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +29,8 @@ public class InternalScheduledService {
     private final ScheduledThreadPoolExecutor timerExecutor;
 
     private InternalScheduledService() {
-        this.timerExecutor = new ScheduledThreadPoolExecutor(2, new SpringBootDsThreadFactory());
+        this.timerExecutor = new ScheduledThreadPoolExecutor(2,
+                new SpringBootDsThreadFactory());
         timerExecutor.setKeepAliveTime(15, TimeUnit.SECONDS);
         timerExecutor.allowCoreThreadTimeOut(true);
     }
@@ -39,11 +39,11 @@ public class InternalScheduledService {
         return single;
     }
 
-    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
-                                                  long initialDelay,
-                                                  long period,
-                                                  TimeUnit unit) {
-        return timerExecutor.scheduleAtFixedRate(command, initialDelay, period, unit);
+    public void scheduleAtFixedRate(Runnable command,
+                                    long initialDelay,
+                                    long period,
+                                    TimeUnit unit) {
+        timerExecutor.scheduleAtFixedRate(command, initialDelay, period, unit);
     }
 
     private static final class SpringBootDsThreadFactory implements ThreadFactory {

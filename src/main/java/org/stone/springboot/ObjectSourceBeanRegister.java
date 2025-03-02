@@ -45,7 +45,7 @@ import javax.sql.DataSource;
 @AutoConfigureBefore(DataSourceAutoConfiguration.class)
 public class ObjectSourceBeanRegister {
     @Bean
-    public DataSource beeDataSource(Environment environment) throws Exception {
+    public DataSource beeObjectSource(Environment environment) throws Exception {
 //        //1:read ds id
 //        String dsId = SpringDataSourceUtil.getConfigValue(SpringDataSourceUtil.Config_DS_Prefix, SpringDataSourceUtil.Config_DS_Id, environment);
 //        if (isBlank(dsId)) dsId = "beeDataSource";//default ds Id

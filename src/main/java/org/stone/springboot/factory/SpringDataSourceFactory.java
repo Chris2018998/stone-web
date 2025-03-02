@@ -27,14 +27,14 @@ import javax.sql.DataSource;
 public interface SpringDataSourceFactory {
 
     /**
-     * Create a datasource by configuration
+     * Create a datasource with configuration in spring boot.
      *
      * @param environment SpringBoot environment
      * @param dsId        configured data source id
      * @param prefix      configured prefix name
      * @return data source instance
-     * @throws Exception when fail to set
+     * @throws SpringDataSourceException when fail to set
      */
-    DataSource createDataSource(String prefix, String dsId, Environment environment) throws Exception;
+    DataSource createDataSource(String prefix, String dsId, Environment environment) throws SpringDataSourceException;
 
 }

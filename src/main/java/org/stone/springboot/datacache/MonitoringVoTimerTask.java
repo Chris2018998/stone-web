@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.stone.springboot.DataSourceBeanManager;
 import org.stone.springboot.ObjectSourceBeanManager;
 import org.stone.springboot.extension.LocalJsonUtil;
-import org.stone.springboot.sql.SqlExecutionJdbcUtil;
+import org.stone.springboot.sql.StatementJdbcUtil;
 
 import java.util.Date;
 
@@ -34,6 +34,8 @@ public final class MonitoringVoTimerTask implements Runnable {
     private final CacheClient client;
     //cache client
     private final LocalJsonUtil jsonUtil;
+    //prefix of cache key
+    private final String cacheKeyPrefix;
     //monitoring data
     private final MonitoringVo monitoringData;
 
@@ -41,9 +43,11 @@ public final class MonitoringVoTimerTask implements Runnable {
 
     public MonitoringVoTimerTask(CacheClient client,
                                  LocalJsonUtil jsonUtil,
+                                 String cacheDataPrefix,
                                  MonitoringVo monitoringData) {
         this.client = client;
         this.jsonUtil = jsonUtil;
+        this.cacheKeyPrefix = cacheDataPrefix;
         this.monitoringData = monitoringData;
     }
 
@@ -52,9 +56,9 @@ public final class MonitoringVoTimerTask implements Runnable {
             monitoringData.setDsList(DataSourceBeanManager.getInstance().getDataSourceMonitoringVoList());
             monitoringData.setSqlList(DataSourceBeanManager.getInstance().getSqlExecutionList());
             monitoringData.setOsList(ObjectSourceBeanManager.getInstance().getOsPoolMonitorVoList());
-            monitoringData.setCacheTime(SqlExecutionJdbcUtil.formatDate(new Date()));
+            monitoringData.setCacheTime(StatementJdbcUtil.formatDate(new Date()));
 
-            client.set(monitoringData.getAppContextUrl(), jsonUtil.object2String(monitoringData));
+            client.set(cacheKeyPrefix + "-" + monitoringData.getAppContextUrl(), jsonUtil.object2String(monitoringData));
         } catch (Exception e) {
             logger.error("Failed to write monitoring data to cache", e);
         }

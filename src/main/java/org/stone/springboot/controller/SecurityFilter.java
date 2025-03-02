@@ -35,8 +35,13 @@ public class SecurityFilter implements Filter {
     private final String loggedInTagName;
     private final String[] excludeUrlSuffix = {".js", ".css", ".gif"};
     private final String[] excludeUrls = {"/stone/login", "/stone/login.html"};
-    private final String[] restUrls = {"/stone/getDataSourceList", "/stone/getSqlTraceList",
-            "/stone/clearDataSourcePool", "/stone/getObjectSourceList", "/stone/clearObjectSourcePool"};
+    private final String[] restUrls = {
+            "/stone/getLocalDataSourceList",
+            "/stone/getLocalSqlList",
+            "/stone/clearLocalDataSourcePool",
+            "/stone/cancelStatementExecution",
+            "/stone/getLocalObjectSourceList",
+            "/stone/clearLocalObjectSourcePool"};
 
     SecurityFilter(String userId, String loggedInTagName) {
         this.userId = userId;

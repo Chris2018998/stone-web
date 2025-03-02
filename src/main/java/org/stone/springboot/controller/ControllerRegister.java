@@ -35,37 +35,30 @@ import static org.stone.tools.CommonUtil.isBlank;
  */
 public class ControllerRegister implements ImportBeanDefinitionRegistrar {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private MonitoringConfigManager monitorConfig;
-    private DataSourceBeanManager monitorManager;
-
-    public void setMonitorConfig(MonitoringConfigManager monitorConfig) {
-        this.monitorConfig = monitorConfig;
-    }
-
-    public final void setMonitorManager(DataSourceBeanManager monitorManager) {
-        this.monitorManager = monitorManager;
-    }
 
     //Register controller bean to ioc
     public final void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        //2:assembly Controller
+        DataSourceBeanManager dsManager = DataSourceBeanManager.getInstance();
+        MonitoringConfigManager mcManager = MonitoringConfigManager.getInstance();
+
+        //2: register Controller
         String resetControllerRegName = MonitorController.class.getName();
-        if (!DataSourceBeanManager.getInstance().existsBeanDefinition(resetControllerRegName, registry)) {
+        if (!dsManager.existsBeanDefinition(resetControllerRegName, registry)) {
             GenericBeanDefinition define = new GenericBeanDefinition();
             define.setBeanClass(MonitorController.class);
             define.setPrimary(true);
-            define.setInstanceSupplier(DataSourceBeanManager.getInstance().createSpringSupplier(
-                    new MonitorController(monitorConfig, monitorManager)));
+            define.setInstanceSupplier(dsManager.createSpringSupplier(
+                    new MonitorController(mcManager, dsManager)));
             registry.registerBeanDefinition(resetControllerRegName, define);
-            log.info("Register DataSource-restController({}) with id:{}", define.getBeanClassName(), resetControllerRegName);
+            log.info("Register stone monitor controller({}) with id:{}", define.getBeanClassName(), resetControllerRegName);
         } else {
             log.error("BeanDefinition id {} already exists in spring context", resetControllerRegName);
         }
 
-        //3: assembly controller controller filter
+        //3: register filter
         String resetControllerFilterRegName = SecurityFilter.class.getName();
-        if (isBlank(monitorConfig.getConsoleUserId()) && !DataSourceBeanManager.getInstance().existsBeanDefinition(resetControllerFilterRegName, registry)) {
-            SecurityFilter dsFilter = new SecurityFilter(monitorConfig.getConsoleUserId(), monitorConfig.getLoggedInSuccessTagName());
+        if (isBlank(mcManager.getConsoleUserId()) && !dsManager.existsBeanDefinition(resetControllerFilterRegName, registry)) {
+            SecurityFilter dsFilter = new SecurityFilter(mcManager.getConsoleUserId(), mcManager.getLoggedInSuccessTagName());
             FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>(dsFilter);
             registration.setName(resetControllerFilterRegName);
             registration.addUrlPatterns("/stone/*");
@@ -73,9 +66,9 @@ public class ControllerRegister implements ImportBeanDefinitionRegistrar {
             GenericBeanDefinition define = new GenericBeanDefinition();
             define.setBeanClass(FilterRegistrationBean.class);
             define.setPrimary(true);
-            define.setInstanceSupplier(DataSourceBeanManager.getInstance().createSpringSupplier(registration));
+            define.setInstanceSupplier(dsManager.createSpringSupplier(registration));
             registry.registerBeanDefinition(resetControllerFilterRegName, define);
-            log.info("Register stone-login-filter({}) with id:{}", define.getBeanClassName(), resetControllerFilterRegName);
+            log.info("Register stone security filter({}) with id:{}", define.getBeanClassName(), resetControllerFilterRegName);
         } else {
             log.error("BeanDefinition id {} has been exists in spring context", resetControllerFilterRegName);
         }

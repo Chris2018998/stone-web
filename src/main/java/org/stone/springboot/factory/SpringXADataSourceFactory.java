@@ -15,18 +15,26 @@
  */
 package org.stone.springboot.factory;
 
+import org.springframework.core.env.Environment;
+
+import javax.sql.XADataSource;
+
 /*
- * Throws this exception when {@link SpringDataSourceFactory} fail to a data source.
+ * XAData source factory interface.
  *
  *  @author Chris Liao
  */
-public final class SpringDataSourceException extends RuntimeException {
+public interface SpringXADataSourceFactory {
 
-    public SpringDataSourceException(String message) {
-        super(message);
-    }
+    /**
+     * Create a Xa datasource with configuration in spring boot.
+     *
+     * @param environment SpringBoot environment
+     * @param dsId        configured data source id
+     * @param prefix      configured prefix name
+     * @return data source instance
+     * @throws SpringXADataSourceException when fail to set
+     */
+    XADataSource createXADataSource(String prefix, String dsId, Environment environment) throws SpringXADataSourceException;
 
-    public SpringDataSourceException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

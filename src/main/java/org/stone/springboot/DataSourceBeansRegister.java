@@ -68,14 +68,14 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
         //2: load configuration of monitor
         MonitoringConfigManager.getInstance().loadMonitorConfig(environment);
 
-        //3: load configuration for combination datasource
-        Properties combineProperties = getCompositeDsInfo(dsIdList, environment, registry);
+        //3: load configuration for dynamic datasource
+        Properties dynamicSourceProperties = getDynamicDsInfo(dsIdList, environment, registry);
 
         //4: create datasource with configuration
         Map<String, DataSourceBean> dsMap = createDataSources(dsIdList, environment);
 
         //5: register datasource to spring container
-        this.registerDataSources(dsMap, combineProperties, registry);
+        this.registerDataSources(dsMap, dynamicSourceProperties, registry);
     }
 
     /**
@@ -110,13 +110,13 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
     }
 
     /**
-     * 2: get combine config info
+     * 2: get dynamic config info
      *
      * @param dsIdList    datasource name list
      * @param environment spring boot environment
      * @return datasource name list
      */
-    private Properties getCompositeDsInfo(List<String> dsIdList, Environment environment, BeanDefinitionRegistry registry) {
+    private Properties getDynamicDsInfo(List<String> dsIdList, Environment environment, BeanDefinitionRegistry registry) {
         String combineId = DataSourceBeanManager.getInstance().getConfigValue(Config_DS_Prefix, Config_Dyn_DS_Id, environment);
         String primaryDs = DataSourceBeanManager.getInstance().getConfigValue(Config_DS_Prefix, Config_Dyn_DS_PrimaryId, environment);
 
@@ -125,14 +125,14 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
 
         if (!isBlank(combineId)) {
             if (dsIdList.contains(combineId))
-                throw new SpringDataSourceException("Composite-dataSource id (" + combineId + ")can't be in ds-id list");
+                throw new SpringDataSourceException("Dynamic-dataSource id (" + combineId + ")can't be in ds-id list");
             if (DataSourceBeanManager.getInstance().existsBeanDefinition(combineId, registry))
-                throw new SpringDataSourceException("Composite-dataSource id(" + combineId + ")has been registered by another bean");
+                throw new SpringDataSourceException("Dynamic-dataSource id(" + combineId + ")has been registered by another bean");
 
             if (isBlank(primaryDs))
                 throw new SpringDataSourceException("Missed or not found config item:" + Config_DS_Prefix + "." + Config_Dyn_DS_PrimaryId);
             if (!dsIdList.contains(primaryDs.trim()))
-                throw new SpringDataSourceException("Combine-primaryDs(" + primaryDs + "not found in ds-id list");
+                throw new SpringDataSourceException("Dynamic-primaryDs(" + primaryDs + "not found in ds-id list");
         }
 
         Properties combineProperties = new Properties();
