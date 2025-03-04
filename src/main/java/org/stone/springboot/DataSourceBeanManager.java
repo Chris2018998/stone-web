@@ -21,8 +21,8 @@ import org.stone.beecp.BeeDataSource;
 import org.stone.springboot.factory.SpringDataSourceException;
 import org.stone.springboot.factory.SpringDataSourceFactory;
 import org.stone.springboot.factory.SpringXADataSourceFactory;
-import org.stone.springboot.sql.StatementExecution;
-import org.stone.springboot.sql.StatementExecutionCollector;
+import org.stone.springboot.jdbc.StatementExecution;
+import org.stone.springboot.jdbc.StatementExecutionCollector;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;

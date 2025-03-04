@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.sql;
+package org.stone.springboot.jdbc;
 
 import javax.sql.ConnectionEventListener;
 import javax.sql.StatementEventListener;

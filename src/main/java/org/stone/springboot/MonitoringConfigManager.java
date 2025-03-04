@@ -25,8 +25,8 @@ import org.stone.springboot.datacache.MonitoringVo;
 import org.stone.springboot.datacache.MonitoringVoTimerTask;
 import org.stone.springboot.extension.JackSonImpl;
 import org.stone.springboot.extension.LocalJsonUtil;
-import org.stone.springboot.sql.StatementExecutionCollector;
-import org.stone.springboot.sql.StatementSqlAlert;
+import org.stone.springboot.jdbc.StatementExecutionCollector;
+import org.stone.springboot.jdbc.StatementSqlAlert;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

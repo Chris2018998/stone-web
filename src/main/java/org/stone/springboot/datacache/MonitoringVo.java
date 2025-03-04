@@ -17,7 +17,7 @@ package org.stone.springboot.datacache;
 
 import org.stone.beecp.BeeConnectionPoolMonitorVo;
 import org.stone.beeop.BeeObjectPoolMonitorVo;
-import org.stone.springboot.sql.StatementExecution;
+import org.stone.springboot.jdbc.StatementExecution;
 
 import java.io.Serializable;
 import java.util.Collection;

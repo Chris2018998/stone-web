@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.stone.springboot.DataSourceBeanManager;
 import org.stone.springboot.ObjectSourceBeanManager;
 import org.stone.springboot.extension.LocalJsonUtil;
-import org.stone.springboot.sql.StatementJdbcUtil;
+import org.stone.springboot.jdbc.StatementJdbcUtil;
 
 import java.util.Date;
 

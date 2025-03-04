@@ -18,9 +18,9 @@ package org.stone.springboot;
 import org.stone.beecp.BeeConnectionPoolMonitorVo;
 import org.stone.beecp.BeeDataSource;
 import org.stone.beecp.jta.BeeJtaDataSource;
-import org.stone.springboot.sql.StatementExecutionCollector;
-import org.stone.springboot.sql.StatementJdbcUtil;
-import org.stone.springboot.sql.XAConnectionImpl;
+import org.stone.springboot.jdbc.StatementExecutionCollector;
+import org.stone.springboot.jdbc.StatementJdbcUtil;
+import org.stone.springboot.jdbc.XAConnectionImpl;
 
 import javax.sql.DataSource;
 import javax.sql.XAConnection;

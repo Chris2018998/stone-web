@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.sql;
+package org.stone.springboot.jdbc;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Statement;
 
-import static org.stone.springboot.sql.ConnectionHandler.Type_Statement;
+import static org.stone.springboot.jdbc.ConnectionHandler.Type_Statement;
 
 /**
  * @author Chris Liao

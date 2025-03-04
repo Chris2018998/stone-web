@@ -7,7 +7,7 @@
  *
  * Project Licensed under GNU Lesser General Public License v2.1.
  */
-package org.stone.springboot.sql.wall;
+package org.stone.springboot.jdbc.sqlwall;
 
 /**
  * DB Object access permit definition
