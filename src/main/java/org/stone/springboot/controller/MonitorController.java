@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.stone.springboot.DataSourceBeanManager;
-import org.stone.springboot.MonitoringConfigManager;
 
 import java.util.Map;
 import java.util.Objects;
@@ -38,12 +37,16 @@ import static org.stone.tools.CommonUtil.isBlank;
 @Controller
 public class MonitorController {
     private final static String consolePage = "/stone/monitor.html";
-    private final MonitoringConfigManager monitorConfig;
+    private final String configuredUsername;
+    private final String configuredPassword;
+    private final String loggedInTagName;
     private final DataSourceBeanManager dsManager;
 
-    public MonitorController(MonitoringConfigManager monitorConfig, DataSourceBeanManager stoneMonitorManager) {
-        this.monitorConfig = monitorConfig;
-        this.dsManager = stoneMonitorManager;
+    public MonitorController(String username, String password, String loggedInTagName) {
+        this.configuredUsername = username;
+        this.configuredPassword = password;
+        this.loggedInTagName = loggedInTagName;
+        this.dsManager = DataSourceBeanManager.getInstance();
     }
 
     //***************************************************************************************************************//
@@ -66,16 +69,16 @@ public class MonitorController {
     @PostMapping("/stone/login")
     public ControllerResponse login(@RequestBody Map<String, String> paramMap, HttpServletRequest req) {
         HttpSession session = req.getSession();
-        if ("Y".equals(session.getAttribute(monitorConfig.getLoggedInSuccessTagName())))//has login
+        if ("Y".equals(session.getAttribute(loggedInTagName)))//has login
             return new ControllerResponse(ControllerResponse.CODE_SUCCESS, null, "Login Success");
-        if (isBlank(monitorConfig.getConsoleUserId()))
+        if (isBlank(configuredUsername))
             return new ControllerResponse(ControllerResponse.CODE_SUCCESS, null, "Login Success");
 
         try {
             String userId = paramMap.get("userId");
             String password = paramMap.get("password");
-            if (Objects.equals(monitorConfig.getConsoleUserId(), userId) && Objects.equals(monitorConfig.getConsolePassword(), password)) {//checked pass
-                session.setAttribute(monitorConfig.getLoggedInSuccessTagName(), "Y");
+            if (Objects.equals(configuredUsername, userId) && Objects.equals(configuredPassword, password)) {//checked pass
+                session.setAttribute(loggedInTagName, "Y");
                 return new ControllerResponse(ControllerResponse.CODE_SUCCESS, null, "Login Success");
             } else
                 return new ControllerResponse(ControllerResponse.CODE_FAILED, null, "Login Failed");

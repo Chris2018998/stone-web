@@ -34,14 +34,43 @@ import static org.stone.springboot.Constants.*;
 import static org.stone.tools.CommonUtil.isBlank;
 
 /*
- * example of multi-dataSource
+ * #ids of datasource
+ * spring.datasource.dsId=ds1,ds2,ds3
  *
- * spring.datasource.dsId=ds1,ds2
- * spring.datasource.ds1.type=org.stone.beecp.BeeDataSource
+ * #ds1
  * spring.datasource.ds1.primary=true
+ * spring.datasource.ds1.type=org.stone.beecp.BeeDataSource
+ * spring.datasource.ds1.username=root
+ * spring.datasource.ds1.password=root
+ * spring.datasource.ds1.jdbcUrl=jdbc:mysql://localhost:3306/test
+ * spring.datasource.ds1.driverClassName=com.mysql.jdbc.Driver
+ * spring.datasource.ds1.fairMode=true
+ * spring.datasource.ds1.initialSize=10
+ * spring.datasource.ds1.maxActive=10
  *
+ * #ds2
  * spring.datasource.ds2.primary=false
- * spring.datasource.ds2.jndiName=DsJndi
+ * spring.datasource.ds2.type=org.stone.beecp.BeeDataSource
+ * spring.datasource.ds2.username=root
+ * spring.datasource.ds2.password=root
+ * spring.datasource.ds2.jdbcUrl=jdbc:mysql://localhost:3306/test
+ * spring.datasource.ds2.driverClassName=com.mysql.jdbc.Driver
+ * spring.datasource.ds2.fairMode=true
+ * spring.datasource.ds2.initialSize=10
+ * spring.datasource.ds2.maxActive=10
+ *
+ * #ds3
+ * spring.datasource.ds3.primary=false
+ * spring.datasource.ds3.jndiName=DsJndi
+ *
+ * #sql execution trace configuration
+ * spring.datasource.sql-trace=true
+ * spring.datasource.sql-show=true
+ * spring.datasource.sql-queue-max-size=100
+ * spring.datasource.sql-slow-threshold-time=5000
+ * spring.datasource.sql-expiration-time=18000
+ * spring.datasource.sql-queue-scan-period-time=18000
+ * spring.datasource.sql-alert-action=xxxxx
  *
  * @author Chris Liao
  */
@@ -65,17 +94,20 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
         //1: read configured id list of datasource
         List<String> dsIdList = getDsIdList(environment, registry);
 
-        //2: load configuration of monitor
-        MonitoringConfigManager.getInstance().loadMonitorConfig(environment);
-
-        //3: load configuration for dynamic datasource
+        //2: load configuration for dynamic datasource
         Properties dynamicSourceProperties = getDynamicDsInfo(dsIdList, environment, registry);
 
-        //4: create datasource with configuration
+        //3: create datasource with configuration
         Map<String, DataSourceBean> dsMap = createDataSources(dsIdList, environment);
+
+        //4: register datasource to spring container
+        this.registerDataSources(dsMap, dynamicSourceProperties, registry);
 
         //5: register datasource to spring container
         this.registerDataSources(dsMap, dynamicSourceProperties, registry);
+
+        //6:Setup statement execution collector to data source manager if exists its configuration
+        DataSourceBeanManager.getInstance().setupStatementExecutionCollector(environment);
     }
 
     /**
@@ -180,7 +212,6 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
 
         for (DataSourceBean ds : dsMap.values())
             registerDataSourceBean(ds, registry);
-
 
         //register combine DataSource
         if (!isBlank(combineDsId) && !isBlank(primaryDsId)) {

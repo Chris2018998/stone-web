@@ -21,7 +21,7 @@ import org.stone.springboot.controller.ControllerRegister;
 import java.lang.annotation.*;
 
 /*
- *  Bee DataSource Monitor annotation
+ * Annotation to enable web UI to show monitoring info of pools
  *
  *  @author Chris Liao
  */
@@ -29,6 +29,6 @@ import java.lang.annotation.*;
 @Documented
 @Target(ElementType.TYPE)
 @Import(value = {ControllerRegister.class})
-public @interface EnableMonitor {
+public @interface EnableBeeUI {
 }
 

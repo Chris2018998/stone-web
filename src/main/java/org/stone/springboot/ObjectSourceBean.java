@@ -35,7 +35,7 @@ public class ObjectSourceBean<K, V> {
     }
 
     //***************************************************************************************************************//
-    //                                     1: base properties (3)                                                    //
+    //                                     1: base properties (4)                                                    //
     //***************************************************************************************************************//
     public String getOsId() {
         return osId;
@@ -49,13 +49,12 @@ public class ObjectSourceBean<K, V> {
         this.primary = primary;
     }
 
-
     public BeeObjectHandle<K, V> getObjectHandle() throws Exception {
         return os.getObjectHandle();
     }
 
     //***************************************************************************************************************//
-    //                                     2: Pool Monitor (4)                                                       //
+    //                                     2: Pool Monitor (3)                                                       //
     //***************************************************************************************************************//
     public void close() throws Exception {
         os.close();

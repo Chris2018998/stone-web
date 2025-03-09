@@ -17,7 +17,7 @@ package org.stone.springboot.controller;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
-import org.stone.springboot.MonitoringConfigManager;
+import org.stone.springboot.extension.LocalJsonUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -33,6 +33,8 @@ import static org.stone.tools.CommonUtil.isBlank;
 public class SecurityFilter implements Filter {
     private final String userId;
     private final String loggedInTagName;
+    private final LocalJsonUtil jsonTool;
+
     private final String[] excludeUrlSuffix = {".js", ".css", ".gif"};
     private final String[] excludeUrls = {"/stone/login", "/stone/login.html"};
     private final String[] restUrls = {
@@ -43,9 +45,10 @@ public class SecurityFilter implements Filter {
             "/stone/getLocalObjectSourceList",
             "/stone/clearLocalObjectSourcePool"};
 
-    SecurityFilter(String userId, String loggedInTagName) {
+    SecurityFilter(String userId, String loggedInTagName, LocalJsonUtil jsonTool) {
         this.userId = userId;
         this.loggedInTagName = loggedInTagName;
+        this.jsonTool = jsonTool;
     }
 
     @Override
@@ -70,7 +73,7 @@ public class SecurityFilter implements Filter {
                 res.setContentType("application/json");
                 OutputStream ps = res.getOutputStream();
                 ControllerResponse restResponse = new ControllerResponse(ControllerResponse.CODE_SECURITY, null, "unauthorized");
-                ps.write(MonitoringConfigManager.getInstance().getJsonUtil().object2String(restResponse).getBytes(StandardCharsets.UTF_8));
+                ps.write(jsonTool.object2String(restResponse).getBytes(StandardCharsets.UTF_8));
             } else {
                 req.getRequestDispatcher("/stone/login.html").forward(req, res);
             }

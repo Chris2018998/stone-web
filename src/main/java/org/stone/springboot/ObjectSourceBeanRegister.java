@@ -21,45 +21,43 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
-import org.stone.beecp.BeeDataSource;
-
-import javax.sql.DataSource;
+import org.stone.beeop.BeeObjectSource;
 
 /*
- * Default register to import a data source to spring boot
+ * Default register to import an object pool to spring boot
  *
- * spring.datasource.dsId=beeDs
- * spring.datasource.type=org.stone.beecp.BeeDataSource
- * spring.datasource.username=root
- * spring.datasource.password=
- * spring.datasource.jdbcUrl=jdbc:mysql://localhost:3306/test
- * spring.datasource.driverClassName=com.mysql.jdbc.Driver
- * spring.datasource.fairMode=true
- * spring.datasource.initialSize=10
- * spring.datasource.maxActive =10
+ * spring.objectsource.dsId=beeDs
+ * spring.objectsource.type=org.stone.beecp.Beeobjectsource
+ * spring.objectsource.username=root
+ * spring.objectsource.password=
+ * spring.objectsource.jdbcUrl=jdbc:mysql://localhost:3306/test
+ * spring.objectsource.driverClassName=com.mysql.jdbc.Driver
+ * spring.objectsource.fairMode=true
+ * spring.objectsource.initialSize=10
+ * spring.objectsource.maxActive =10
  *
  * @author Chris Liao
  */
-@ConditionalOnClass(BeeDataSource.class)
-@ConditionalOnProperty(name = "spring.datasource.type", havingValue = "org.stone.beecp.BeeDataSource")
+@ConditionalOnClass(BeeObjectSource.class)
+@ConditionalOnProperty(name = "spring.objectsource.type", havingValue = "org.stone.beeop.BeeObjectSource")
 @AutoConfigureBefore(DataSourceAutoConfiguration.class)
 public class ObjectSourceBeanRegister {
     @Bean
-    public DataSource beeObjectSource(Environment environment) throws Exception {
+    public BeeObjectSource beeObjectSource(Environment environment) throws Exception {
 //        //1:read ds id
-//        String dsId = SpringDataSourceUtil.getConfigValue(SpringDataSourceUtil.Config_DS_Prefix, SpringDataSourceUtil.Config_DS_Id, environment);
-//        if (isBlank(dsId)) dsId = "beeDataSource";//default ds Id
+//        String dsId = SpringobjectsourceUtil.getConfigValue(SpringobjectsourceUtil.Config_DS_Prefix, SpringobjectsourceUtil.Config_DS_Id, environment);
+//        if (isBlank(dsId)) dsId = "beeobjectsource";//default ds Id
 //
-//        //2:read datasource monitor config
-//        MonitorConfig dataSourceMonitorConfig = SpringDataSourceUtil.loadDsMonitorConfig(environment);
+//        //2:read objectsource monitor config
+//        MonitorConfig objectsourceMonitorConfig = SpringobjectsourceUtil.loadDsMonitorConfig(environment);
 //
 //        //3:setup monitor config
-//        SpringDataSourceManager.getInstance().setupMonitorConfig(dataSourceMonitorConfig);
+//        SpringobjectsourceManager.getInstance().setupMonitorConfig(objectsourceMonitorConfig);
 //
-//        //4:create BeeDataSource
-//        DataSource ds = new BeeDataSourceFactory().createDataSource(SpringDataSourceUtil.Config_DS_Prefix, dsId, environment);
-//        SpringDataSource springDs = new SpringDataSource(dsId, ds, false);
-//        SpringDataSourceManager.getInstance().addSpringBootDataSource(springDs);
+//        //4:create Beeobjectsource
+//        objectsource ds = new BeeobjectsourceFactory().createobjectsource(SpringobjectsourceUtil.Config_DS_Prefix, dsId, environment);
+//        Springobjectsource springDs = new Springobjectsource(dsId, ds, false);
+//        SpringobjectsourceManager.getInstance().addSpringBootobjectsource(springDs);
 //
 //        return springDs;
 

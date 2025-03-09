@@ -19,6 +19,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.stone.beecp.BeeDataSource;
@@ -31,7 +32,7 @@ import static org.stone.tools.CommonUtil.isBlank;
 import static org.stone.tools.CommonUtil.isNotBlank;
 
 /*
- * A configuration example is below
+ * #A configuration example is below
  *
  * spring.datasource.dsId=beeDs
  * spring.datasource.type=org.stone.beecp.BeeDataSource
@@ -43,6 +44,15 @@ import static org.stone.tools.CommonUtil.isNotBlank;
  * spring.datasource.initialSize=10
  * spring.datasource.maxActive=10
  *
+ * #sql execution trace configuration
+ * spring.datasource.sql-trace=true
+ * spring.datasource.sql-show=true
+ * spring.datasource.sql-queue-max-size=100
+ * spring.datasource.sql-slow-threshold-time=5000
+ * spring.datasource.sql-expiration-time=18000
+ * spring.datasource.sql-queue-scan-period-time=18000
+ * spring.datasource.sql-alert-action=xxxxx
+ *
  * @author Chris Liao
  */
 @ConditionalOnClass(BeeDataSource.class)
@@ -51,26 +61,22 @@ import static org.stone.tools.CommonUtil.isNotBlank;
 public class DataSourceBeanRegister {
 
     @Bean
-    public DataSource beeDataSource(Environment environment) throws Exception {
-        //1: Get manager
+    public DataSource beeDataSource(ApplicationContext applicationContext) {
+        //1:Create bee data source with loading configuration from Spring boot environment
+        Environment environment = applicationContext.getEnvironment();
         DataSourceBeanManager dsManager = DataSourceBeanManager.getInstance();
-
-        //2: Get configured Ids of data source
         String dsId = dsManager.getConfigValue(Config_DS_Prefix, Config_DS_Id, environment);
         if (isBlank(dsId)) dsId = "beeDataSource";
-
-        //3: Load monitoring configuration
-        MonitoringConfigManager.getInstance().loadMonitorConfig(environment);
-
-        //4: Create datasource with configuration
         DataSource ds = new SpringBeeDataSourceFactory().createDataSource(Config_DS_Prefix, dsId, environment);
         String primaryText = dsManager.getConfigValue(Config_DS_Prefix, Config_DS_Primary, environment);
         boolean isPrimary = isNotBlank(primaryText) && Boolean.valueOf(primaryText).booleanValue();
-
         DataSourceBean springDs = new DataSourceBean(dsId, false, isPrimary, ds);
         dsManager.addDataSource(springDs);
 
-        //5: return created datasource to be registered in spring contain
+        //2:Setup statement execution collector to data source manager if exists its configuration
+        dsManager.setupStatementExecutionCollector(environment);
+
+        //3: return created datasource to be registered in spring contain
         return springDs;
     }
 }

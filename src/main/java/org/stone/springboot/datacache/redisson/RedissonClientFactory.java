@@ -24,10 +24,11 @@ import org.stone.springboot.datacache.CacheClientProvider;
  *
  * @author Chris Liao
  */
-public class RedissonClientProvider implements CacheClientProvider {
+
+public class RedissonClientFactory implements CacheClientProvider {
 
     public CacheClient create(Environment environment) {
-        //@Todo fill implementation code
+        //@todo
         return null;
     }
 }

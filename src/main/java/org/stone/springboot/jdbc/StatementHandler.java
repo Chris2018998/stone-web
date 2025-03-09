@@ -98,7 +98,7 @@ public final class StatementHandler implements InvocationHandler {
                 execution.setExecuteEndTime(executeEndTime);
                 long elapsedTime = executeEndTime - execution.getExecuteStartTime();
                 execution.setElapsedTime(elapsedTime);
-                execution.setSlowInd(elapsedTime >= collector.getSqlSlowTime());
+                execution.setSlowInd(elapsedTime >= collector.getSqlSlowThresholdTime());
             }
         }
     }

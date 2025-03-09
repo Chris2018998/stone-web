@@ -47,7 +47,7 @@ public final class DataSourceBean implements DataSource, XADataSource {
     private StatementExecutionCollector statementExecutionCollector;
 
     public DataSourceBean(String dsId, boolean jndiDs, boolean primary, Object ds) {
-        if (ds == null) throw new java.lang.IllegalArgumentException("Data source can't be null");
+        if (ds == null) throw new IllegalArgumentException("Data source can't be null");
         this.dsId = dsId;
         this.jndiDs = jndiDs;
         this.primary = primary;
@@ -110,7 +110,7 @@ public final class DataSourceBean implements DataSource, XADataSource {
     //***************************************************************************************************************//
     void close() throws SQLException {
         if (jndiDs) return;
-        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide features of dataSource");
+        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide feature of dataSource");
 
         if (isBeeDs) {
             ((BeeDataSource) ds).close();
@@ -120,7 +120,7 @@ public final class DataSourceBean implements DataSource, XADataSource {
     }
 
     void clear(boolean force) throws SQLException {
-        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide features of dataSource");
+        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide feature of dataSource");
         if (isBeeDs) {
             ((BeeDataSource) ds).clear(force);
         } else if (isBeeJtaDs) {
@@ -129,7 +129,7 @@ public final class DataSourceBean implements DataSource, XADataSource {
     }
 
     BeeConnectionPoolMonitorVo getPoolMonitorVo() throws SQLException {
-        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide features of dataSource");
+        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide feature of dataSource");
         if (isBeeDs) {
             return ((BeeDataSource) ds).getPoolMonitorVo();
         } else if (isBeeJtaDs) {

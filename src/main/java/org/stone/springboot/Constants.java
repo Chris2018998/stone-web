@@ -25,6 +25,8 @@ public class Constants {
     //***************************************************************************************************************//
     //                                     1: Data Source                                                            //
     //***************************************************************************************************************//
+    //prefix of spring bee
+    public static final String Config_Bee_Prefix = "spring.bee";
     //prefix of configuration of spring data source
     public static final String Config_DS_Prefix = "spring.datasource";
     //Configuration class name of datasource class type

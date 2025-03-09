@@ -44,14 +44,10 @@ import static org.stone.tools.CommonUtil.isNotBlank;
  */
 public final class DataSourceBeanManager extends SpringConfigurationLoader {
     private static final DataSourceBeanManager single = new DataSourceBeanManager();
-    //data sources map
-    private final Map<String, DataSourceBean> dataSourceMap;
-    //sql execution collector
+    //Data source map
+    private final Map<String, DataSourceBean> dataSourceMap = new ConcurrentHashMap<>(1);
+    //Sql execution collector
     private StatementExecutionCollector statementExecutionCollector;
-
-    private DataSourceBeanManager() {
-        this.dataSourceMap = new ConcurrentHashMap<>(1);
-    }
 
     public static DataSourceBeanManager getInstance() {
         return single;
@@ -95,7 +91,7 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
     //                                     2: sql-trace (1)                                                          //
     //***************************************************************************************************************//
     public Collection<StatementExecution> getSqlExecutionList() {
-        return statementExecutionCollector != null ? statementExecutionCollector.getSqlTraceQueue() : null;
+        return statementExecutionCollector != null ? statementExecutionCollector.getSqlExecQueue() : null;
     }
 
     public void cancelStatementExecution(String statementUUID) throws SQLException {
@@ -104,10 +100,16 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
         }
     }
 
-    void setStatementExecutionCollector(StatementExecutionCollector statementExecutionCollector) {
-        this.statementExecutionCollector = statementExecutionCollector;
-        for (DataSourceBean ds : dataSourceMap.values())
-            ds.setStatementExecutionCollector(statementExecutionCollector);
+    void setupStatementExecutionCollector(Environment environment) {
+        if ("true".equalsIgnoreCase(this.getConfigValue(Config_DS_Prefix, "sqlTrace", environment))) {
+            StatementExecutionCollector collector = new StatementExecutionCollector();
+            this.setConfigPropertiesValue(collector, Config_DS_Prefix, null, environment);
+
+            collector.initialize();
+            this.statementExecutionCollector = collector;
+            for (DataSourceBean ds : dataSourceMap.values())
+                ds.setStatementExecutionCollector(statementExecutionCollector);
+        }
     }
 
     //***************************************************************************************************************//

@@ -20,30 +20,27 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Global Scheduled service to run tasks.(Only use in stone-web project)
+ * Local Schedule service
  *
  * @author Chris Liao
  */
-public class InternalScheduledService {
-    private static final InternalScheduledService single = new InternalScheduledService();
-    private final ScheduledThreadPoolExecutor timerExecutor;
+public class LocalScheduleService {
+    private static final LocalScheduleService single = new LocalScheduleService();
+    private ScheduledThreadPoolExecutor scheduledExecutor;
 
-    private InternalScheduledService() {
-        this.timerExecutor = new ScheduledThreadPoolExecutor(2,
-                new SpringBootDsThreadFactory());
-        timerExecutor.setKeepAliveTime(15, TimeUnit.SECONDS);
-        timerExecutor.allowCoreThreadTimeOut(true);
-    }
-
-    public static InternalScheduledService getInstance() {
+    public static LocalScheduleService getInstance() {
         return single;
     }
 
-    public void scheduleAtFixedRate(Runnable command,
-                                    long initialDelay,
-                                    long period,
-                                    TimeUnit unit) {
-        timerExecutor.scheduleAtFixedRate(command, initialDelay, period, unit);
+    public void scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+        if (scheduledExecutor == null) {
+            this.scheduledExecutor = new ScheduledThreadPoolExecutor(2,
+                    new SpringBootDsThreadFactory());
+            scheduledExecutor.setKeepAliveTime(15, TimeUnit.SECONDS);
+            scheduledExecutor.allowCoreThreadTimeOut(true);
+        }
+
+        scheduledExecutor.scheduleAtFixedRate(command, initialDelay, period, unit);
     }
 
     private static final class SpringBootDsThreadFactory implements ThreadFactory {
