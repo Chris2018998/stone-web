@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.datacache.redisson;
+package org.stone.springboot.extension.redisson;
 
-import org.springframework.core.env.Environment;
-import org.stone.springboot.datacache.CacheClient;
-import org.stone.springboot.datacache.CacheClientProvider;
+import org.redisson.api.RedissonClient;
+import org.stone.springboot.extension.CacheClient;
+import org.stone.springboot.extension.CacheClientProvider;
+import org.stone.springboot.monitor.MonitorConfig;
 
 /**
  * Redisson Client Provider.
@@ -25,10 +26,13 @@ import org.stone.springboot.datacache.CacheClientProvider;
  * @author Chris Liao
  */
 
-public class RedissonClientFactory implements CacheClientProvider {
+public class RedissonClientProvider2 implements CacheClientProvider {
+    private RedissonClientImpl client;
 
-    public CacheClient create(Environment environment) {
-        //@todo
-        return null;
+    public CacheClient get() {
+        if (client == null) {
+            this.client = new RedissonClientImpl(MonitorConfig.getInstance().getSpringContext().getBean(RedissonClient.class));
+        }
+        return client;
     }
 }

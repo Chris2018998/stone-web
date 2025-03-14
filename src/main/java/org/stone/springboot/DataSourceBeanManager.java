@@ -44,6 +44,7 @@ import static org.stone.tools.CommonUtil.isNotBlank;
  */
 public final class DataSourceBeanManager extends SpringConfigurationLoader {
     private static final DataSourceBeanManager single = new DataSourceBeanManager();
+
     //Data source map
     private final Map<String, DataSourceBean> dataSourceMap = new ConcurrentHashMap<>(1);
     //Sql execution collector

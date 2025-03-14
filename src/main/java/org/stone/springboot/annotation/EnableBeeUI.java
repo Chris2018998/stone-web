@@ -16,7 +16,7 @@
 package org.stone.springboot.annotation;
 
 import org.springframework.context.annotation.Import;
-import org.stone.springboot.controller.ControllerRegister;
+import org.stone.springboot.monitor.WebUiControllerRegister;
 
 import java.lang.annotation.*;
 
@@ -28,7 +28,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Target(ElementType.TYPE)
-@Import(value = {ControllerRegister.class})
+@Import(value = {WebUiControllerRegister.class})
 public @interface EnableBeeUI {
 }
 

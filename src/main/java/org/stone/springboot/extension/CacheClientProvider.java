@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.datacache;
-
-import org.springframework.core.env.Environment;
+package org.stone.springboot.extension;
 
 /**
  * Cache client Provider.
@@ -25,6 +23,5 @@ import org.springframework.core.env.Environment;
 
 public interface CacheClientProvider {
 
-    CacheClient create(Environment environment);
-
+    CacheClient get();
 }

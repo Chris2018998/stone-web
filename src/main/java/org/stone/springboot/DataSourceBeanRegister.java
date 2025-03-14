@@ -19,7 +19,6 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.stone.beecp.BeeDataSource;
@@ -61,9 +60,8 @@ import static org.stone.tools.CommonUtil.isNotBlank;
 public class DataSourceBeanRegister {
 
     @Bean
-    public DataSource beeDataSource(ApplicationContext applicationContext) {
+    public DataSource beeDataSource(Environment environment) {
         //1:Create bee data source with loading configuration from Spring boot environment
-        Environment environment = applicationContext.getEnvironment();
         DataSourceBeanManager dsManager = DataSourceBeanManager.getInstance();
         String dsId = dsManager.getConfigValue(Config_DS_Prefix, Config_DS_Id, environment);
         if (isBlank(dsId)) dsId = "beeDataSource";

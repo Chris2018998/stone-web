@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.datacache.redisson;
+package org.stone.springboot.extension.redisson;
 
-import org.stone.springboot.datacache.CacheClient;
+import org.stone.springboot.extension.CacheClient;
+import org.stone.springboot.extension.CacheClientProvider;
 
 /**
- * Cache client interface.
+ * Redisson Client Provider.
  *
  * @author Chris Liao
  */
-public class RedissonClient implements CacheClient {
 
-    public String get(String key) {
+public class RedissonClientProvider1 implements CacheClientProvider {
+
+    public CacheClient get() {
         return null;
-    }
-
-    public void set(String key, String value) {
-
     }
 }

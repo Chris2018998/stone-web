@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.datacache;
+package org.stone.springboot.monitor;
 
 import org.stone.beecp.BeeConnectionPoolMonitorVo;
 import org.stone.beeop.BeeObjectPoolMonitorVo;
@@ -30,14 +30,14 @@ import java.util.Collection;
  * @author Chris Liao
  */
 
-public final class MonitoringVo implements Serializable {
+public final class PoolsSnapshot implements Serializable {
     private final String appContextUrl;
     private String cacheTime;
     private Collection<BeeConnectionPoolMonitorVo> dsList;
-    private Collection<StatementExecution> sqlList;
+    private Collection<StatementExecution> sqlExecutionList;
     private Collection<BeeObjectPoolMonitorVo> osList;
 
-    public MonitoringVo(String appContextUrl) {
+    public PoolsSnapshot(String appContextUrl) {
         this.appContextUrl = appContextUrl;
     }
 
@@ -61,12 +61,12 @@ public final class MonitoringVo implements Serializable {
         this.dsList = dsList;
     }
 
-    public Collection<StatementExecution> getSqlList() {
-        return sqlList;
+    public Collection<StatementExecution> getSqlExecutionList() {
+        return sqlExecutionList;
     }
 
-    public void setSqlList(Collection<StatementExecution> sqlList) {
-        this.sqlList = sqlList;
+    public void setSqlExecutionList(Collection<StatementExecution> sqlExecutionList) {
+        this.sqlExecutionList = sqlExecutionList;
     }
 
     public Collection<BeeObjectPoolMonitorVo> getOsList() {

@@ -13,22 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.controller;
+package org.stone.springboot.monitor;
 
 import jakarta.servlet.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.context.EnvironmentAware;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
-import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.stone.springboot.LocalScheduleService;
-import org.stone.springboot.datacache.CacheClient;
-import org.stone.springboot.datacache.MonitoringVo;
-import org.stone.springboot.datacache.MonitoringVoTimerTask;
+import org.stone.springboot.extension.CacheClientProvider;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.stone.tools.CommonUtil.isBlank;
@@ -41,7 +40,7 @@ import static org.stone.tools.CommonUtil.isBlank;
  * #2: configuration for cache
  * spring.bee.cache.key-prefix=spring-bee-
  * spring.bee.cache.write-period=18000
- * spring.bee.cache.client-factory=org.stone.springboot.datacache.redisson.RedissonClientFactory
+ * spring.bee.cache.client-factory=org.stone.springboot.extension.redisson.RedissonClientFactory
  * spring.bee.json-tool=org.stone.springboot.extension.JackSonImpl
  * <p>
  * #3: comments out
@@ -53,29 +52,28 @@ import static org.stone.tools.CommonUtil.isBlank;
  *
  * @author Chris Liao
  */
-public class ControllerRegister implements EnvironmentAware, ImportBeanDefinitionRegistrar {
+public class WebUiControllerRegister implements ApplicationContextAware, ImportBeanDefinitionRegistrar {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    //spring boot env
-    private Environment environment;
+    private ApplicationContext applicationContext;
 
     //spring boot env
-    public final void setEnvironment(Environment environment) {
-        this.environment = environment;
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
     //Register controller bean to ioc
     public final void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        ConfigurationVo loader = ConfigurationVo.getInstance();
-        loader.load(environment);
+        MonitorConfig loader = new MonitorConfig();
+        loader.load(applicationContext.getEnvironment());
 
         //2: register Controller
-        String resetControllerRegName = MonitorController.class.getName();
+        String resetControllerRegName = WebUiController.class.getName();
         if (!loader.existsBeanDefinition(resetControllerRegName, registry)) {
             GenericBeanDefinition define = new GenericBeanDefinition();
-            define.setBeanClass(MonitorController.class);
+            define.setBeanClass(WebUiController.class);
             define.setPrimary(true);
             define.setInstanceSupplier(loader.createSpringSupplier(
-                    new MonitorController(loader.getUserId(), loader.getPassword(), loader.getLoggedFlag())));
+                    new WebUiController(loader.getUsername(), loader.getPassword(), loader.getLoggedFlag())));
             registry.registerBeanDefinition(resetControllerRegName, define);
             log.info("Register stone monitor controller({}) with id:{}", define.getBeanClassName(), resetControllerRegName);
         } else {
@@ -83,9 +81,9 @@ public class ControllerRegister implements EnvironmentAware, ImportBeanDefinitio
         }
 
         //3: register filter
-        String resetControllerFilterRegName = SecurityFilter.class.getName();
-        if (isBlank(loader.getUserId()) && !loader.existsBeanDefinition(resetControllerFilterRegName, registry)) {
-            SecurityFilter dsFilter = new SecurityFilter(loader.getUserId(), loader.getLoggedFlag(), loader.getJsonTool());
+        String resetControllerFilterRegName = RequestFilter.class.getName();
+        if (isBlank(loader.getUsername()) && !loader.existsBeanDefinition(resetControllerFilterRegName, registry)) {
+            RequestFilter dsFilter = new RequestFilter(loader.getUsername(), loader.getLoggedFlag(), loader.getJsonTool());
             FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>(dsFilter);
             registration.setName(resetControllerFilterRegName);
             registration.addUrlPatterns("/stone/*");
@@ -101,12 +99,16 @@ public class ControllerRegister implements EnvironmentAware, ImportBeanDefinitio
         }
 
         //4: run a task
-        CacheClient client = loader.getCacheClientFactory();
-        if (client != null) {
-            MonitoringVo monitoringVo = new MonitoringVo(loader.getAppWebContext());
-            MonitoringVoTimerTask task = new MonitoringVoTimerTask(client, loader.getJsonTool(),
-                    loader.getCacheKeyPrefix(), monitoringVo);
-            LocalScheduleService.getInstance().scheduleAtFixedRate(task, 0L, loader.getWritePeriod(), MILLISECONDS);
+        CacheClientProvider provider = loader.getCacheClientProvider();
+        if (provider != null) {
+            PoolsSnapshot poolsSnapshot = new PoolsSnapshot(loader.getHostWebUrl());
+            CacheTask task = new CacheTask(
+                    loader.getCacheKeyPrefix(),
+                    poolsSnapshot,
+                    loader.getJsonTool(),
+                    provider);
+
+            LocalScheduleService.getInstance().scheduleAtFixedRate(task, 0L, loader.getCacheInterval(), MILLISECONDS);
         }
     }
 }

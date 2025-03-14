@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.controller;
+package org.stone.springboot.monitor;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,8 +30,8 @@ import static org.stone.tools.CommonUtil.isBlank;
  *
  * @author Chris Liao
  */
-public class SecurityFilter implements Filter {
-    private final String userId;
+public class RequestFilter implements Filter {
+    private final String userName;
     private final String loggedInTagName;
     private final LocalJsonUtil jsonTool;
 
@@ -45,10 +45,10 @@ public class SecurityFilter implements Filter {
             "/stone/getLocalObjectSourceList",
             "/stone/clearLocalObjectSourcePool"};
 
-    SecurityFilter(String userId, String loggedInTagName, LocalJsonUtil jsonTool) {
-        this.userId = userId;
-        this.loggedInTagName = loggedInTagName;
+    RequestFilter(String userName, String loggedInTagName, LocalJsonUtil jsonTool) {
+        this.userName = userName;
         this.jsonTool = jsonTool;
+        this.loggedInTagName = loggedInTagName;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class SecurityFilter implements Filter {
     }
 
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-        if (isBlank(userId)) {
+        if (isBlank(userName)) {
             chain.doFilter(req, res);
         } else {
             HttpServletRequest httpReq = (HttpServletRequest) req;
@@ -72,7 +72,7 @@ public class SecurityFilter implements Filter {
             } else if (isRestRequestUrl(requestPath)) {//is rest request url
                 res.setContentType("application/json");
                 OutputStream ps = res.getOutputStream();
-                ControllerResponse restResponse = new ControllerResponse(ControllerResponse.CODE_SECURITY, null, "unauthorized");
+                RestResponse restResponse = new RestResponse(RestResponse.CODE_SECURITY, null, "unauthorized");
                 ps.write(jsonTool.object2String(restResponse).getBytes(StandardCharsets.UTF_8));
             } else {
                 req.getRequestDispatcher("/stone/login.html").forward(req, res);
