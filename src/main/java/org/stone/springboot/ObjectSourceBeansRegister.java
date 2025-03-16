@@ -35,15 +35,22 @@ import static org.stone.springboot.Constants.*;
 import static org.stone.tools.CommonUtil.isBlank;
 
 /*
- * SpringBoot objectSource config example
+ * #ids of objectSource
+ * spring.objectSource.osId=os1,os2
  *
- *  spring.objectSource.osId=os1,os2
- *  spring.objectSource.os1.type=cn.beecp.BeeDataSoruce
- *  spring.objectSource.os1.primary=true
+ * #os1
+ * spring.objectSource.os1.fairMode=true
+ * spring.objectSource.os1.initialSize=10
+ * spring.objectSource.os1.maxActive=10
+ * ......
  *
- *  spring.objectSource.os2.primary=false
+ * #os2
+ * spring.objectSource.os2.fairMode=false
+ * spring.objectSource.os2.initialSize=20
+ * spring.objectSource.os2.maxActive=50
+ * ......
  *
- *   @author Chris Liao
+ * @author Chris Liao
  */
 public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, ImportBeanDefinitionRegistrar {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
@@ -99,7 +106,7 @@ public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, Import
         for (String id : osIds) {
             if (isBlank(id)) continue;
             id = id.trim();
-            if (osBeanManager.existsBeanDefinition(id, registry))
+            if (SpringConfigurationLoader.existsBeanDefinition(id, registry))
                 throw new ConfigurationException("Existed a registered bean with id '" + id + "'");
 
             //ObjectSource id(" + id + ")has been registered by another bean
@@ -129,7 +136,7 @@ public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, Import
         if (!isBlank(dynId)) {
             if (osIdList.contains(dynId))
                 throw new ConfigurationException("Dynamic object source id '" + dynId + "' can't be in os-id list");
-            if (osBeanManager.existsBeanDefinition(dynId, registry))
+            if (SpringConfigurationLoader.existsBeanDefinition(dynId, registry))
                 throw new ConfigurationException("Dynamic object source id '" + dynId + "' has been registered by another bean");
 
             if (isBlank(primaryDs))
@@ -189,7 +196,7 @@ public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, Import
 
             GenericBeanDefinition define = new GenericBeanDefinition();
             define.setBeanClass(DynamicObjectSource.class);
-            define.setInstanceSupplier(osBeanManager.createSpringSupplier(new DynamicObjectSource<>(dynOsId, osThreadLocal)));
+            define.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(new DynamicObjectSource<>(dynOsId, osThreadLocal)));
             registry.registerBeanDefinition(dynOsId, define);
             log.info("Registered a dynamic object source(type:{})with bean Id '{}'", define.getBeanClassName(), dynOsId);
 
@@ -199,7 +206,7 @@ public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, Import
 
             DynamicAspect<K, V> dynamicAspect = new DynamicAspect<>();
             dynamicAspect.setDynOsThreadLocal(primaryOsId, osThreadLocal);
-            osIdSetDefine.setInstanceSupplier(osBeanManager.createSpringSupplier(dynamicAspect));
+            osIdSetDefine.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(dynamicAspect));
             registry.registerBeanDefinition(aspectBeanId, osIdSetDefine);
             log.info("Registered an aspect component(type:{})for dynamic object source with bean Id '{}'", define.getBeanClassName(), aspectBeanId);
         }
@@ -210,7 +217,7 @@ public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, Import
         GenericBeanDefinition define = new GenericBeanDefinition();
         define.setPrimary(springOs.isPrimary());
         define.setBeanClass(springOs.getClass());
-        define.setInstanceSupplier(osBeanManager.createSpringSupplier(springOs));
+        define.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(springOs));
         registry.registerBeanDefinition(springOs.getOsId(), define);
         log.info("Registered a object source(type:{})with bean Id '{}'", define.getBeanClassName(), springOs.getOsId());
         osBeanManager.addObjectSource(springOs);

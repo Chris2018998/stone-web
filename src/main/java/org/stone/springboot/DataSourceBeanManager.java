@@ -54,6 +54,19 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
         return single;
     }
 
+    private static DataSourceBean createJndiDataSourceBean(String dsId, String jndiName, boolean isPrimary) {
+        try {
+            Object namingObj = new InitialContext().lookup(jndiName);
+            if (namingObj instanceof DataSource) {
+                return new DataSourceBean(dsId, true, isPrimary, namingObj);
+            } else {
+                throw new DataSourceException("The object is not a ata source object with jndi name '" + jndiName + "'");
+            }
+        } catch (NamingException e) {
+            throw new DataSourceException("Failed to lookup jndi object with name '" + jndiName + "'", e);
+        }
+    }
+
     //***************************************************************************************************************//
     //                                     1: ds maintenance(4)                                                      //
     //***************************************************************************************************************//
@@ -128,19 +141,6 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
         }
     }
 
-    private DataSourceBean createJndiDataSourceBean(String dsId, String jndiName, boolean isPrimary) {
-        try {
-            Object namingObj = new InitialContext().lookup(jndiName);
-            if (namingObj instanceof DataSource) {
-                return new DataSourceBean(dsId, true, isPrimary, namingObj);
-            } else {
-                throw new DataSourceException("The object is not a ata source object with jndi name '" + jndiName + "'");
-            }
-        } catch (NamingException e) {
-            throw new DataSourceException("Failed to lookup jndi object with name '" + jndiName + "'", e);
-        }
-    }
-
     private DataSourceBean createDataSourceBeanByDsType(String prefix, String dsId, Environment environment, boolean isPrimary) {
         //1: get configuration ds,factory
         String dsClassName = getConfigValue(prefix, Config_DS_Type, environment);
@@ -190,7 +190,7 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
         } else if (dsFactory instanceof SpringDataSourceFactory) {
             ds = ((SpringDataSourceFactory) dsFactory).createDataSource(prefix, dsId, environment);
         } else {
-            ds = createInstanceByClassName(dsId, dsClass);
+            ds = createDataSourceByClassName(dsId, dsClass);
             setConfigPropertiesValue(ds, prefix, dsId, environment);
         }
 

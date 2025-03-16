@@ -40,19 +40,19 @@ public class SpringConfigurationLoader {
     //Logger
     private final Logger log = LoggerFactory.getLogger(SpringConfigurationLoader.class);
 
-    public Supplier<?> createSpringSupplier(Object bean) {
+    public static Supplier<?> createSpringSupplier(Object bean) {
         return new SpringRegSupplier(bean);
     }
 
-    public Object createInstanceByClassName(String dsId, Class<?> objClass) {
+    public static Object createDataSourceByClassName(String dsId, Class<?> dsClass) {
         try {
-            return objClass.newInstance();
+            return dsClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            throw new DataSourceException("DataSource(" + dsId + ")-Failed to instantiated the class:" + objClass.getName(), e);
+            throw new DataSourceException("DataSource(" + dsId + ")-Failed to instantiated the class:" + dsClass.getName(), e);
         }
     }
 
-    public boolean existsBeanDefinition(String beanName, BeanDefinitionRegistry registry) {
+    public static boolean existsBeanDefinition(String beanName, BeanDefinitionRegistry registry) {
         boolean exists = true;
         try {
             registry.getBeanDefinition(beanName);

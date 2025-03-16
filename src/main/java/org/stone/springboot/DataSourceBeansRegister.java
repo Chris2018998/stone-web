@@ -48,6 +48,7 @@ import static org.stone.tools.CommonUtil.isBlank;
  * spring.datasource.ds1.fairMode=true
  * spring.datasource.ds1.initialSize=10
  * spring.datasource.ds1.maxActive=10
+ * ......
  *
  * #ds2
  * spring.datasource.ds2.primary=false
@@ -59,6 +60,7 @@ import static org.stone.tools.CommonUtil.isBlank;
  * spring.datasource.ds2.fairMode=true
  * spring.datasource.ds2.initialSize=10
  * spring.datasource.ds2.maxActive=10
+ * ......
  *
  * #ds3
  * spring.datasource.ds3.primary=false
@@ -130,7 +132,7 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
         Set<String> dsIdList = new HashSet<>(dsIds.length);
         for (String id : dsIds) {
             if (isBlank(id)) continue;
-            if (dsBeanManager.existsBeanDefinition(id, registry))
+            if (SpringConfigurationLoader.existsBeanDefinition(id, registry))
                 throw new ConfigurationException("Existed a registered bean with id '" + id + "'");
 
             dsIdList.add(id);
@@ -159,7 +161,7 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
         if (!isBlank(dynId)) {
             if (dsIdList.contains(dynId))
                 throw new ConfigurationException("Dynamic dataSource id '" + dynId + "' can't be in ds-id list");
-            if (dsBeanManager.existsBeanDefinition(dynId, registry))
+            if (SpringConfigurationLoader.existsBeanDefinition(dynId, registry))
                 throw new ConfigurationException("Dynamic dataSource id '" + dynId + "' has been registered by another bean");
 
             if (isBlank(primaryDs))
@@ -219,7 +221,7 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
 
             GenericBeanDefinition define = new GenericBeanDefinition();
             define.setBeanClass(DynamicDataSource.class);
-            define.setInstanceSupplier(dsBeanManager.createSpringSupplier(new DynamicDataSource(dsThreadLocal)));
+            define.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(new DynamicDataSource(dsThreadLocal)));
             registry.registerBeanDefinition(dynDsId, define);
             log.info("Registered a dynamic object source(type:{})with bean Id '{}'", define.getBeanClassName(), dynDsId);
 
@@ -229,7 +231,7 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
 
             DynamicAspect<?, ?> dynamicAspect = new DynamicAspect<>();
             dynamicAspect.setDynDsThreadLocal(primaryDsId, dsThreadLocal);
-            dsIdSetDefine.setInstanceSupplier(dsBeanManager.createSpringSupplier(dynamicAspect));
+            dsIdSetDefine.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(dynamicAspect));
             registry.registerBeanDefinition(dsIdSetterId, dsIdSetDefine);
             log.info("Registered an aspect component(type:{})for dynamic data source with bean Id '{}'", dsIdSetDefine.getBeanClassName(), dsIdSetterId);
         }
@@ -240,7 +242,7 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
         GenericBeanDefinition define = new GenericBeanDefinition();
         define.setPrimary(springDs.isPrimary());
         define.setBeanClass(springDs.getClass());
-        define.setInstanceSupplier(dsBeanManager.createSpringSupplier(springDs));
+        define.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(springDs));
         registry.registerBeanDefinition(springDs.getDsId(), define);
         log.info("Registered a data source(type:{})with bean Id '{}'", define.getBeanClassName(), springDs.getDsId());
         dsBeanManager.addDataSource(springDs);

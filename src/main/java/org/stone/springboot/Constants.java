@@ -29,7 +29,7 @@ public class Constants {
     public static final String Config_Monitor_Prefix = "spring.bee.monitor";
 
     //***************************************************************************************************************//
-    //                                     2: virtual Thread                                                                //
+    //                                     2: virtual Thread                                                         //
     //***************************************************************************************************************//
     //Spring boot virtual threads
     public static final String Config_Virtual_Thread = "spring.threads.virtual.enabled";

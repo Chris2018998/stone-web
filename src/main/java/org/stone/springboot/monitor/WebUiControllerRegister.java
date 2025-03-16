@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 import org.stone.springboot.LocalScheduleService;
+import org.stone.springboot.SpringConfigurationLoader;
 import org.stone.springboot.extension.CacheClientProvider;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -54,11 +55,11 @@ public class WebUiControllerRegister implements ApplicationContextAware, ImportB
 
         //2: register Controller
         String resetControllerRegName = WebUiController.class.getName();
-        if (!loader.existsBeanDefinition(resetControllerRegName, registry)) {
+        if (!SpringConfigurationLoader.existsBeanDefinition(resetControllerRegName, registry)) {
             GenericBeanDefinition define = new GenericBeanDefinition();
             define.setBeanClass(WebUiController.class);
             define.setPrimary(true);
-            define.setInstanceSupplier(loader.createSpringSupplier(new WebUiController()));
+            define.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(new WebUiController()));
             registry.registerBeanDefinition(resetControllerRegName, define);
             log.info("Register bee monitor controller({}) with id:{}", define.getBeanClassName(), resetControllerRegName);
         } else {
@@ -67,7 +68,7 @@ public class WebUiControllerRegister implements ApplicationContextAware, ImportB
 
         //3: register filter
         String resetControllerFilterRegName = RequestFilter.class.getName();
-        if (isBlank(loader.getUsername()) && !loader.existsBeanDefinition(resetControllerFilterRegName, registry)) {
+        if (isBlank(loader.getUsername()) && !SpringConfigurationLoader.existsBeanDefinition(resetControllerFilterRegName, registry)) {
             RequestFilter dsFilter = new RequestFilter(loader.getJsonTool());
             FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>(dsFilter);
             registration.setName(resetControllerFilterRegName);
@@ -76,7 +77,7 @@ public class WebUiControllerRegister implements ApplicationContextAware, ImportB
             GenericBeanDefinition define = new GenericBeanDefinition();
             define.setBeanClass(FilterRegistrationBean.class);
             define.setPrimary(true);
-            define.setInstanceSupplier(loader.createSpringSupplier(registration));
+            define.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(registration));
             registry.registerBeanDefinition(resetControllerFilterRegName, define);
             log.info("Register bee security filter({}) with id:{}", define.getBeanClassName(), resetControllerFilterRegName);
         } else {

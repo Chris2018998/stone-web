@@ -18,7 +18,6 @@ package org.stone.springboot.dynamic;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.Order;
 import org.stone.springboot.DataSourceBean;
@@ -62,12 +61,7 @@ public final class DynamicAspect<K, V> {
     //***************************************************************************************************************//
     //                                     2: dataSource Aspect                                                      //
     //***************************************************************************************************************/
-    @Pointcut("@annotation(org.stone.springboot.annotation.BeeDsId)")
-    public void dsPointcut() {
-        //do nothing
-    }
-
-    @Around("dsPointcut()")
+    @Around("@annotation(org.stone.springboot.annotation.BeeDsId)")
     public Object setDataSourceId(ProceedingJoinPoint joinPoint) throws Throwable {
         if (dsLocal == null) throw new DataSourceException("Combine datasource not be enable");
         if (isBlank(primaryDsId)) throw new DataSourceException("Combine primary datasource id not set");
@@ -88,12 +82,7 @@ public final class DynamicAspect<K, V> {
     //***************************************************************************************************************//
     //                                     3: objectSource Aspect                                                    //
     //***************************************************************************************************************/
-    @Pointcut("@annotation(org.stone.springboot.annotation.BeeOsId)")
-    public void osPointcut() {
-        //do nothing
-    }
-
-    @Around("osPointcut()")
+    @Around("@annotation(org.stone.springboot.annotation.BeeOsId)")
     public Object setObjectSourceId(ProceedingJoinPoint joinPoint) throws Throwable {
         if (dsLocal == null) throw new DataSourceException("Combine object-source not be enable");
         if (isBlank(primaryDsId)) throw new DataSourceException("Combine primary object-source id not set");

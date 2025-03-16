@@ -31,7 +31,6 @@ import static org.stone.tools.CommonUtil.isBlank;
  * A default object source register to import single data source to spring container
  *
  * spring.objectSource.osId=beeOs
- * spring.objectSource.type=org.stone.beecp.BeeObjectSource
  * spring.objectSource.fairMode=true
  * spring.objectSource.initialSize=10
  * spring.objectSource.maxActive =10
