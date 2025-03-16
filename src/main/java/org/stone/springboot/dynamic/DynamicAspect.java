@@ -27,6 +27,7 @@ import org.stone.springboot.ObjectSourceBeanManager;
 import org.stone.springboot.annotation.BeeDsId;
 import org.stone.springboot.annotation.BeeOsId;
 import org.stone.springboot.exception.DataSourceException;
+import org.stone.springboot.exception.ObjectSourceException;
 
 import static org.stone.tools.CommonUtil.isBlank;
 
@@ -63,8 +64,8 @@ public final class DynamicAspect<K, V> {
     //***************************************************************************************************************/
     @Around("@annotation(org.stone.springboot.annotation.BeeDsId)")
     public Object setDataSourceId(ProceedingJoinPoint joinPoint) throws Throwable {
-        if (dsLocal == null) throw new DataSourceException("Combine datasource not be enable");
-        if (isBlank(primaryDsId)) throw new DataSourceException("Combine primary datasource id not set");
+        if (dsLocal == null) throw new DataSourceException("Dynamic datasource not be enable");
+        if (isBlank(primaryDsId)) throw new DataSourceException("Dynamic primary datasource id not set");
 
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         BeeDsId annotation = methodSignature.getMethod().getAnnotation(BeeDsId.class);
@@ -84,8 +85,8 @@ public final class DynamicAspect<K, V> {
     //***************************************************************************************************************/
     @Around("@annotation(org.stone.springboot.annotation.BeeOsId)")
     public Object setObjectSourceId(ProceedingJoinPoint joinPoint) throws Throwable {
-        if (dsLocal == null) throw new DataSourceException("Combine object-source not be enable");
-        if (isBlank(primaryDsId)) throw new DataSourceException("Combine primary object-source id not set");
+        if (osLocal == null) throw new ObjectSourceException("Dynamic object-source not be enable");
+        if (isBlank(primaryOsId)) throw new ObjectSourceException("Dynamic primary object-source id not set");
 
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         BeeOsId annotation = methodSignature.getMethod().getAnnotation(BeeOsId.class);
