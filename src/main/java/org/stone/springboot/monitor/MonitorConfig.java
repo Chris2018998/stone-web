@@ -26,8 +26,10 @@ import org.stone.springboot.extension.LocalJsonUtil;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import static org.stone.springboot.Constants.Config_Bee_Prefix;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.stone.springboot.Constants.Config_Monitor_Prefix;
 import static org.stone.tools.CommonUtil.isBlank;
+import static org.stone.tools.CommonUtil.isNotBlank;
 
 /**
  * #1: configuration for UI
@@ -59,12 +61,12 @@ public final class MonitorConfig extends SpringConfigurationLoader {
     private String password = "admin";
     private String loggedFlag = WebUiController.class.getName();
 
-    //2: spring.bee.cache.x
-    private long cacheInterval;
-    private String cacheKeyPrefix;
+    //2: spring.bee.monitor.x
     private CacheClientProvider cacheClientProvider;
+    private String cacheKeyPrefix = "spring:bee:monitor:";
+    private long cacheInterval = SECONDS.toMillis(10L);
 
-    //3: spring.bee.json.x
+    //3:spring.bee.monitor.x
     private LocalJsonUtil jsonTool;
 
     //your web app url
@@ -99,12 +101,13 @@ public final class MonitorConfig extends SpringConfigurationLoader {
         if (!isBlank(loggedFlag)) this.loggedFlag = loggedFlag;
     }
 
+
     public long getCacheInterval() {
         return cacheInterval;
     }
 
     public void setCacheInterval(long cacheInterval) {
-        this.cacheInterval = cacheInterval;
+        if (cacheInterval > 1000L) this.cacheInterval = cacheInterval;
     }
 
     public String getCacheKeyPrefix() {
@@ -112,7 +115,7 @@ public final class MonitorConfig extends SpringConfigurationLoader {
     }
 
     public void setCacheKeyPrefix(String cacheKeyPrefix) {
-        this.cacheKeyPrefix = cacheKeyPrefix;
+        if (isNotBlank(cacheKeyPrefix)) this.cacheKeyPrefix = cacheKeyPrefix;
     }
 
     public CacheClientProvider getCacheClientProvider() {
@@ -148,10 +151,7 @@ public final class MonitorConfig extends SpringConfigurationLoader {
     //***************************************************************************************************************//
     public void load(Environment environment) {
         //1: load Monitoring configuration
-        setConfigPropertiesValue(this, Config_Bee_Prefix + ".ui", null, environment);
-        setConfigPropertiesValue(this, Config_Bee_Prefix + ".cache", null, environment);
-        setConfigPropertiesValue(this, Config_Bee_Prefix, null, environment);
-
+        setConfigPropertiesValue(this, Config_Monitor_Prefix, null, environment);
         //2: create provider
         this.hostWebUrl = buildAppContextInfo(environment);
     }

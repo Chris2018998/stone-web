@@ -27,7 +27,7 @@ import org.stone.springboot.ObjectSourceBean;
 import org.stone.springboot.ObjectSourceBeanManager;
 import org.stone.springboot.annotation.BeeDsId;
 import org.stone.springboot.annotation.BeeOsId;
-import org.stone.springboot.factory.SpringDataSourceException;
+import org.stone.springboot.exception.DataSourceException;
 
 import static org.stone.tools.CommonUtil.isBlank;
 
@@ -39,21 +39,22 @@ import static org.stone.tools.CommonUtil.isBlank;
 
 @Aspect
 @Order(1)
-public final class DynamicAspect {
-    private final String primaryDsId;
-    private final ThreadLocal<DataSourceBean> dsLocal;
+public final class DynamicAspect<K, V> {
+    private String primaryDsId;
+    private ThreadLocal<DataSourceBean> dsLocal;
+
     private String primaryOsId;
-    private ThreadLocal<ObjectSourceBean<?, ?>> osLocal;
+    private ThreadLocal<ObjectSourceBean<K, V>> osLocal;
 
     //***************************************************************************************************************//
     //                                     1: properties set(3)                                                      //
     //***************************************************************************************************************/
-    public DynamicAspect(String primaryDsId, ThreadLocal<DataSourceBean> dsLocal) {
+    public void setDynDsThreadLocal(String primaryDsId, ThreadLocal<DataSourceBean> dsLocal) {
         this.dsLocal = dsLocal;
         this.primaryDsId = primaryDsId;
     }
 
-    public void setOsThreadLocal(String primaryOsId, ThreadLocal<ObjectSourceBean<?, ?>> osLocal) {
+    public void setDynOsThreadLocal(String primaryOsId, ThreadLocal<ObjectSourceBean<K, V>> osLocal) {
         this.osLocal = osLocal;
         this.primaryOsId = primaryOsId;
     }
@@ -68,8 +69,8 @@ public final class DynamicAspect {
 
     @Around("dsPointcut()")
     public Object setDataSourceId(ProceedingJoinPoint joinPoint) throws Throwable {
-        if (dsLocal == null) throw new SpringDataSourceException("Combine datasource not be enable");
-        if (isBlank(primaryDsId)) throw new SpringDataSourceException("Combine primary datasource id not set");
+        if (dsLocal == null) throw new DataSourceException("Combine datasource not be enable");
+        if (isBlank(primaryDsId)) throw new DataSourceException("Combine primary datasource id not set");
 
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         BeeDsId annotation = methodSignature.getMethod().getAnnotation(BeeDsId.class);
@@ -94,8 +95,8 @@ public final class DynamicAspect {
 
     @Around("osPointcut()")
     public Object setObjectSourceId(ProceedingJoinPoint joinPoint) throws Throwable {
-        if (dsLocal == null) throw new SpringDataSourceException("Combine object-source not be enable");
-        if (isBlank(primaryDsId)) throw new SpringDataSourceException("Combine primary object-source id not set");
+        if (dsLocal == null) throw new DataSourceException("Combine object-source not be enable");
+        if (isBlank(primaryDsId)) throw new DataSourceException("Combine primary object-source id not set");
 
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         BeeOsId annotation = methodSignature.getMethod().getAnnotation(BeeOsId.class);

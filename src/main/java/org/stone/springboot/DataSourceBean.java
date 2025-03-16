@@ -31,7 +31,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 
 /**
- * A data source wrapper
+ * A data Source wrapper
  *
  * @author Chris Liao
  */

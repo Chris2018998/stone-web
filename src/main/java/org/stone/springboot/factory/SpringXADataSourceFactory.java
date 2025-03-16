@@ -16,6 +16,7 @@
 package org.stone.springboot.factory;
 
 import org.springframework.core.env.Environment;
+import org.stone.springboot.exception.XADataSourceException;
 
 import javax.sql.XADataSource;
 
@@ -33,8 +34,8 @@ public interface SpringXADataSourceFactory {
      * @param dsId        configured data source id
      * @param prefix      configured prefix name
      * @return data source instance
-     * @throws SpringXADataSourceException when fail to set
+     * @throws XADataSourceException when fail to set
      */
-    XADataSource createXADataSource(String prefix, String dsId, Environment environment) throws SpringXADataSourceException;
+    XADataSource createXADataSource(String prefix, String dsId, Environment environment) throws XADataSourceException;
 
 }

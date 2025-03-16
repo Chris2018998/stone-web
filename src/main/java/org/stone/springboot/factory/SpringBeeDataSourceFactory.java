@@ -18,8 +18,10 @@ package org.stone.springboot.factory;
 import org.springframework.core.env.Environment;
 import org.stone.beecp.BeeDataSource;
 import org.stone.beecp.BeeDataSourceConfig;
+import org.stone.beecp.BeeDataSourceConfigException;
 import org.stone.beecp.jta.BeeJtaDataSource;
 import org.stone.springboot.DataSourceBeanManager;
+import org.stone.springboot.exception.DataSourceException;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -28,7 +30,9 @@ import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
 import static org.stone.beecp.pool.ConnectionPoolStatics.*;
-import static org.stone.tools.CommonUtil.isBlank;
+import static org.stone.springboot.Constants.Config_ThreadLocal_Enable;
+import static org.stone.springboot.Constants.Config_Virtual_Thread;
+import static org.stone.tools.CommonUtil.isNotBlank;
 
 /*
  * BeeDataSource Spring boot Factory
@@ -42,41 +46,80 @@ import static org.stone.tools.CommonUtil.isBlank;
  *  @author Chris liao
  */
 public class SpringBeeDataSourceFactory implements SpringDataSourceFactory {
+    private final DataSourceBeanManager dsManager = DataSourceBeanManager.getInstance();
 
-    private static void setConnectPropertiesConfig(BeeDataSourceConfig config, String prefix, Environment environment) {
-        DataSourceBeanManager manager = DataSourceBeanManager.getInstance();
-
-        config.addConnectProperty(manager.getConfigValue(prefix, CONFIG_CONNECT_PROP, environment));
-        String connectPropertiesCount = manager.getConfigValue(prefix, CONFIG_CONNECT_PROP_SIZE, environment);
-        if (!isBlank(connectPropertiesCount)) {
+    private void setConnectPropertiesConfig(BeeDataSourceConfig config, String dsPrefix, Environment environment) {
+        config.addConnectProperty(dsManager.getConfigValue(dsPrefix, CONFIG_CONNECT_PROP, environment));
+        String connectPropertiesCount = dsManager.getConfigValue(dsPrefix, CONFIG_CONNECT_PROP_SIZE, environment);
+        if (isNotBlank(connectPropertiesCount)) {
             int count = Integer.parseInt(connectPropertiesCount.trim());
             for (int i = 1; i <= count; i++)
-                config.addConnectProperty(manager.getConfigValue(prefix, CONFIG_CONNECT_PROP_KEY_PREFIX + i, environment));
+                config.addConnectProperty(dsManager.getConfigValue(dsPrefix, CONFIG_CONNECT_PROP_KEY_PREFIX + i, environment));
         }
     }
 
-    public DataSource createDataSource(String prefix, String dsId, Environment environment) throws SpringDataSourceException {
-        DataSourceBeanManager manager = DataSourceBeanManager.getInstance();
+    private void setSqlExceptionFatalConfig(BeeDataSourceConfig config, String dsPrefix, Environment environment) {
+        String sqlExceptionCode = dsManager.getConfigValue(dsPrefix, CONFIG_SQL_EXCEPTION_CODE, environment);
+        String sqlExceptionState = dsManager.getConfigValue(dsPrefix, CONFIG_SQL_EXCEPTION_STATE, environment);
 
+        if (isNotBlank(sqlExceptionCode)) {
+            for (String code : sqlExceptionCode.trim().split(",")) {
+                try {
+                    config.addSqlExceptionCode(Integer.parseInt(code));
+                } catch (NumberFormatException e) {
+                    throw new BeeDataSourceConfigException(code + " is not a valid SQLException error code");
+                }
+            }
+        }
+
+        if (isNotBlank(sqlExceptionState)) {
+            for (String state : sqlExceptionState.trim().split(",")) {
+                config.addSqlExceptionState(state);
+            }
+        }
+    }
+
+    private void setConfigPrintExclusionList(BeeDataSourceConfig config, String dsPrefix, Environment environment) {
+        String exclusionListText = dsManager.getConfigValue(dsPrefix, CONFIG_CONFIG_PRINT_EXCLUSION_LIST, environment);
+        if (isNotBlank(exclusionListText)) {
+            config.clearAllConfigPrintExclusion();//remove existed exclusion
+            for (String exclusion : exclusionListText.trim().split(",")) {
+                config.addConfigPrintExclusion(exclusion);
+            }
+        }
+    }
+
+    public DataSource createDataSource(String dsPrefix, String dsId, Environment environment) throws DataSourceException {
         //1:read spring configuration and inject to datasource's config object
         BeeDataSourceConfig config = new BeeDataSourceConfig();
-        manager.setConfigPropertiesValue(config, prefix, dsId, environment);
-        setConnectPropertiesConfig(config, prefix, environment);
+        dsManager.setConfigPropertiesValue(config, dsPrefix, dsId, environment);
+        setConnectPropertiesConfig(config, dsPrefix, environment);
+        setSqlExceptionFatalConfig(config, dsPrefix, environment);
+        setConfigPrintExclusionList(config, dsPrefix, environment);
 
-        //2:try to lookup TransactionManager with jndi name
+        //2:try to lookup TransactionManager by jndi
         TransactionManager tm = null;
-        String tmJndiName = manager.getConfigValue(prefix, CONFIG_TM_JNDI, environment);
-        if (!isBlank(tmJndiName)) {
+        String tmJndiName = dsManager.getConfigValue(dsPrefix, CONFIG_TM_JNDI, environment);
+        if (isNotBlank(tmJndiName)) {
             try {
                 Context nameCtx = new InitialContext();
                 tm = (TransactionManager) nameCtx.lookup(tmJndiName);
             } catch (NamingException e) {
-                throw new SpringDataSourceException("Failed to look transaction manager with jndi name:" + tmJndiName, e);
+                throw new DataSourceException("Failed to look transaction manager with jndi name:" + tmJndiName, e);
             }
         }
 
         //3:create dataSource instance
         BeeDataSource ds = new BeeDataSource(config);
+
+        //4:disable threadLocal if exists virtual thread config item
+        String threadLocalEnable = dsManager.getConfigValue(dsPrefix, Config_ThreadLocal_Enable, environment);
+        if (threadLocalEnable == null) {
+            boolean enableVirtualThread = Boolean.parseBoolean(environment.getProperty(Config_Virtual_Thread, "false"));
+            ds.setEnableThreadLocal(!enableVirtualThread);
+        }
+
+        //5:create jta dataSource or not
         return (tm != null) ? new BeeJtaDataSource(ds, tm) : ds;
     }
 }

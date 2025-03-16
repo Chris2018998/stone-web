@@ -33,9 +33,9 @@ import java.util.Collection;
 public final class PoolsSnapshot implements Serializable {
     private final String appContextUrl;
     private String cacheTime;
-    private Collection<BeeConnectionPoolMonitorVo> dsList;
-    private Collection<StatementExecution> sqlExecutionList;
-    private Collection<BeeObjectPoolMonitorVo> osList;
+    private Collection<BeeConnectionPoolMonitorVo> dsPoolList;
+    private Collection<StatementExecution> dsSqlList;
+    private Collection<BeeObjectPoolMonitorVo> osPoolList;
 
     public PoolsSnapshot(String appContextUrl) {
         this.appContextUrl = appContextUrl;
@@ -53,27 +53,27 @@ public final class PoolsSnapshot implements Serializable {
         this.cacheTime = cacheTime;
     }
 
-    public Collection<BeeConnectionPoolMonitorVo> getDsList() {
-        return dsList;
+    public Collection<BeeConnectionPoolMonitorVo> getDsPoolList() {
+        return dsPoolList;
     }
 
-    public void setDsList(Collection<BeeConnectionPoolMonitorVo> dsList) {
-        this.dsList = dsList;
+    public void setDsPoolList(Collection<BeeConnectionPoolMonitorVo> dsPoolList) {
+        this.dsPoolList = dsPoolList;
     }
 
-    public Collection<StatementExecution> getSqlExecutionList() {
-        return sqlExecutionList;
+    public Collection<StatementExecution> getDsSqlList() {
+        return dsSqlList;
     }
 
-    public void setSqlExecutionList(Collection<StatementExecution> sqlExecutionList) {
-        this.sqlExecutionList = sqlExecutionList;
+    public void setDsSqlList(Collection<StatementExecution> dsSqlList) {
+        this.dsSqlList = dsSqlList;
     }
 
-    public Collection<BeeObjectPoolMonitorVo> getOsList() {
-        return osList;
+    public Collection<BeeObjectPoolMonitorVo> getOsPoolList() {
+        return osPoolList;
     }
 
-    public void setOsList(Collection<BeeObjectPoolMonitorVo> osList) {
-        this.osList = osList;
+    public void setOsPoolList(Collection<BeeObjectPoolMonitorVo> osPoolList) {
+        this.osPoolList = osPoolList;
     }
 }

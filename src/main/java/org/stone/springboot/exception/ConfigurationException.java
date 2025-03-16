@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.factory;
+package org.stone.springboot.exception;
 
 /*
-/*
- * Throws this exception when {@link SpringXADataSourceFactory} fail to a XA data source.
+ * Throws this exception when exist invalid configuration
  *
  *  @author Chris Liao
  */
+public class ConfigurationException extends AssemblyException {
 
-public final class SpringXADataSourceException extends RuntimeException {
-
-    public SpringXADataSourceException(String message) {
+    public ConfigurationException(String message) {
         super(message);
     }
 
-    public SpringXADataSourceException(String message, Throwable cause) {
+    public ConfigurationException(String message, Throwable cause) {
         super(message, cause);
     }
 }

@@ -65,6 +65,7 @@ public class DataSourceBeanRegister {
         DataSourceBeanManager dsManager = DataSourceBeanManager.getInstance();
         String dsId = dsManager.getConfigValue(Config_DS_Prefix, Config_DS_Id, environment);
         if (isBlank(dsId)) dsId = "beeDataSource";
+
         DataSource ds = new SpringBeeDataSourceFactory().createDataSource(Config_DS_Prefix, dsId, environment);
         String primaryText = dsManager.getConfigValue(Config_DS_Prefix, Config_DS_Primary, environment);
         boolean isPrimary = isNotBlank(primaryText) && Boolean.valueOf(primaryText).booleanValue();

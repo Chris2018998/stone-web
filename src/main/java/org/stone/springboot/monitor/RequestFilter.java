@@ -31,24 +31,32 @@ import static org.stone.tools.CommonUtil.isBlank;
  * @author Chris Liao
  */
 public class RequestFilter implements Filter {
-    private final String userName;
-    private final String loggedInTagName;
+    static final String URL_Pattern = "/bee/*";
+    static final String Welcome_URL = "/bee";
+    static final String Welcome_URL2 = "/bee/";
+    static final String Login_URL = "/bee/login";
+    static final String Login_Page = "/bee/login.html";
+    static final String Monitor_Page = "/bee/monitor.html";
+    static final String Ds_Pool_List_URL = "/bee/dsPoolList";
+    static final String Ds_Pool_Clear_URL = "/bee/dsPoolClear";
+    static final String Ds_Sql_List_URL = "/bee/dsSqlList";
+    static final String Ds_Sql_Cancel_URL = "/bee/dsSqlCancel";
+    static final String Os_Pool_List_URL = "/bee/osPoolList";
+    static final String Os_Pool_Clear_URL = "/bee/osPoolClear";
+
     private final LocalJsonUtil jsonTool;
-
     private final String[] excludeUrlSuffix = {".js", ".css", ".gif"};
-    private final String[] excludeUrls = {"/stone/login", "/stone/login.html"};
+    private final String[] excludeUrls = {Login_URL, Login_Page};
     private final String[] restUrls = {
-            "/stone/getLocalDataSourceList",
-            "/stone/getLocalSqlList",
-            "/stone/clearLocalDataSourcePool",
-            "/stone/cancelStatementExecution",
-            "/stone/getLocalObjectSourceList",
-            "/stone/clearLocalObjectSourcePool"};
+            Ds_Pool_List_URL,
+            Ds_Pool_Clear_URL,
+            Ds_Sql_List_URL,
+            Ds_Sql_Cancel_URL,
+            Os_Pool_List_URL,
+            Os_Pool_Clear_URL};
 
-    RequestFilter(String userName, String loggedInTagName, LocalJsonUtil jsonTool) {
-        this.userName = userName;
+    RequestFilter(LocalJsonUtil jsonTool) {
         this.jsonTool = jsonTool;
-        this.loggedInTagName = loggedInTagName;
     }
 
     @Override
@@ -61,13 +69,13 @@ public class RequestFilter implements Filter {
     }
 
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-        if (isBlank(userName)) {
+        if (isBlank(MonitorConfig.getInstance().getUsername())) {
             chain.doFilter(req, res);
         } else {
             HttpServletRequest httpReq = (HttpServletRequest) req;
             String requestPath = httpReq.getServletPath();
 
-            if ("Y".equals(httpReq.getSession().getAttribute(loggedInTagName)) || isExcludeUrl(requestPath)) {
+            if ("Y".equals(httpReq.getSession().getAttribute(MonitorConfig.getInstance().getLoggedFlag())) || isExcludeUrl(requestPath)) {
                 chain.doFilter(req, res);
             } else if (isRestRequestUrl(requestPath)) {//is rest request url
                 res.setContentType("application/json");
@@ -75,7 +83,7 @@ public class RequestFilter implements Filter {
                 RestResponse restResponse = new RestResponse(RestResponse.CODE_SECURITY, null, "unauthorized");
                 ps.write(jsonTool.object2String(restResponse).getBytes(StandardCharsets.UTF_8));
             } else {
-                req.getRequestDispatcher("/stone/login.html").forward(req, res);
+                req.getRequestDispatcher(Login_Page).forward(req, res);
             }
         }
     }

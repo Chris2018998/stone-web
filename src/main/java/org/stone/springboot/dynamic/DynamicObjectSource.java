@@ -27,8 +27,8 @@ public final class DynamicObjectSource<K, V> extends ObjectSourceBean<K, V> {
     private final ThreadLocal<ObjectSourceBean<K, V>> osLocal;
     private boolean isClosed = false;
 
-    public DynamicObjectSource(ThreadLocal<ObjectSourceBean<K, V>> osLocal) {
-        super(null, null);
+    public DynamicObjectSource(String osId, ThreadLocal<ObjectSourceBean<K, V>> osLocal) {
+        super(osId, false, null);
         this.osLocal = osLocal;
     }
 

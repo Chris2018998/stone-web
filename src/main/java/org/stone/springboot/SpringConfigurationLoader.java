@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.env.Environment;
-import org.stone.springboot.factory.SpringDataSourceException;
+import org.stone.springboot.exception.DataSourceException;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -48,7 +48,7 @@ public class SpringConfigurationLoader {
         try {
             return objClass.newInstance();
         } catch (Exception e) {
-            throw new SpringDataSourceException("DataSource(" + dsId + ")-Failed to instantiated the class:" + objClass.getName(), e);
+            throw new DataSourceException("DataSource(" + dsId + ")-Failed to instantiated the class:" + objClass.getName(), e);
         }
     }
 
@@ -62,7 +62,7 @@ public class SpringConfigurationLoader {
         return exists;
     }
 
-    public void setConfigPropertiesValue(Object bean, String prefix, String id, Environment environment) throws SpringDataSourceException {
+    public void setConfigPropertiesValue(Object bean, String prefix, String id, Environment environment) throws DataSourceException {
         try {
             //1:get all set methods
             Map<String, Method> setMethodMap = getClassSetMethodMap(bean.getClass());
@@ -78,7 +78,7 @@ public class SpringConfigurationLoader {
             //4:inject found config value to ds config object
             setPropertiesValue(bean, setMethodMap, setValueMap);
         } catch (Throwable e) {
-            throw new SpringDataSourceException("DataSource(" + id + ")-Failed to set properties", e);
+            throw new DataSourceException("DataSource(" + id + ")-Failed to set properties", e);
         }
     }
 

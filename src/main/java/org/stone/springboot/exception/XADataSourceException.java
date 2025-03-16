@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.factory;
+package org.stone.springboot.exception;
 
 /*
- * Throws this exception when {@link SpringDataSourceFactory} fail to a data source.
+ * Throws this exception when {@link SpringXADataSourceFactory} fail to a XA data source.
  *
  *  @author Chris Liao
  */
-public final class SpringDataSourceException extends RuntimeException {
 
-    public SpringDataSourceException(String message) {
+public final class XADataSourceException extends AssemblyException {
+
+    public XADataSourceException(String message) {
         super(message);
     }
 
-    public SpringDataSourceException(String message, Throwable cause) {
+    public XADataSourceException(String message, Throwable cause) {
         super(message, cause);
     }
 }

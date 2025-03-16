@@ -16,6 +16,7 @@
 package org.stone.springboot.factory;
 
 import org.springframework.core.env.Environment;
+import org.stone.springboot.exception.DataSourceException;
 
 import javax.sql.DataSource;
 
@@ -33,8 +34,8 @@ public interface SpringDataSourceFactory {
      * @param dsId        configured data source id
      * @param prefix      configured prefix name
      * @return data source instance
-     * @throws SpringDataSourceException when fail to set
+     * @throws DataSourceException when fail to set
      */
-    DataSource createDataSource(String prefix, String dsId, Environment environment) throws SpringDataSourceException;
+    DataSource createDataSource(String prefix, String dsId, Environment environment) throws DataSourceException;
 
 }

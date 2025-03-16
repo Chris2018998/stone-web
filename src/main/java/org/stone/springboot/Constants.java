@@ -23,27 +23,49 @@ package org.stone.springboot;
 public class Constants {
 
     //***************************************************************************************************************//
-    //                                     1: Data Source                                                            //
+    //                                     1: Monitor                                                                //
     //***************************************************************************************************************//
-    //prefix of spring bee
-    public static final String Config_Bee_Prefix = "spring.bee";
-    //prefix of configuration of spring data source
+    //prefix of spring bee monitor
+    public static final String Config_Monitor_Prefix = "spring.bee.monitor";
+
+    //***************************************************************************************************************//
+    //                                     2: virtual Thread                                                                //
+    //***************************************************************************************************************//
+    //Spring boot virtual threads
+    public static final String Config_Virtual_Thread = "spring.threads.virtual.enabled";
+    //thread local enable
+    public static final String Config_ThreadLocal_Enable = "enableThreadLocal";
+
+    //***************************************************************************************************************//
+    //                                     3: Data Source                                                            //
+    //***************************************************************************************************************//
+    //prefix of spring data source
     public static final String Config_DS_Prefix = "spring.datasource";
-    //Configuration class name of datasource class type
-    public static final String Config_DS_Type = "type";
-    //Configuration class name of data Source factory
-    public static final String Config_Factory_Type = "factory";
-    //Configuration name of jndi name of datasource
-    public static final String Config_DS_Jndi = "jndiName";
-    //Configuration name of a data source id
+    //Data source registered to spring container with this id
     public static final String Config_DS_Id = "dsId";
-    //Configuration name of primary value
+    //Configuration name of jndi
+    public static final String Config_DS_Jndi = "jndiName";
+    //data source class name
+    public static final String Config_DS_Type = "type";
+    //Register to spring Ioc as primary data source
     public static final String Config_DS_Primary = "primary";
-    //Configuration name of id of dynamic data source
+    //factory class name to create datasource
+    public static final String Config_DS_Factory = "factory";
+
+    //Composited data source registered to spring with this id
     public static final String Config_Dyn_DS_Id = "dynDsId";
-    //Configuration name of primary id of dynamic data source
+    //ID of primary datasource in composited data source
     public static final String Config_Dyn_DS_PrimaryId = "dynDsPrimaryId";
+
     //***************************************************************************************************************//
-    //                                     2: Object Source                                                          //
+    //                                     4: Object Source                                                          //
     //***************************************************************************************************************//
+    //prefix of configuration of spring object source
+    public static final String Config_OS_Prefix = "spring.objectSource";
+    public static final String Config_OS_Id = "osId";
+    public static final String Config_OS_Primary = "primary";
+    //Configuration name of id of dynamic object source
+    public static final String Config_Dyn_OS_Id = "dynOsId";
+    //Configuration name of primary id of dynamic object source
+    public static final String Config_Dyn_OS_PrimaryId = "dynOsPrimaryId";
 }

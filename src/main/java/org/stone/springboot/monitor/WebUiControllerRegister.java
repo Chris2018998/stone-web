@@ -30,25 +30,11 @@ import org.stone.springboot.LocalScheduleService;
 import org.stone.springboot.extension.CacheClientProvider;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.stone.springboot.monitor.RequestFilter.URL_Pattern;
 import static org.stone.tools.CommonUtil.isBlank;
 
 /**
- * #1: configuration for UI
- * spring.bee.ui.username=admin
- * spring.bee.ui.password=admin
- * spring.bee.ui.logged-flag=bee-logged-success
- * #2: configuration for cache
- * spring.bee.cache.key-prefix=spring-bee-
- * spring.bee.cache.write-period=18000
- * spring.bee.cache.client-factory=org.stone.springboot.extension.redisson.RedissonClientFactory
- * spring.bee.json-tool=org.stone.springboot.extension.JackSonImpl
- * <p>
- * #3: comments out
- * #spring.bee.redis-host=192.168.1.1
- * #spring.bee.redis-port=6379
- * #spring.bee.redis-password=redis
- * #spring.bee.redis-send-period=18000
- * #spring.bee.redis-read-period=1800
+ * Controller importer
  *
  * @author Chris Liao
  */
@@ -72,10 +58,9 @@ public class WebUiControllerRegister implements ApplicationContextAware, ImportB
             GenericBeanDefinition define = new GenericBeanDefinition();
             define.setBeanClass(WebUiController.class);
             define.setPrimary(true);
-            define.setInstanceSupplier(loader.createSpringSupplier(
-                    new WebUiController(loader.getUsername(), loader.getPassword(), loader.getLoggedFlag())));
+            define.setInstanceSupplier(loader.createSpringSupplier(new WebUiController()));
             registry.registerBeanDefinition(resetControllerRegName, define);
-            log.info("Register stone monitor controller({}) with id:{}", define.getBeanClassName(), resetControllerRegName);
+            log.info("Register bee monitor controller({}) with id:{}", define.getBeanClassName(), resetControllerRegName);
         } else {
             log.error("BeanDefinition id {} already exists in spring context", resetControllerRegName);
         }
@@ -83,17 +68,17 @@ public class WebUiControllerRegister implements ApplicationContextAware, ImportB
         //3: register filter
         String resetControllerFilterRegName = RequestFilter.class.getName();
         if (isBlank(loader.getUsername()) && !loader.existsBeanDefinition(resetControllerFilterRegName, registry)) {
-            RequestFilter dsFilter = new RequestFilter(loader.getUsername(), loader.getLoggedFlag(), loader.getJsonTool());
+            RequestFilter dsFilter = new RequestFilter(loader.getJsonTool());
             FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>(dsFilter);
             registration.setName(resetControllerFilterRegName);
-            registration.addUrlPatterns("/stone/*");
+            registration.addUrlPatterns(URL_Pattern);
 
             GenericBeanDefinition define = new GenericBeanDefinition();
             define.setBeanClass(FilterRegistrationBean.class);
             define.setPrimary(true);
             define.setInstanceSupplier(loader.createSpringSupplier(registration));
             registry.registerBeanDefinition(resetControllerFilterRegName, define);
-            log.info("Register stone security filter({}) with id:{}", define.getBeanClassName(), resetControllerFilterRegName);
+            log.info("Register bee security filter({}) with id:{}", define.getBeanClassName(), resetControllerFilterRegName);
         } else {
             log.error("BeanDefinition id {} has been exists in spring context", resetControllerFilterRegName);
         }
@@ -101,10 +86,9 @@ public class WebUiControllerRegister implements ApplicationContextAware, ImportB
         //4: run a task
         CacheClientProvider provider = loader.getCacheClientProvider();
         if (provider != null) {
-            PoolsSnapshot poolsSnapshot = new PoolsSnapshot(loader.getHostWebUrl());
             CacheTask task = new CacheTask(
                     loader.getCacheKeyPrefix(),
-                    poolsSnapshot,
+                    new PoolsSnapshot(loader.getHostWebUrl()),
                     loader.getJsonTool(),
                     provider);
 

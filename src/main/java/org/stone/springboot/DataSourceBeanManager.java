@@ -18,7 +18,7 @@ package org.stone.springboot;
 import org.springframework.core.env.Environment;
 import org.stone.beecp.BeeConnectionPoolMonitorVo;
 import org.stone.beecp.BeeDataSource;
-import org.stone.springboot.factory.SpringDataSourceException;
+import org.stone.springboot.exception.DataSourceException;
 import org.stone.springboot.factory.SpringDataSourceFactory;
 import org.stone.springboot.factory.SpringXADataSourceFactory;
 import org.stone.springboot.jdbc.StatementExecution;
@@ -38,7 +38,7 @@ import static org.stone.tools.CommonUtil.isBlank;
 import static org.stone.tools.CommonUtil.isNotBlank;
 
 /**
- * A manager to maintain a set of data sources registered in spring container.
+ * A Management tool to maintain registered datasource bean.
  *
  * @author Chris Liao
  */
@@ -66,12 +66,12 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
         ds.setStatementExecutionCollector(statementExecutionCollector);
     }
 
-    public void clearDataSourcePool(String dsId, boolean force) throws SQLException {
+    public void clearDsPool(String dsId, boolean force) throws SQLException {
         DataSourceBean ds = dataSourceMap.get(dsId);
         if (ds != null) ds.clear(force);
     }
 
-    public List<BeeConnectionPoolMonitorVo> getDataSourceMonitoringVoList() throws SQLException {
+    public List<BeeConnectionPoolMonitorVo> getDsPoolMonitorVoList() throws SQLException {
         List<BeeConnectionPoolMonitorVo> poolMonitorVoList = new ArrayList<>(dataSourceMap.size());
         Iterator<DataSourceBean> iterator = dataSourceMap.values().iterator();
 
@@ -134,17 +134,17 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
             if (namingObj instanceof DataSource) {
                 return new DataSourceBean(dsId, true, isPrimary, namingObj);
             } else {
-                throw new SpringDataSourceException("The object is not a ata source object with jndi name:" + jndiName);
+                throw new DataSourceException("The object is not a ata source object with jndi name '" + jndiName + "'");
             }
         } catch (NamingException e) {
-            throw new SpringDataSourceException("Failed to lookup jndi object with name:" + jndiName, e);
+            throw new DataSourceException("Failed to lookup jndi object with name '" + jndiName + "'", e);
         }
     }
 
     private DataSourceBean createDataSourceBeanByDsType(String prefix, String dsId, Environment environment, boolean isPrimary) {
         //1: get configuration ds,factory
         String dsClassName = getConfigValue(prefix, Config_DS_Type, environment);
-        String factoryClassName = getConfigValue(prefix, Config_Factory_Type, environment);
+        String factoryClassName = getConfigValue(prefix, Config_DS_Factory, environment);
         if (isBlank(dsClassName)) {
             dsClassName = BeeDataSource.class.getName();
             if (isBlank(factoryClassName)) factoryClassName = SpringDataSourceFactory.class.getName();
@@ -155,10 +155,10 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
         try {
             dsClass = Class.forName(dsClassName);
         } catch (ClassNotFoundException e) {
-            throw new SpringDataSourceException("Not found Datasource/XaDatasource class name:" + dsClassName);
+            throw new DataSourceException("Not found Datasource/XaDatasource class name:" + dsClassName);
         }
         if (!DataSource.class.isAssignableFrom(dsClass) && !XADataSource.class.isAssignableFrom(dsClass))
-            throw new SpringDataSourceException("Invalid class,the configured class must implement interface " + DataSource.class.getName()
+            throw new DataSourceException("Invalid class,the configured class must implement interface " + DataSource.class.getName()
                     + " or interface " + XADataSource.class.getName());
 
 
@@ -169,17 +169,17 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
             try {
                 dsFactoryClass = Class.forName(factoryClassName);
             } catch (ClassNotFoundException e) {
-                throw new SpringDataSourceException("Not found datasource factory class name:" + factoryClassName);
+                throw new DataSourceException("Not found datasource factory class name:" + factoryClassName);
             }
 
             if (!SpringDataSourceFactory.class.isAssignableFrom(dsFactoryClass) && !SpringXADataSourceFactory.class.isAssignableFrom(dsFactoryClass))
-                throw new SpringDataSourceException("Invalid datasource factory class,must implement interface " + SpringDataSourceFactory.class.getName()
+                throw new DataSourceException("Invalid datasource factory class,must implement interface " + SpringDataSourceFactory.class.getName()
                         + " or interface " + SpringXADataSourceFactory.class.getName());
             try {
                 dsFactory = dsFactoryClass.getDeclaredConstructor(new Class[0]).newInstance();
             } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
                      InvocationTargetException e) {
-                throw new SpringDataSourceException("Failed to create data source factory", e);
+                throw new DataSourceException("Failed to create data source factory", e);
             }
         }
 

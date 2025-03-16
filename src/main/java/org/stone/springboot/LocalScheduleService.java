@@ -20,7 +20,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Local Schedule service
+ * Schedule service to run two tasks(expiration sql-execution scan and push pools snapshot data to cache)
  *
  * @author Chris Liao
  */

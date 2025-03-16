@@ -25,7 +25,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.stone.springboot.dynamic.DynamicAspect;
 import org.stone.springboot.dynamic.DynamicDataSource;
-import org.stone.springboot.factory.SpringDataSourceException;
+import org.stone.springboot.exception.ConfigurationException;
+import org.stone.springboot.exception.DataSourceException;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -76,10 +77,13 @@ import static org.stone.tools.CommonUtil.isBlank;
  */
 public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefinitionRegistrar {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    //spring boot env
+    private final DataSourceBeanManager dsBeanManager;
     private Environment environment;
 
-    //spring boot env
+    public DataSourceBeansRegister() {
+        this.dsBeanManager = DataSourceBeanManager.getInstance();
+    }
+
     public final void setEnvironment(Environment environment) {
         this.environment = environment;
     }
@@ -92,22 +96,22 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
      */
     public final void registerBeanDefinitions(AnnotationMetadata classMetadata, BeanDefinitionRegistry registry) {
         //1: read configured id list of datasource
-        List<String> dsIdList = getDsIdList(environment, registry);
+        Set<String> dsIdList = getDsIdList(environment, registry);
 
         //2: load configuration for dynamic datasource
-        Properties dynamicSourceProperties = getDynamicDsInfo(dsIdList, environment, registry);
+        Properties dynamicSourceProperties = this.getDynamicDsInfo(dsIdList, environment, registry);
 
         //3: create datasource with configuration
-        Map<String, DataSourceBean> dsMap = createDataSources(dsIdList, environment);
+        Map<String, DataSourceBean> dsMap = this.createDataSourceBean(dsIdList, environment);
 
         //4: register datasource to spring container
-        this.registerDataSources(dsMap, dynamicSourceProperties, registry);
+        this.registerDataSourceBean(dsMap, dynamicSourceProperties, registry);
 
         //5: register datasource to spring container
-        this.registerDataSources(dsMap, dynamicSourceProperties, registry);
+        this.registerDataSourceBean(dsMap, dynamicSourceProperties, registry);
 
         //6:Setup statement execution collector to data source manager if exists its configuration
-        DataSourceBeanManager.getInstance().setupStatementExecutionCollector(environment);
+        dsBeanManager.setupStatementExecutionCollector(environment);
     }
 
     /**
@@ -117,26 +121,23 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
      * @param registry    spring boot registry
      * @return datasource name list
      */
-    private List<String> getDsIdList(Environment environment, BeanDefinitionRegistry registry) {
-        String dsIdsText = DataSourceBeanManager.getInstance().getConfigValue(Config_DS_Prefix, Config_DS_Id, environment);
+    private Set<String> getDsIdList(Environment environment, BeanDefinitionRegistry registry) {
+        String dsIdsText = dsBeanManager.getConfigValue(Config_DS_Prefix, Config_DS_Id, environment);
         if (isBlank(dsIdsText))
-            throw new SpringDataSourceException("Missed or not found config item:" + Config_DS_Prefix + "." + Config_DS_Id);
+            throw new ConfigurationException("Missed or not found config item '" + Config_DS_Prefix + "." + Config_DS_Id + "'");
 
         String[] dsIds = dsIdsText.trim().split(",");
-        ArrayList<String> dsIdList = new ArrayList<>(dsIds.length);
+        Set<String> dsIdList = new HashSet<>(dsIds.length);
         for (String id : dsIds) {
             if (isBlank(id)) continue;
-
-            id = id.trim();
-            if (dsIdList.contains(id))
-                throw new SpringDataSourceException("Duplicated id(" + id + ")in multi-datasource id list");
-            if (DataSourceBeanManager.getInstance().existsBeanDefinition(id, registry))
-                throw new SpringDataSourceException("DataSource id(" + id + ")has been registered by another bean");
+            if (dsBeanManager.existsBeanDefinition(id, registry))
+                throw new ConfigurationException("Existed a registered bean with id '" + id + "'");
 
             dsIdList.add(id);
         }
+
         if (dsIdList.isEmpty())
-            throw new SpringDataSourceException("Missed or not found config item:" + Config_DS_Prefix + "." + Config_DS_Id);
+            throw new ConfigurationException("Missed or not found config item '" + Config_DS_Prefix + "." + Config_DS_Id + "'");
 
         return dsIdList;
     }
@@ -148,27 +149,27 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
      * @param environment spring boot environment
      * @return datasource name list
      */
-    private Properties getDynamicDsInfo(List<String> dsIdList, Environment environment, BeanDefinitionRegistry registry) {
-        String combineId = DataSourceBeanManager.getInstance().getConfigValue(Config_DS_Prefix, Config_Dyn_DS_Id, environment);
-        String primaryDs = DataSourceBeanManager.getInstance().getConfigValue(Config_DS_Prefix, Config_Dyn_DS_PrimaryId, environment);
+    private Properties getDynamicDsInfo(Set<String> dsIdList, Environment environment, BeanDefinitionRegistry registry) {
+        String dynId = dsBeanManager.getConfigValue(Config_DS_Prefix, Config_Dyn_DS_Id, environment);
+        String primaryDs = dsBeanManager.getConfigValue(Config_DS_Prefix, Config_Dyn_DS_PrimaryId, environment);
 
-        combineId = (combineId == null) ? "" : combineId;
+        dynId = (dynId == null) ? "" : dynId;
         primaryDs = (primaryDs == null) ? "" : primaryDs;
 
-        if (!isBlank(combineId)) {
-            if (dsIdList.contains(combineId))
-                throw new SpringDataSourceException("Dynamic-dataSource id (" + combineId + ")can't be in ds-id list");
-            if (DataSourceBeanManager.getInstance().existsBeanDefinition(combineId, registry))
-                throw new SpringDataSourceException("Dynamic-dataSource id(" + combineId + ")has been registered by another bean");
+        if (!isBlank(dynId)) {
+            if (dsIdList.contains(dynId))
+                throw new ConfigurationException("Dynamic dataSource id '" + dynId + "' can't be in ds-id list");
+            if (dsBeanManager.existsBeanDefinition(dynId, registry))
+                throw new ConfigurationException("Dynamic dataSource id '" + dynId + "' has been registered by another bean");
 
             if (isBlank(primaryDs))
-                throw new SpringDataSourceException("Missed or not found config item:" + Config_DS_Prefix + "." + Config_Dyn_DS_PrimaryId);
+                throw new ConfigurationException("Missed or not found config item '" + Config_DS_Prefix + "." + Config_Dyn_DS_PrimaryId + "'");
             if (!dsIdList.contains(primaryDs.trim()))
-                throw new SpringDataSourceException("Dynamic-primaryDs(" + primaryDs + "not found in ds-id list");
+                throw new ConfigurationException("Dynamic primaryDs '" + primaryDs + "' not found in ds-id list");
         }
 
         Properties combineProperties = new Properties();
-        combineProperties.put(Config_Dyn_DS_Id, combineId);
+        combineProperties.put(Config_Dyn_DS_Id, dynId);
         combineProperties.put(Config_Dyn_DS_PrimaryId, primaryDs);
         return combineProperties;
     }
@@ -180,13 +181,12 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
      * @param environment spring boot environment
      * @return dataSource holder map
      */
-    private Map<String, DataSourceBean> createDataSources(List<String> dsIdList, Environment environment) {
-        DataSourceBeanManager manager = DataSourceBeanManager.getInstance();
+    private Map<String, DataSourceBean> createDataSourceBean(Set<String> dsIdList, Environment environment) {
         Map<String, DataSourceBean> dsMap = new LinkedHashMap<>(dsIdList.size());
         try {
             for (String dsId : dsIdList) {
                 String dsPrefix = Config_DS_Prefix + "." + dsId;
-                dsMap.put(dsId, manager.createDataSourceBean(dsPrefix, dsId, environment));//create datasource instance
+                dsMap.put(dsId, dsBeanManager.createDataSourceBean(dsPrefix, dsId, environment));//create datasource instance
             }
             return dsMap;
         } catch (Throwable e) {//failed then close all created dataSource
@@ -194,10 +194,10 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
                 try {
                     ds.close();
                 } catch (SQLException ee) {
-
+                    //do nothing
                 }
             }
-            throw new SpringDataSourceException("multi-DataSource created failed", e);
+            throw new DataSourceException("Multi data source created failed", e);
         }
     }
 
@@ -206,29 +206,32 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
      *
      * @param dsMap datasource list
      */
-    private void registerDataSources(Map<String, DataSourceBean> dsMap, Properties combineProperties, BeanDefinitionRegistry registry) {
-        String combineDsId = combineProperties.getProperty(Config_Dyn_DS_Id);
+    private void registerDataSourceBean(Map<String, DataSourceBean> dsMap, Properties combineProperties, BeanDefinitionRegistry registry) {
+        String dynDsId = combineProperties.getProperty(Config_Dyn_DS_Id);
         String primaryDsId = combineProperties.getProperty(Config_Dyn_DS_PrimaryId);
 
         for (DataSourceBean ds : dsMap.values())
             registerDataSourceBean(ds, registry);
 
         //register combine DataSource
-        if (!isBlank(combineDsId) && !isBlank(primaryDsId)) {
+        if (!isBlank(dynDsId) && !isBlank(primaryDsId)) {
             ThreadLocal<DataSourceBean> dsThreadLocal = new ThreadLocal<>();
 
             GenericBeanDefinition define = new GenericBeanDefinition();
             define.setBeanClass(DynamicDataSource.class);
-            define.setInstanceSupplier(DataSourceBeanManager.getInstance().createSpringSupplier(new DynamicDataSource(dsThreadLocal)));
-            registry.registerBeanDefinition(combineDsId, define);
-            log.info("Registered Combine-DataSource({})with id:{}", define.getBeanClassName(), combineDsId);
+            define.setInstanceSupplier(dsBeanManager.createSpringSupplier(new DynamicDataSource(dsThreadLocal)));
+            registry.registerBeanDefinition(dynDsId, define);
+            log.info("Registered a dynamic object source(type:{})with bean Id '{}'", define.getBeanClassName(), dynDsId);
 
-            String dsIdSetterId = DynamicAspect.class.getName();
+            String dsIdSetterId = "beeDs_" + DynamicAspect.class.getName();
             GenericBeanDefinition dsIdSetDefine = new GenericBeanDefinition();
             dsIdSetDefine.setBeanClass(DynamicAspect.class);
-            dsIdSetDefine.setInstanceSupplier(DataSourceBeanManager.getInstance().createSpringSupplier(new DynamicAspect(primaryDsId, dsThreadLocal)));
+
+            DynamicAspect<?, ?> dynamicAspect = new DynamicAspect<>();
+            dynamicAspect.setDynDsThreadLocal(primaryDsId, dsThreadLocal);
+            dsIdSetDefine.setInstanceSupplier(dsBeanManager.createSpringSupplier(dynamicAspect));
             registry.registerBeanDefinition(dsIdSetterId, dsIdSetDefine);
-            log.info("Registered DsId-setter({})with id:{}", dsIdSetDefine.getBeanClassName(), dsIdSetterId);
+            log.info("Registered an aspect component(type:{})for dynamic data source with bean Id '{}'", dsIdSetDefine.getBeanClassName(), dsIdSetterId);
         }
     }
 
@@ -237,10 +240,10 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
         GenericBeanDefinition define = new GenericBeanDefinition();
         define.setPrimary(springDs.isPrimary());
         define.setBeanClass(springDs.getClass());
-        define.setInstanceSupplier(DataSourceBeanManager.getInstance().createSpringSupplier(springDs));
+        define.setInstanceSupplier(dsBeanManager.createSpringSupplier(springDs));
         registry.registerBeanDefinition(springDs.getDsId(), define);
-        log.info("Registered DataSource({})with id:{}", define.getBeanClassName(), springDs.getDsId());
-        DataSourceBeanManager.getInstance().addDataSource(springDs);
+        log.info("Registered a data source(type:{})with bean Id '{}'", define.getBeanClassName(), springDs.getDsId());
+        dsBeanManager.addDataSource(springDs);
     }
 }
 

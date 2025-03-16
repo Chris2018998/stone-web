@@ -43,11 +43,8 @@ public final class CacheTask implements Runnable {
 
     private final Logger logger = LoggerFactory.getLogger(CacheTask.class);
 
-    public CacheTask(
-            String keyPrefix,
-            PoolsSnapshot snapshot,
-            LocalJsonUtil jsonUtil,
-            CacheClientProvider provider) {
+    public CacheTask(String keyPrefix, PoolsSnapshot snapshot,
+                     LocalJsonUtil jsonUtil, CacheClientProvider provider) {
 
         this.keyPrefix = keyPrefix;
         this.snapshot = snapshot;
@@ -57,9 +54,9 @@ public final class CacheTask implements Runnable {
 
     public void run() {
         try {
-            snapshot.setDsList(DataSourceBeanManager.getInstance().getDataSourceMonitoringVoList());
-            snapshot.setSqlExecutionList(DataSourceBeanManager.getInstance().getSqlExecutionList());
-            snapshot.setOsList(ObjectSourceBeanManager.getInstance().getOsPoolMonitorVoList());
+            snapshot.setDsPoolList(DataSourceBeanManager.getInstance().getDsPoolMonitorVoList());
+            snapshot.setDsSqlList(DataSourceBeanManager.getInstance().getSqlExecutionList());
+            snapshot.setOsPoolList(ObjectSourceBeanManager.getInstance().getOsPoolMonitorVoList());
             snapshot.setCacheTime(StatementJdbcUtil.formatDate(new Date()));
 
             CacheClient client = provider.get();

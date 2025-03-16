@@ -18,24 +18,27 @@ package org.stone.springboot;
 import org.stone.beeop.BeeObjectHandle;
 import org.stone.beeop.BeeObjectPoolMonitorVo;
 import org.stone.beeop.BeeObjectSource;
+import org.stone.beeop.BeeObjectSourceConfig;
 
 /**
- * object source(only support beeop)
+ * A wrapper around Object source(only support BeeObjectSource)
  *
  * @author Chris Liao
  */
-public class ObjectSourceBean<K, V> {
+public class ObjectSourceBean<K, V> extends BeeObjectSource<K, V> {
     private final String osId;
+    private final boolean primary;
     private final BeeObjectSource<K, V> os;
-    private boolean primary;
 
-    public ObjectSourceBean(String osId, BeeObjectSource<K, V> os) {
+    public ObjectSourceBean(String osId, boolean primary, BeeObjectSource<K, V> os) {
+        if (os == null) throw new IllegalArgumentException("Object source can't be null");
         this.osId = osId;
         this.os = os;
+        this.primary = primary;
     }
 
     //***************************************************************************************************************//
-    //                                     1: base properties (4)                                                    //
+    //                                     1: base operation methods(2)                                              //
     //***************************************************************************************************************//
     public String getOsId() {
         return osId;
@@ -45,26 +48,68 @@ public class ObjectSourceBean<K, V> {
         return primary;
     }
 
-    public void setPrimary(boolean primary) {
-        this.primary = primary;
-    }
-
+    //***************************************************************************************************************//
+    //                                     2: Pool Monitor (5)                                                       //
+    //***************************************************************************************************************//
     public BeeObjectHandle<K, V> getObjectHandle() throws Exception {
         return os.getObjectHandle();
     }
 
-    //***************************************************************************************************************//
-    //                                     2: Pool Monitor (3)                                                       //
-    //***************************************************************************************************************//
-    public void close() throws Exception {
-        os.close();
+    public BeeObjectHandle<K, V> getObjectHandle(K key) throws Exception {
+        return os.getObjectHandle(key);
     }
 
-    void clear() throws Exception {
-        os.clear(false);
+    //***************************************************************************************************************//
+    //                                      3: clear and monitoring(3)                                               //
+    //***************************************************************************************************************//
+    public void clear(boolean forceRecycleBorrowed) throws Exception {
+        os.clear(forceRecycleBorrowed);
+    }
+
+    public void clear(boolean forceRecycleBorrowed, BeeObjectSourceConfig<K, V> config) throws Exception {
+        os.clear(forceRecycleBorrowed, config);
     }
 
     public BeeObjectPoolMonitorVo getPoolMonitorVo() throws Exception {
         return os.getPoolMonitorVo();
+    }
+
+    //***************************************************************************************************************//
+    //                                       4: keys maintenance(9)                                                  //
+    //***************************************************************************************************************//
+    public boolean exists(K key) throws Exception {
+        return os.exists(key);
+    }
+
+    public void clear(K key) throws Exception {
+        os.clear(key);
+    }
+
+    public void clear(K key, boolean forceRecycleBorrowed) throws Exception {
+        os.clear(key, forceRecycleBorrowed);
+    }
+
+    public void deleteKey(K key) throws Exception {
+        os.deleteKey(key);
+    }
+
+    public void deleteKey(K key, boolean forceRecycleBorrowed) throws Exception {
+        os.deleteKey(key, forceRecycleBorrowed);
+    }
+
+    public boolean isPrintRuntimeLog(K key) throws Exception {
+        return os.isPrintRuntimeLog(key);
+    }
+
+    public void setPrintRuntimeLog(K key, boolean enable) throws Exception {
+        os.setPrintRuntimeLog(key, enable);
+    }
+
+    public BeeObjectPoolMonitorVo getMonitorVo(K key) throws Exception {
+        return os.getMonitorVo(key);
+    }
+
+    public Thread[] interruptObjectCreating(K key, boolean interruptTimeout) throws Exception {
+        return os.interruptObjectCreating(key, interruptTimeout);
     }
 }

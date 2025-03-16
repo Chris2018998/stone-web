@@ -23,44 +23,35 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.stone.beeop.BeeObjectSource;
 
+import static org.stone.springboot.Constants.Config_OS_Id;
+import static org.stone.springboot.Constants.Config_OS_Prefix;
+import static org.stone.tools.CommonUtil.isBlank;
+
 /*
- * Default register to import an object pool to spring boot
+ * A default object source register to import single data source to spring container
  *
- * spring.objectsource.dsId=beeDs
- * spring.objectsource.type=org.stone.beecp.Beeobjectsource
- * spring.objectsource.username=root
- * spring.objectsource.password=
- * spring.objectsource.jdbcUrl=jdbc:mysql://localhost:3306/test
- * spring.objectsource.driverClassName=com.mysql.jdbc.Driver
- * spring.objectsource.fairMode=true
- * spring.objectsource.initialSize=10
- * spring.objectsource.maxActive =10
+ * spring.objectSource.osId=beeOs
+ * spring.objectSource.type=org.stone.beecp.BeeObjectSource
+ * spring.objectSource.fairMode=true
+ * spring.objectSource.initialSize=10
+ * spring.objectSource.maxActive =10
  *
  * @author Chris Liao
  */
 @ConditionalOnClass(BeeObjectSource.class)
-@ConditionalOnProperty(name = "spring.objectsource.type", havingValue = "org.stone.beeop.BeeObjectSource")
+@ConditionalOnProperty(name = "spring.objectSource.type", havingValue = "org.stone.beeop.BeeObjectSource")
 @AutoConfigureBefore(DataSourceAutoConfiguration.class)
 public class ObjectSourceBeanRegister {
-    @Bean
-    public BeeObjectSource beeObjectSource(Environment environment) throws Exception {
-//        //1:read ds id
-//        String dsId = SpringobjectsourceUtil.getConfigValue(SpringobjectsourceUtil.Config_DS_Prefix, SpringobjectsourceUtil.Config_DS_Id, environment);
-//        if (isBlank(dsId)) dsId = "beeobjectsource";//default ds Id
-//
-//        //2:read objectsource monitor config
-//        MonitorConfig objectsourceMonitorConfig = SpringobjectsourceUtil.loadDsMonitorConfig(environment);
-//
-//        //3:setup monitor config
-//        SpringobjectsourceManager.getInstance().setupMonitorConfig(objectsourceMonitorConfig);
-//
-//        //4:create Beeobjectsource
-//        objectsource ds = new BeeobjectsourceFactory().createobjectsource(SpringobjectsourceUtil.Config_DS_Prefix, dsId, environment);
-//        Springobjectsource springDs = new Springobjectsource(dsId, ds, false);
-//        SpringobjectsourceManager.getInstance().addSpringBootobjectsource(springDs);
-//
-//        return springDs;
 
-        return null;
+    @Bean
+    public <K, V> BeeObjectSource<K, V> beeObjectSource(Environment environment) {
+        //1:Create bee data source with loading configuration from Spring boot environment
+        ObjectSourceBeanManager<K, V> osManager = ObjectSourceBeanManager.getInstance();
+        String osId = osManager.getConfigValue(Config_OS_Prefix, Config_OS_Id, environment);
+        if (isBlank(osId)) osId = "beeObjectSource";
+
+        ObjectSourceBean<K, V> osBean = osManager.createObjectSourceBean(Config_OS_Prefix, osId, environment);
+        osManager.addObjectSource(osBean);
+        return osBean;
     }
 }
