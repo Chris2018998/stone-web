@@ -19,7 +19,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.core.annotation.Order;
 import org.stone.springboot.DataSourceBean;
 import org.stone.springboot.DataSourceBeanManager;
 import org.stone.springboot.ObjectSourceBean;
@@ -32,13 +31,12 @@ import org.stone.springboot.exception.ObjectSourceException;
 import static org.stone.tools.CommonUtil.isBlank;
 
 /*
- * combine Aspect
+ * dynamic Aspect
  *
  * @author Chris Liao
  */
 
 @Aspect
-@Order(1)
 public final class DynamicAspect<K, V> {
     private String primaryDsId;
     private ThreadLocal<DataSourceBean> dsLocal;

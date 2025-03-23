@@ -222,6 +222,4 @@ public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, Import
         log.info("Registered a object source(type:{})with bean Id '{}'", define.getBeanClassName(), springOs.getOsId());
         osBeanManager.addObjectSource(springOs);
     }
-
-
 }

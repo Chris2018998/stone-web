@@ -44,6 +44,8 @@ public class RequestFilter implements Filter {
     static final String Os_Pool_List_URL = "/bee/osPoolList";
     static final String Os_Pool_Clear_URL = "/bee/osPoolClear";
 
+    private final String loggedFlag;
+    private final boolean securityCheck;
     private final LocalJsonUtil jsonTool;
     private final String[] excludeUrlSuffix = {".js", ".css", ".gif"};
     private final String[] excludeUrls = {Login_URL, Login_Page};
@@ -57,6 +59,8 @@ public class RequestFilter implements Filter {
 
     RequestFilter(LocalJsonUtil jsonTool) {
         this.jsonTool = jsonTool;
+        this.loggedFlag = MonitorConfig.getInstance().getLoggedFlag();
+        this.securityCheck = isBlank(MonitorConfig.getInstance().getUsername());
     }
 
     @Override
@@ -69,13 +73,11 @@ public class RequestFilter implements Filter {
     }
 
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-        if (isBlank(MonitorConfig.getInstance().getUsername())) {
-            chain.doFilter(req, res);
-        } else {
+        if (securityCheck) {
             HttpServletRequest httpReq = (HttpServletRequest) req;
             String requestPath = httpReq.getServletPath();
 
-            if ("Y".equals(httpReq.getSession().getAttribute(MonitorConfig.getInstance().getLoggedFlag())) || isExcludeUrl(requestPath)) {
+            if ("Y".equals(httpReq.getSession().getAttribute(loggedFlag)) || isExcludeUrl(requestPath)) {
                 chain.doFilter(req, res);
             } else if (isRestRequestUrl(requestPath)) {//is rest request url
                 res.setContentType("application/json");
@@ -85,6 +87,8 @@ public class RequestFilter implements Filter {
             } else {
                 req.getRequestDispatcher(Login_Page).forward(req, res);
             }
+        } else {
+            chain.doFilter(req, res);
         }
     }
 

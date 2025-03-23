@@ -19,6 +19,7 @@ import jakarta.servlet.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -32,7 +33,6 @@ import org.stone.springboot.extension.CacheClientProvider;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.stone.springboot.monitor.RequestFilter.URL_Pattern;
-import static org.stone.tools.CommonUtil.isBlank;
 
 /**
  * Controller importer
@@ -44,47 +44,48 @@ public class WebUiControllerRegister implements ApplicationContextAware, ImportB
     private ApplicationContext applicationContext;
 
     //spring boot env
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+    public void setApplicationContext(ApplicationContext SpringBeanContext) throws BeansException {
+        this.applicationContext = SpringBeanContext;
     }
 
     //Register controller bean to ioc
     public final void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+        //1: check bean name
+        String resetControllerRegName = WebUiController.class.getName();
+        String resetControllerFilterRegName = RequestFilter.class.getName();
+        if (SpringConfigurationLoader.existsBeanDefinition(resetControllerRegName, registry)) {
+            log.error("BeanDefinition id {} already exists in spring context", resetControllerRegName);
+            throw new BeanDefinitionStoreException("BeanDefinition id '" + resetControllerRegName + "'already exists in spring context");
+        }
+        if (SpringConfigurationLoader.existsBeanDefinition(resetControllerFilterRegName, registry)) {
+            log.error("BeanDefinition id {} already exists in spring context", resetControllerFilterRegName);
+            throw new BeanDefinitionStoreException("BeanDefinition id '" + resetControllerFilterRegName + "'already exists in spring context");
+        }
+
+        //2: load configuration
         MonitorConfig loader = new MonitorConfig();
         loader.load(applicationContext.getEnvironment());
 
-        //2: register Controller
-        String resetControllerRegName = WebUiController.class.getName();
-        if (!SpringConfigurationLoader.existsBeanDefinition(resetControllerRegName, registry)) {
-            GenericBeanDefinition define = new GenericBeanDefinition();
-            define.setBeanClass(WebUiController.class);
-            define.setPrimary(true);
-            define.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(new WebUiController()));
-            registry.registerBeanDefinition(resetControllerRegName, define);
-            log.info("Register bee monitor controller({}) with id:{}", define.getBeanClassName(), resetControllerRegName);
-        } else {
-            log.error("BeanDefinition id {} already exists in spring context", resetControllerRegName);
-        }
+        //3: Register controller and filter
+        GenericBeanDefinition define = new GenericBeanDefinition();
+        define.setBeanClass(WebUiController.class);
+        define.setPrimary(true);
+        define.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(new WebUiController()));
+        registry.registerBeanDefinition(resetControllerRegName, define);
+        log.info("Register bee monitor controller({}) with id:{}", define.getBeanClassName(), resetControllerRegName);
 
-        //3: register filter
-        String resetControllerFilterRegName = RequestFilter.class.getName();
-        if (isBlank(loader.getUsername()) && !SpringConfigurationLoader.existsBeanDefinition(resetControllerFilterRegName, registry)) {
-            RequestFilter dsFilter = new RequestFilter(loader.getJsonTool());
-            FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>(dsFilter);
-            registration.setName(resetControllerFilterRegName);
-            registration.addUrlPatterns(URL_Pattern);
+        RequestFilter dsFilter = new RequestFilter(loader.getJsonTool());
+        FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>(dsFilter);
+        registration.setName(resetControllerFilterRegName);
+        registration.addUrlPatterns(URL_Pattern);
+        define = new GenericBeanDefinition();
+        define.setBeanClass(FilterRegistrationBean.class);
+        define.setPrimary(true);
+        define.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(registration));
+        registry.registerBeanDefinition(resetControllerFilterRegName, define);
+        log.info("Register bee security filter({}) with id:{}", define.getBeanClassName(), resetControllerFilterRegName);
 
-            GenericBeanDefinition define = new GenericBeanDefinition();
-            define.setBeanClass(FilterRegistrationBean.class);
-            define.setPrimary(true);
-            define.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(registration));
-            registry.registerBeanDefinition(resetControllerFilterRegName, define);
-            log.info("Register bee security filter({}) with id:{}", define.getBeanClassName(), resetControllerFilterRegName);
-        } else {
-            log.error("BeanDefinition id {} has been exists in spring context", resetControllerFilterRegName);
-        }
-
-        //4: run a task
+        //4: schedule a task to write pool snapshots to cache
         CacheClientProvider provider = loader.getCacheClientProvider();
         if (provider != null) {
             CacheTask task = new CacheTask(
