@@ -24,6 +24,8 @@ import org.stone.springboot.factory.SpringBeeObjectSourceFactory;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.stone.beeop.pool.ObjectPoolStatics.POOL_CLOSED;
+import static org.stone.beeop.pool.ObjectPoolStatics.POOL_CLOSING;
 import static org.stone.springboot.Constants.Config_OS_Primary;
 import static org.stone.tools.CommonUtil.isNotBlank;
 
@@ -71,7 +73,8 @@ public class ObjectSourceBeanManager<K, V> extends SpringConfigurationLoader {
             ObjectSourceBean<K, V> os = iterator.next();
             BeeObjectPoolMonitorVo vo = os.getPoolMonitorVo();
             if (vo == null) continue;
-            if (vo.getPoolState() == 3) {//POOL_CLOSED
+            int poolState = vo.getPoolState();
+            if (poolState == POOL_CLOSING || poolState == POOL_CLOSED) {//POOL_CLEARING,POOL_CLOSED
                 iterator.remove();
             } else {
                 poolMonitorVoList.add(vo);

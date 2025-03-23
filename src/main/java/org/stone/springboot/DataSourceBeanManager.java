@@ -33,6 +33,8 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.stone.beecp.pool.ConnectionPoolStatics.POOL_CLOSED;
+import static org.stone.beecp.pool.ConnectionPoolStatics.POOL_CLOSING;
 import static org.stone.springboot.Constants.*;
 import static org.stone.tools.CommonUtil.isBlank;
 import static org.stone.tools.CommonUtil.isNotBlank;
@@ -63,7 +65,7 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
                 throw new DataSourceException("The object is not a ata source object with jndi name '" + jndiName + "'");
             }
         } catch (NamingException e) {
-            throw new DataSourceException("Failed to lookup jndi object with name '" + jndiName + "'", e);
+            throw new DataSourceException("Failed to lookup jndi object with jndi name '" + jndiName + "'", e);
         }
     }
 
@@ -92,7 +94,8 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
             DataSourceBean ds = iterator.next();
             BeeConnectionPoolMonitorVo vo = ds.getPoolMonitorVo();
             if (vo == null) continue;
-            if (vo.getPoolState() == 3) {//POOL_CLOSED
+            int poolState = vo.getPoolState();
+            if (poolState == POOL_CLOSING || poolState == POOL_CLOSED) {//POOL_CLEARING,POOL_CLOSED
                 iterator.remove();
             } else {
                 poolMonitorVoList.add(vo);
