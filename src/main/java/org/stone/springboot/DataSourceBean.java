@@ -69,10 +69,6 @@ public final class DataSourceBean implements DataSource, XADataSource {
         return primary;
     }
 
-//    public boolean isBeeDs() {
-//        return isBeeDs || isBeeJtaDs;
-//    }
-
     void setStatementExecutionCollector(StatementExecutionCollector statementExecutionCollector) {
         this.statementExecutionCollector = statementExecutionCollector;
     }
