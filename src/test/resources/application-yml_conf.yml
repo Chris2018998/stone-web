@@ -1,0 +1,35 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /dsDemo
+
+spring:
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+
+  datasource:
+    sql-trace: true
+    sql-show: false
+    sql-trace-max-size: 100
+    sql-trace-timeout: 60000
+    sql-slow-threshold-time: 1
+    sql-trace-timeout-scan-period: 6000
+    sql-exec-alert-action: org.stone.beecp.springboot.test.util.TestAlert
+    dynDsId: combineDs
+    dynDsPrimaryId: ds1
+    dsId: ds1,ds2
+    ds1:
+      type: org.stone.beecp.BeeDataSource
+      primary: true
+      username: root
+      password: root
+      jdbcUrl: jdbc:derby:/path/to/ds1;create=true
+      driverClassName: org.apache.derby.iapi.jdbc.AutoloadedDriver
+    ds2:
+      type: org.stone.beecp.BeeDataSource
+      driver-class-name: org.apache.derby.iapi.jdbc.AutoloadedDriver
+      jdbc-url: jdbc:derby:/path/to/ds2;create=true
+      password: root
+      username: root
+
