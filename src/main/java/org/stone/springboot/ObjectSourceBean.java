@@ -21,7 +21,7 @@ import org.stone.beeop.BeeObjectHandle;
 import org.stone.beeop.BeeObjectPoolMonitorVo;
 import org.stone.beeop.BeeObjectSource;
 import org.stone.beeop.BeeObjectSourceConfig;
-import org.stone.beeop.exception.PoolNotCreatedException;
+import org.stone.beeop.pool.exception.PoolNotCreatedException;
 
 /**
  * A wrapper around Object source(only support BeeObjectSource)
