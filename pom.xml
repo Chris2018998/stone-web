@@ -21,6 +21,7 @@
         <redisson.version>3.49.0</redisson.version>
         <spring.boot.version>3.5.0</spring.boot.version>
         <mysql-connector.version>9.3.0</mysql-connector.version>
+        <prometheus.version>0.16.0</prometheus.version>
     </properties>
 
     <licenses>
@@ -75,6 +76,13 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <version>${spring.boot.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient</artifactId>
+            <version>${prometheus.version}</version>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
