@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.stone.beecp.BeeConnectionPoolMonitorVo;
 import org.stone.beecp.BeeDataSource;
-import org.stone.beecp.exception.PoolNotCreatedException;
+import org.stone.beecp.pool.exception.PoolNotCreatedException;
 import org.stone.beecp.jta.BeeJtaDataSource;
 import org.stone.springboot.jdbc.StatementExecutionCollector;
 import org.stone.springboot.jdbc.StatementJdbcUtil;
