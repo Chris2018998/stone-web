@@ -63,8 +63,11 @@ public class Constants {
     //***************************************************************************************************************//
     //prefix of configuration of spring object source
     public static final String Config_OS_Prefix = "spring.objectSource";
+
     public static final String Config_OS_Id = "osId";
+
     public static final String Config_OS_Primary = "primary";
+
     //Configuration name of id of dynamic object source
     public static final String Config_Dyn_OS_Id = "dynOsId";
     //Configuration name of primary id of dynamic object source

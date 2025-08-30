@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.monitor;
+package org.stone.springboot.controller;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +30,7 @@ import static org.stone.tools.CommonUtil.isBlank;
  *
  * @author Chris Liao
  */
-public class RequestFilter implements Filter {
+public class MonitorControllerRequestFilter implements Filter {
     static final String URL_Pattern = "/bee/*";
     static final String Welcome_URL = "/bee";
     static final String Welcome_URL2 = "/bee/";
@@ -56,7 +56,7 @@ public class RequestFilter implements Filter {
             Os_Pool_List_URL,
             Os_Pool_Clear_URL};
 
-    RequestFilter() {
+    MonitorControllerRequestFilter() {
         this.loggedFlag = MonitorConfig.getInstance().getLoggedFlag();
         this.securityCheck = isBlank(MonitorConfig.getInstance().getUsername());
     }
@@ -80,7 +80,7 @@ public class RequestFilter implements Filter {
             } else if (isRestRequestUrl(requestPath)) {//is rest request url
                 res.setContentType("application/json");
                 OutputStream ps = res.getOutputStream();
-                RestResponse restResponse = new RestResponse(RestResponse.CODE_SECURITY, null, "unauthorized");
+                MonitorControllerResponse restResponse = new MonitorControllerResponse(MonitorControllerResponse.CODE_SECURITY, null, "unauthorized");
                 ps.write(JackSonUtil.object2String(restResponse).getBytes(StandardCharsets.UTF_8));
             } else {
                 req.getRequestDispatcher(Login_Page).forward(req, res);

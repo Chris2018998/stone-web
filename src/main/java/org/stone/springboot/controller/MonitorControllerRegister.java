@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.monitor;
+package org.stone.springboot.controller;
 
 import jakarta.servlet.Filter;
 import org.slf4j.Logger;
@@ -28,14 +28,14 @@ import org.stone.springboot.SpringConfigurationLoader;
 import org.stone.springboot.extension.CacheClientProvider;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.stone.springboot.monitor.RequestFilter.URL_Pattern;
+import static org.stone.springboot.controller.MonitorControllerRequestFilter.URL_Pattern;
 
 /**
  * Controller importer
  *
  * @author Chris Liao
  */
-public class WebUiControllerRegister {
+public class MonitorControllerRegister {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     //Register controller bean to ioc
@@ -46,12 +46,12 @@ public class WebUiControllerRegister {
         loader.load(environment);
 
         //2: Register controller
-        String resetControllerRegName = WebUiController.class.getName();
+        String resetControllerRegName = MonitorController.class.getName();
         if (!SpringConfigurationLoader.existsBeanDefinition(resetControllerRegName, registry)) {
             GenericBeanDefinition define = new GenericBeanDefinition();
-            define.setBeanClass(WebUiController.class);
+            define.setBeanClass(MonitorController.class);
             define.setPrimary(true);
-            define.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(new WebUiController()));
+            define.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(new MonitorController()));
             registry.registerBeanDefinition(resetControllerRegName, define);
             log.info("Register bee monitor controller({}) with id:{}", define.getBeanClassName(), resetControllerRegName);
         } else {
@@ -59,9 +59,9 @@ public class WebUiControllerRegister {
         }
 
         //3: Register filter
-        String resetControllerFilterRegName = RequestFilter.class.getName();
+        String resetControllerFilterRegName = MonitorControllerRequestFilter.class.getName();
         if (!SpringConfigurationLoader.existsBeanDefinition(resetControllerFilterRegName, registry)) {
-            RequestFilter dsFilter = new RequestFilter();
+            MonitorControllerRequestFilter dsFilter = new MonitorControllerRequestFilter();
             FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>(dsFilter);
             registration.setName(resetControllerFilterRegName);
             registration.addUrlPatterns(URL_Pattern);
@@ -79,9 +79,9 @@ public class WebUiControllerRegister {
         CacheClientProvider provider = loader.getCacheClientProvider();
         LocalScheduleService scheduleService = LocalScheduleService.getInstance();
         if (provider != null && !scheduleService.isFull()) {
-            CacheTask task = new CacheTask(
+            PoolSnapshotPushTask task = new PoolSnapshotPushTask(
                     loader.getCacheKeyPrefix(),
-                    new PoolsSnapshot(loader.getHostWebUrl()),
+                    new PoolSnapshot(loader.getHostWebUrl()),
                     provider);
 
             scheduleService.scheduleAtFixedRate(task, 0L, loader.getCacheInterval(), MILLISECONDS);

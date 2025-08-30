@@ -26,15 +26,15 @@ import org.stone.springboot.annotation.BeeDsId;
 import org.stone.springboot.annotation.EnableBeeDs;
 import org.stone.springboot.beecp.util.ServerSideUtil;
 import org.stone.springboot.exception.DataSourceException;
-import org.stone.springboot.monitor.RestResponse;
+import org.stone.springboot.controller.MonitorControllerResponse;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.Map;
 
-import static org.stone.springboot.monitor.RestResponse.CODE_FAILED;
-import static org.stone.springboot.monitor.RestResponse.CODE_SUCCESS;
+import static org.stone.springboot.controller.MonitorControllerResponse.CODE_FAILED;
+import static org.stone.springboot.controller.MonitorControllerResponse.CODE_SUCCESS;
 import static org.stone.tools.CommonUtil.isBlank;
 
 /*
@@ -126,7 +126,7 @@ public class MultiDsController {
     }
 
     @PostMapping("/testGetConnection")
-    public RestResponse testGetConnection(@RequestBody Map<String, String> map) {
+    public MonitorControllerResponse testGetConnection(@RequestBody Map<String, String> map) {
         try {
             String dsId = map != null ? map.get("dsId") : null;
             if (isBlank(dsId))
@@ -135,14 +135,14 @@ public class MultiDsController {
                 throw new DataSourceException("DataSource Id must be one of list(ds1,ds2)");
 
             DataSource ds = "ds1".equals(dsId) ? ds1 : ds2;
-            return new RestResponse(CODE_SUCCESS, ServerSideUtil.testGetConnection(ds), "OK");
+            return new MonitorControllerResponse(CODE_SUCCESS, ServerSideUtil.testGetConnection(ds), "OK");
         } catch (Throwable e) {
-            return new RestResponse(CODE_FAILED, e.getMessage(), "Failed");
+            return new MonitorControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
         }
     }
 
     @PostMapping("/testSQL")
-    public RestResponse testSQL(@RequestBody Map<String, String> map) {
+    public MonitorControllerResponse testSQL(@RequestBody Map<String, String> map) {
         try {
             String dsId = map.get("dsId");
             String sql = map.get("sql");
@@ -161,60 +161,60 @@ public class MultiDsController {
                 throw new DataSourceException("Execute type must be one of list(Statement,PreparedStatement,CallableStatement)");
 
             DataSource ds = "ds1".equals(dsId) ? ds1 : ds2;
-            return new RestResponse(CODE_SUCCESS, ServerSideUtil.testSQL(ds, sql, type, slowInd), "Ok");
+            return new MonitorControllerResponse(CODE_SUCCESS, ServerSideUtil.testSQL(ds, sql, type, slowInd), "Ok");
         } catch (Throwable e) {
-            return new RestResponse(CODE_FAILED, e.getMessage(), "Failed");
+            return new MonitorControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
         }
     }
 
     @PostMapping("/testGetConnection1")
     @BeeDsId("ds1")
-    public RestResponse testCombineDs1() {
+    public MonitorControllerResponse testCombineDs1() {
         try {
-            return new RestResponse(CODE_SUCCESS, ServerSideUtil.testGetConnection(combineDs), "OK");
+            return new MonitorControllerResponse(CODE_SUCCESS, ServerSideUtil.testGetConnection(combineDs), "OK");
         } catch (Throwable e) {
             e.printStackTrace();
-            return new RestResponse(CODE_FAILED, e.getMessage(), "Failed");
+            return new MonitorControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
         }
     }
 
     @PostMapping("/testGetConnection2")
     @BeeDsId("ds2")
-    public RestResponse testCombineDs2() {
+    public MonitorControllerResponse testCombineDs2() {
         try {
-            return new RestResponse(CODE_SUCCESS, ServerSideUtil.testGetConnection(combineDs), "OK");
+            return new MonitorControllerResponse(CODE_SUCCESS, ServerSideUtil.testGetConnection(combineDs), "OK");
         } catch (Throwable e) {
             e.printStackTrace();
-            return new RestResponse(CODE_FAILED, e.getMessage(), "Failed");
+            return new MonitorControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
         }
     }
 
     @PostMapping("/testExecSQL1")
     @BeeDsId("ds1")
-    public RestResponse testExecSQL1(@RequestBody Map<String, String> map) {
+    public MonitorControllerResponse testExecSQL1(@RequestBody Map<String, String> map) {
         try {
             String sql = map.get("sql");
             String type = map.get("type");
             String slowInd = map.get("slowInd");
 
-            return new RestResponse(CODE_SUCCESS, ServerSideUtil.testSQL(combineDs, sql, type, slowInd), "OK");
+            return new MonitorControllerResponse(CODE_SUCCESS, ServerSideUtil.testSQL(combineDs, sql, type, slowInd), "OK");
         } catch (Throwable e) {
             e.printStackTrace();
-            return new RestResponse(CODE_FAILED, e.getMessage(), "Failed");
+            return new MonitorControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
         }
     }
 
     @PostMapping("/testExecSQL2")
     @BeeDsId("ds2")
-    public RestResponse testExecSQL2(@RequestBody Map<String, String> map) {
+    public MonitorControllerResponse testExecSQL2(@RequestBody Map<String, String> map) {
         try {
             String sql = map.get("sql");
             String type = map.get("type");
             String slowInd = map.get("slowInd");
-            return new RestResponse(CODE_SUCCESS, ServerSideUtil.testSQL(combineDs, sql, type, slowInd), "OK");
+            return new MonitorControllerResponse(CODE_SUCCESS, ServerSideUtil.testSQL(combineDs, sql, type, slowInd), "OK");
         } catch (Throwable e) {
             e.printStackTrace();
-            return new RestResponse(CODE_FAILED, e.getMessage(), "Failed");
+            return new MonitorControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
         }
     }
 }

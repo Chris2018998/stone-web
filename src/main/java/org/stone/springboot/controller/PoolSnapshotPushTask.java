@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.monitor;
+package org.stone.springboot.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +31,11 @@ import java.util.Date;
  *
  * @author Chris Liao
  */
-public final class CacheTask implements Runnable {
+public final class PoolSnapshotPushTask implements Runnable {
     //prefix of cache key
     private final String keyPrefix;
     //monitoring data
-    private final PoolsSnapshot snapshot;
+    private final PoolSnapshot snapshot;
     //cache client
     private final CacheClientProvider provider;
 
@@ -43,9 +43,9 @@ public final class CacheTask implements Runnable {
 
     private final ObjectSourceBeanManager osManager;
 
-    private final Logger logger = LoggerFactory.getLogger(CacheTask.class);
+    private final Logger logger = LoggerFactory.getLogger(PoolSnapshotPushTask.class);
 
-    public CacheTask(String keyPrefix, PoolsSnapshot snapshot, CacheClientProvider provider) {
+    public PoolSnapshotPushTask(String keyPrefix, PoolSnapshot snapshot, CacheClientProvider provider) {
 
         this.keyPrefix = keyPrefix;
         this.snapshot = snapshot;

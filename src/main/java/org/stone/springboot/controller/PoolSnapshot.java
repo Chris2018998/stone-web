@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.monitor;
+package org.stone.springboot.controller;
 
 import org.stone.beecp.BeeConnectionPoolMonitorVo;
 import org.stone.beeop.BeeObjectPoolMonitorVo;
@@ -30,14 +30,14 @@ import java.util.Collection;
  * @author Chris Liao
  */
 
-public final class PoolsSnapshot implements Serializable {
+public final class PoolSnapshot implements Serializable {
     private final String appContextUrl;
     private String cacheTime;
     private Collection<BeeConnectionPoolMonitorVo> dsPoolList;
     private Collection<StatementExecution> dsSqlList;
     private Collection<BeeObjectPoolMonitorVo> osPoolList;
 
-    public PoolsSnapshot(String appContextUrl) {
+    public PoolSnapshot(String appContextUrl) {
         this.appContextUrl = appContextUrl;
     }
 

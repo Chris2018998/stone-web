@@ -24,11 +24,11 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.stone.springboot.annotation.EnableBeeDs;
+import org.stone.springboot.controller.MonitorControllerRegister;
 import org.stone.springboot.dynamic.DynamicAspect;
 import org.stone.springboot.dynamic.DynamicDataSource;
 import org.stone.springboot.exception.ConfigurationException;
 import org.stone.springboot.exception.DataSourceException;
-import org.stone.springboot.monitor.WebUiControllerRegister;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -118,7 +118,7 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
         //6: attempt to register monitor
         Map<String, Object> attributes = classMetadata.getAnnotationAttributes(EnableBeeDs.class.getName(), false);
         if ((boolean) attributes.get(Annotation_Monitor_Attribute_Name)) {
-            new WebUiControllerRegister().registerBeanDefinitions(classMetadata, registry, environment);
+            new MonitorControllerRegister().registerBeanDefinitions(classMetadata, registry, environment);
         }
     }
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.monitor;
+package org.stone.springboot.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,7 @@ public final class MonitorConfig extends SpringConfigurationLoader {
     //1: spring.bee.monitor.x
     private String username = "admin";
     private String password = "admin";
-    private String loggedFlag = WebUiController.class.getName();
+    private String loggedFlag = MonitorController.class.getName();
 
     //2: spring.bee.monitor.x
     private CacheClientProvider cacheClientProvider;

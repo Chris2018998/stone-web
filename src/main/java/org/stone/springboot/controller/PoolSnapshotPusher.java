@@ -13,26 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.extension.redisson;
-
-import org.redisson.api.RedissonClient;
-import org.stone.springboot.controller.MonitorConfig;
-import org.stone.springboot.extension.CacheClient;
-import org.stone.springboot.extension.CacheClientProvider;
+package org.stone.springboot.controller;
 
 /**
- * Redisson Client Provider.
+ * an interface to push runtime info of cp,op to remote server(for example：Redis server,prometheus gateWay server
  *
  * @author Chris Liao
  */
 
-public class RedissonClientProvider2 implements CacheClientProvider {
-    private RedissonClientImpl client;
+public interface PoolSnapshotPusher {
 
-    public CacheClient get() {
-        if (client == null) {
-            this.client = new RedissonClientImpl(MonitorConfig.getInstance().getSpringContext().getBean(RedissonClient.class));
-        }
-        return client;
-    }
+    /**
+     * push snapshot of pools to remote server
+     *
+     * @param snapshot is runtime monitor object
+     * @throws Exception when push fail
+     */
+    void push(PoolSnapshot snapshot) throws Exception;
+
 }

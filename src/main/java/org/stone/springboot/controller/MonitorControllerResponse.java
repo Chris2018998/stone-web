@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.monitor;
+package org.stone.springboot.controller;
 
 /**
  * rest response result object
  *
  * @author Chris Liao
  */
-public final class RestResponse {
+public final class MonitorControllerResponse {
     public static final int CODE_SUCCESS = 1;
     public static final int CODE_FAILED = 2;
     public static final int CODE_SECURITY = 3;
@@ -29,18 +29,18 @@ public final class RestResponse {
     private Object result;
     private String message;
 
-    public RestResponse() {
+    public MonitorControllerResponse() {
     }
 
-    public RestResponse(int code) {
+    public MonitorControllerResponse(int code) {
         this(code, null, null);
     }
 
-    public RestResponse(int code, Object result) {
+    public MonitorControllerResponse(int code, Object result) {
         this(code, result, null);
     }
 
-    public RestResponse(int code, Object result, String message) {
+    public MonitorControllerResponse(int code, Object result, String message) {
         this.code = code;
         this.result = result;
         this.message = message;

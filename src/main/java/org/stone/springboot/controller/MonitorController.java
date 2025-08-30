@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.monitor;
+package org.stone.springboot.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -28,7 +28,7 @@ import org.stone.springboot.ObjectSourceBeanManager;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.stone.springboot.monitor.RequestFilter.*;
+import static org.stone.springboot.controller.MonitorControllerRequestFilter.*;
 import static org.stone.tools.CommonUtil.isBlank;
 
 /**
@@ -37,12 +37,12 @@ import static org.stone.tools.CommonUtil.isBlank;
  * @author Chris Liao
  */
 @Controller
-public class WebUiController {
+public class MonitorController {
     private final MonitorConfig config;
     private final DataSourceBeanManager dsManager;
     private final ObjectSourceBeanManager osManager;
 
-    public WebUiController() {
+    public MonitorController() {
         this.config = MonitorConfig.getInstance();
         this.dsManager = DataSourceBeanManager.getInstance();
         this.osManager = ObjectSourceBeanManager.getInstance();
@@ -66,23 +66,23 @@ public class WebUiController {
     //***************************************************************************************************************//
     @ResponseBody
     @PostMapping(Login_URL)
-    public RestResponse login(@RequestBody Map<String, String> paramMap, HttpServletRequest req) {
+    public MonitorControllerResponse login(@RequestBody Map<String, String> paramMap, HttpServletRequest req) {
         HttpSession session = req.getSession();
         if ("Y".equals(session.getAttribute(config.getLoggedFlag())))//has login
-            return new RestResponse(RestResponse.CODE_SUCCESS, null, "Login Success");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, null, "Login Success");
         if (isBlank(config.getUsername()))
-            return new RestResponse(RestResponse.CODE_SUCCESS, null, "Login Success");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, null, "Login Success");
 
         try {
             String inputtedUserName = paramMap.get("username");
             String inputtedPassword = paramMap.get("password");
             if (Objects.equals(config.getUsername(), inputtedUserName) && Objects.equals(config.getPassword(), inputtedPassword)) {//checked pass
                 session.setAttribute(config.getLoggedFlag(), "Y");
-                return new RestResponse(RestResponse.CODE_SUCCESS, null, "Login Success");
+                return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, null, "Login Success");
             } else
-                return new RestResponse(RestResponse.CODE_FAILED, null, "Login Failed");
+                return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, null, "Login Failed");
         } catch (Throwable e) {
-            return new RestResponse(RestResponse.CODE_FAILED, e, "Login Failed");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Login Failed");
         }
     }
 
@@ -91,46 +91,46 @@ public class WebUiController {
     //***************************************************************************************************************//
     @ResponseBody
     @PostMapping(Ds_Pool_List_URL)
-    public RestResponse getDsPoolList() {
+    public MonitorControllerResponse getDsPoolList() {
         try {
-            return new RestResponse(RestResponse.CODE_SUCCESS, dsManager.getDsPoolMonitorVoList(), "OK");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, dsManager.getDsPoolMonitorVoList(), "OK");
         } catch (Throwable e) {
             e.printStackTrace();
-            return new RestResponse(RestResponse.CODE_FAILED, e, "Failed to get datasource pool info");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to get datasource pool info");
         }
     }
 
     @ResponseBody
     @PostMapping(Ds_Sql_List_URL)
-    public RestResponse getDsSqlList() {
+    public MonitorControllerResponse getDsSqlList() {
         try {
-            return new RestResponse(RestResponse.CODE_SUCCESS, dsManager.getSqlExecutionList(), "OK");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, dsManager.getSqlExecutionList(), "OK");
         } catch (Throwable e) {
-            return new RestResponse(RestResponse.CODE_FAILED, e, "Failed to get traced sql list");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to get traced sql list");
         }
     }
 
     @ResponseBody
     @PostMapping(Ds_Pool_Clear_URL)
-    public RestResponse clearDsPool(@RequestBody Map<String, String> parameterMap) {
+    public MonitorControllerResponse clearDsPool(@RequestBody Map<String, String> parameterMap) {
         try {
             String dsId = parameterMap != null ? parameterMap.get("dsId") : null;
             dsManager.clearDsPool(dsId, false);
-            return new RestResponse(RestResponse.CODE_SUCCESS, null, "OK");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, null, "OK");
         } catch (Throwable e) {
-            return new RestResponse(RestResponse.CODE_FAILED, e, "Failed to clear datasource pool");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to clear datasource pool");
         }
     }
 
     @ResponseBody
     @PostMapping(Ds_Sql_Cancel_URL)
-    public RestResponse cancelStatement(@RequestBody Map<String, String> parameterMap) {
+    public MonitorControllerResponse cancelStatement(@RequestBody Map<String, String> parameterMap) {
         try {
             String statementUUID = parameterMap != null ? parameterMap.get("uuid") : null;
             dsManager.cancelStatementExecution(statementUUID);
-            return new RestResponse(RestResponse.CODE_SUCCESS, null, "OK");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, null, "OK");
         } catch (Throwable e) {
-            return new RestResponse(RestResponse.CODE_FAILED, e, "Failed to cancel statement");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to cancel statement");
         }
     }
 
@@ -139,23 +139,23 @@ public class WebUiController {
     //***************************************************************************************************************//
     @ResponseBody
     @PostMapping(Os_Pool_List_URL)
-    public RestResponse getOsPoolList() {
+    public MonitorControllerResponse getOsPoolList() {
         try {
-            return new RestResponse(RestResponse.CODE_SUCCESS, osManager.getOsPoolMonitorVoList(), "OK");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, osManager.getOsPoolMonitorVoList(), "OK");
         } catch (Throwable e) {
-            return new RestResponse(RestResponse.CODE_FAILED, e, "Failed to get object source pool info");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to get object source pool info");
         }
     }
 
     @ResponseBody
     @PostMapping(Os_Pool_Clear_URL)
-    public RestResponse clearOsPool(@RequestBody Map<String, String> parameterMap) {
+    public MonitorControllerResponse clearOsPool(@RequestBody Map<String, String> parameterMap) {
         try {
             String osId = parameterMap != null ? parameterMap.get("osId") : null;
             osManager.clearOsPool(osId, false);
-            return new RestResponse(RestResponse.CODE_SUCCESS, null, "OK");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, null, "OK");
         } catch (Throwable e) {
-            return new RestResponse(RestResponse.CODE_FAILED, e, "Failed to restart object source pool");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to restart object source pool");
         }
     }
 }
