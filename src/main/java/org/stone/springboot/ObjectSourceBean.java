@@ -111,12 +111,12 @@ public class ObjectSourceBean<K, V> extends BeeObjectSource<K, V> {
         os.deleteKey(key, forceRecycleBorrowed);
     }
 
-    public boolean isPrintRuntimeLog(K key) throws Exception {
-        return os.isPrintRuntimeLog(key);
+    public boolean isEnabledLogPrint(K key) throws Exception {
+        return os.isEnabledLogPrint(key);
     }
 
-    public void setPrintRuntimeLog(K key, boolean enable) throws Exception {
-        os.setPrintRuntimeLog(key, enable);
+    public void enableLogPrint(K key, boolean enable) throws Exception {
+        os.enableLogPrint(key, enable);
     }
 
     public BeeObjectPoolMonitorVo getMonitorVo(K key) throws Exception {
