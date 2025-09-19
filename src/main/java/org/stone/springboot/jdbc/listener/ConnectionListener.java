@@ -15,7 +15,7 @@
  */
 package org.stone.springboot.jdbc.listener;
 
-import org.stone.beecp.BeeConnectionTracker;
+import org.stone.beecp.BeeConnectionInterceptor;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  *  @author Chris Liao
  */
-public class ConnectionListener implements BeeConnectionTracker {
+public class ConnectionListener implements BeeConnectionInterceptor {
     private final ConcurrentHashMap<Object, ConnectionGetEvent> connectionEvent = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Object, StatementSQLEvent> sqlExecutionEvent = new ConcurrentHashMap<>();
     private final int cacheSize = 100;
@@ -37,7 +37,7 @@ public class ConnectionListener implements BeeConnectionTracker {
      *
      * @return a unique key
      */
-    public Object genTraceKey() {
+    public Object genKey() {
         return UUID.randomUUID();
     }
 
