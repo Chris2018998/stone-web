@@ -113,7 +113,7 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
         this.registerDataSourceBean(dsMap, dynamicSourceProperties, registry);
 
         //5:Setup statement execution collector to data source manager if exists its configuration
-        dsBeanManager.setupStatementExecutionCollector(environment);
+        //dsBeanManager.setupStatementExecutionCollector(environment);
 
         //6: attempt to register monitor
         Map<String, Object> attributes = classMetadata.getAnnotationAttributes(EnableBeeDs.class.getName(), false);

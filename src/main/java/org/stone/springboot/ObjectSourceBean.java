@@ -68,12 +68,12 @@ public class ObjectSourceBean<K, V> extends BeeObjectSource<K, V> {
     //***************************************************************************************************************//
     //                                      3: clear and monitoring(3)                                               //
     //***************************************************************************************************************//
-    public void clear(boolean forceRecycleBorrowed) throws Exception {
-        os.clear(forceRecycleBorrowed);
+    public void restart(boolean forceRecycleBorrowed) throws Exception {
+        os.restart(forceRecycleBorrowed);
     }
 
-    public void clear(boolean forceRecycleBorrowed, BeeObjectSourceConfig<K, V> config) throws Exception {
-        os.clear(forceRecycleBorrowed, config);
+    public void restart(boolean forceRecycleBorrowed, BeeObjectSourceConfig<K, V> config) throws Exception {
+        os.restart(forceRecycleBorrowed, config);
     }
 
     public BeeObjectPoolMonitorVo getPoolMonitorVo() throws Exception {
@@ -95,12 +95,12 @@ public class ObjectSourceBean<K, V> extends BeeObjectSource<K, V> {
         return os.exists(key);
     }
 
-    public void clear(K key) throws Exception {
-        os.clear(key);
+    public void restart(K key) throws Exception {
+        os.restart(key);
     }
 
-    public void clear(K key, boolean forceRecycleBorrowed) throws Exception {
-        os.clear(key, forceRecycleBorrowed);
+    public void restart(K key, boolean forceRecycleBorrowed) throws Exception {
+        os.restart(key, forceRecycleBorrowed);
     }
 
     public void deleteKey(K key) throws Exception {
@@ -123,7 +123,7 @@ public class ObjectSourceBean<K, V> extends BeeObjectSource<K, V> {
         return os.getMonitorVo(key);
     }
 
-    public Thread[] interruptObjectCreating(K key, boolean interruptTimeout) throws Exception {
-        return os.interruptObjectCreating(key, interruptTimeout);
+    public Thread[] interruptWaitingThreads(K key, boolean interruptTimeout) throws Exception {
+        return os.interruptWaitingThreads(key, interruptTimeout);
     }
 }

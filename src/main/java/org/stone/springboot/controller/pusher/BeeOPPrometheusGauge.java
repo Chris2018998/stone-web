@@ -76,7 +76,7 @@ public class BeeOPPrometheusGauge {
         poolBorrowedSize.set(vo.getBorrowedSize());
         poolSemaphoreWaitingSize.set(vo.getSemaphoreWaitingSize());
         poolTransferWaitingSize.set(vo.getTransferWaitingSize());
-        poolCreatingCount.set(vo.getCreatingCount());
-        poolCreatingTimeoutCount.set(vo.getCreatingTimeoutCount());
+        poolCreatingCount.set(vo.getCreatingSize());
+        poolCreatingTimeoutCount.set(vo.getCreatingTimeoutSize());
     }
 }

@@ -52,8 +52,8 @@ public class DataSourcePoolMonitorVo implements BeeConnectionPoolMonitorVo {
         return vo.getPoolMode();
     }
 
-    public int getPoolMaxSize() {
-        return vo.getPoolMaxSize();
+    public int getMaxSize() {
+        return vo.getMaxSize();
     }
 
     public int getPoolState() {
@@ -76,11 +76,11 @@ public class DataSourcePoolMonitorVo implements BeeConnectionPoolMonitorVo {
         return vo.getTransferWaitingSize();
     }
 
-    public int getCreatingCount() {
-        return vo.getCreatingCount();
+    public int getCreatingSize() {
+        return vo.getCreatingSize();
     }
 
-    public int getCreatingTimeoutCount() {
-        return vo.getCreatingTimeoutCount();
+    public int getCreatingTimeoutSize() {
+        return vo.getCreatingTimeoutSize();
     }
 }

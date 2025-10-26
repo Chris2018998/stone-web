@@ -49,12 +49,12 @@ public class SpringBeeDataSourceFactory implements SpringDataSourceFactory {
     private final DataSourceBeanManager dsManager = DataSourceBeanManager.getInstance();
 
     private void setConnectPropertiesConfig(BeeDataSourceConfig config, String dsPrefix, Environment environment) {
-        config.addConnectProperty(dsManager.getConfigValue(dsPrefix, CONFIG_CONNECT_PROP, environment));
-        String connectPropertiesCount = dsManager.getConfigValue(dsPrefix, CONFIG_CONNECT_PROP_SIZE, environment);
+        config.addConnectionProviderProperty(dsManager.getConfigValue(dsPrefix, CONFIG_PROVIDER_PROP, environment));
+        String connectPropertiesCount = dsManager.getConfigValue(dsPrefix, CONFIG_PROVIDER_PROP_SIZE, environment);
         if (isNotBlank(connectPropertiesCount)) {
             int count = Integer.parseInt(connectPropertiesCount.trim());
             for (int i = 1; i <= count; i++)
-                config.addConnectProperty(dsManager.getConfigValue(dsPrefix, CONFIG_CONNECT_PROP_KEY_PREFIX + i, environment));
+                config.addConnectionProviderProperty(dsManager.getConfigValue(dsPrefix, CONFIG_PROVIDER_PROP_KEY_PREFIX + i, environment));
         }
     }
 
@@ -80,11 +80,11 @@ public class SpringBeeDataSourceFactory implements SpringDataSourceFactory {
     }
 
     private void setConfigPrintExclusionList(BeeDataSourceConfig config, String dsPrefix, Environment environment) {
-        String exclusionListText = dsManager.getConfigValue(dsPrefix, CONFIG_CONFIG_PRINT_EXCLUSION_LIST, environment);
+        String exclusionListText = dsManager.getConfigValue(dsPrefix, CONFIG_EXCLUSION_LIST_OF_PRINT, environment);
         if (isNotBlank(exclusionListText)) {
-            config.clearAllConfigPrintExclusion();//remove existed exclusion
+            config.clearExclusionListOfPrint();//remove existed exclusion
             for (String exclusion : exclusionListText.trim().split(",")) {
-                config.addConfigPrintExclusion(exclusion);
+                config.addExclusionNameOfPrint(exclusion);
             }
         }
     }
@@ -116,7 +116,7 @@ public class SpringBeeDataSourceFactory implements SpringDataSourceFactory {
         String threadLocalEnable = dsManager.getConfigValue(dsPrefix, Config_ThreadLocal_Enable, environment);
         if (threadLocalEnable == null) {
             boolean enableVirtualThread = Boolean.parseBoolean(environment.getProperty(Config_Virtual_Thread, "false"));
-            ds.setEnableThreadLocal(!enableVirtualThread);
+            ds.setUseThreadLocal(!enableVirtualThread);
         }
 
         //5:create jta dataSource or not

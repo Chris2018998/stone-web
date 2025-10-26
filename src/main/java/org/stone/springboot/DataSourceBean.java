@@ -21,9 +21,6 @@ import org.stone.beecp.BeeConnectionPoolMonitorVo;
 import org.stone.beecp.BeeDataSource;
 import org.stone.beecp.jta.BeeJtaDataSource;
 import org.stone.beecp.pool.exception.PoolNotCreatedException;
-import org.stone.springboot.jdbc.StatementExecutionCollector;
-import org.stone.springboot.jdbc.StatementJdbcUtil;
-import org.stone.springboot.jdbc.XAConnectionImpl;
 
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
@@ -50,8 +47,6 @@ public final class DataSourceBean implements DataSource, XADataSource {
     private final boolean isBeeJtaDs;
     private final DataSourcePoolMonitorVo voWrapper;
     private final Logger log = LoggerFactory.getLogger(DataSourceBean.class);
-    private StatementExecutionCollector statementExecutionCollector;
-
 
     public DataSourceBean(String dsId, boolean jndiDs, boolean primary, Object ds) {
         if (ds == null) throw new IllegalArgumentException("Data source can't be null");
@@ -77,37 +72,27 @@ public final class DataSourceBean implements DataSource, XADataSource {
         return primary;
     }
 
-    void setStatementExecutionCollector(StatementExecutionCollector statementExecutionCollector) {
-        this.statementExecutionCollector = statementExecutionCollector;
-    }
-
     //***************************************************************************************************************//
     //                                     2: methods of getting connection(4)                                       //
     //***************************************************************************************************************//
     public Connection getConnection() throws SQLException {
         if (ds == null) throw new SQLFeatureNotSupportedException("Not provide features of dataSource");
-
-        Connection con = ds.getConnection();
-        return statementExecutionCollector == null ? con : StatementJdbcUtil.createConnection(dsId, false, con, statementExecutionCollector);
+        return ds.getConnection();
     }
 
     public Connection getConnection(String username, String password) throws SQLException {
         if (ds == null) throw new SQLFeatureNotSupportedException("Not provide features of dataSource");
-
-        Connection con = ds.getConnection(username, password);
-        return statementExecutionCollector == null ? con : StatementJdbcUtil.createConnection(dsId, false, con, statementExecutionCollector);
+        return ds.getConnection();
     }
 
     public XAConnection getXAConnection() throws SQLException {
         if (xaDs == null) throw new SQLFeatureNotSupportedException("Not provide features of XADataSource");
-        XAConnection xaCon = xaDs.getXAConnection();
-        return new XAConnectionImpl(dsId, xaCon, statementExecutionCollector);
+        return xaDs.getXAConnection();
     }
 
     public XAConnection getXAConnection(String username, String password) throws SQLException {
         if (xaDs == null) throw new SQLFeatureNotSupportedException("Not provide features of XADataSource");
-        XAConnection xaCon = xaDs.getXAConnection(username, password);
-        return new XAConnectionImpl(dsId, xaCon, statementExecutionCollector);
+        return xaDs.getXAConnection(username, password);
     }
 
     //***************************************************************************************************************//
@@ -127,7 +112,7 @@ public final class DataSourceBean implements DataSource, XADataSource {
     void clear(boolean force) throws SQLException {
         if (ds == null) throw new SQLFeatureNotSupportedException("Not provide feature of dataSource");
         if (isBeeDs) {
-            ((BeeDataSource) ds).clear(force);
+            ((BeeDataSource) ds).restart(force);
         } else if (isBeeJtaDs) {
             ((BeeJtaDataSource) ds).clear(force);
         }

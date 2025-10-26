@@ -18,11 +18,10 @@ package org.stone.springboot;
 import org.springframework.core.env.Environment;
 import org.stone.beecp.BeeConnectionPoolMonitorVo;
 import org.stone.beecp.BeeDataSource;
+import org.stone.beecp.BeeMethodExecutionLog;
 import org.stone.springboot.exception.DataSourceException;
 import org.stone.springboot.factory.SpringDataSourceFactory;
 import org.stone.springboot.factory.SpringXADataSourceFactory;
-import org.stone.springboot.jdbc.StatementExecution;
-import org.stone.springboot.jdbc.StatementExecutionCollector;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -33,8 +32,6 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.stone.beecp.pool.ConnectionPoolStatics.POOL_CLOSED;
-import static org.stone.beecp.pool.ConnectionPoolStatics.POOL_CLOSING;
 import static org.stone.springboot.Constants.*;
 import static org.stone.tools.CommonUtil.isBlank;
 import static org.stone.tools.CommonUtil.isNotBlank;
@@ -49,8 +46,6 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
 
     //Data source map
     private final Map<String, DataSourceBean> dataSourceMap = new ConcurrentHashMap<>(1);
-    //Sql execution collector
-    private StatementExecutionCollector statementExecutionCollector;
 
     public static DataSourceBeanManager getInstance() {
         return single;
@@ -78,7 +73,6 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
 
     public void addDataSource(DataSourceBean ds) {
         dataSourceMap.put(ds.getDsId(), ds);
-        ds.setStatementExecutionCollector(statementExecutionCollector);
     }
 
     public void clearDsPool(String dsId, boolean force) throws SQLException {
@@ -94,8 +88,7 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
             DataSourceBean ds = iterator.next();
             BeeConnectionPoolMonitorVo vo = ds.getPoolMonitorVo();
             if (vo == null) continue;
-            int poolState = vo.getPoolState();
-            if (poolState == POOL_CLOSING || poolState == POOL_CLOSED) {//POOL_CLEARING,POOL_CLOSED
+            if (vo.isClosed()) {//POOL_CLEARING,POOL_CLOSED
                 iterator.remove();
             } else {
                 poolMonitorVoList.add(vo);
@@ -107,26 +100,14 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
     //***************************************************************************************************************//
     //                                     2: sql-trace (1)                                                          //
     //***************************************************************************************************************//
-    public Collection<StatementExecution> getSqlExecutionList() {
-        return statementExecutionCollector != null ? statementExecutionCollector.getSqlExecQueue() : null;
+    public Collection<BeeMethodExecutionLog> getSqlExecutionList() {
+        return null;
     }
 
     public void cancelStatementExecution(String statementUUID) throws SQLException {
-        if (statementExecutionCollector != null) {
-            statementExecutionCollector.cancelStatementExecution(statementUUID);
-        }
-    }
-
-    void setupStatementExecutionCollector(Environment environment) {
-        if ("true".equalsIgnoreCase(this.getConfigValue(Config_DS_Prefix, "sqlTrace", environment))) {
-            StatementExecutionCollector collector = new StatementExecutionCollector();
-            this.setConfigPropertiesValue(collector, Config_DS_Prefix, null, environment);
-
-            collector.initialize();
-            this.statementExecutionCollector = collector;
-            for (DataSourceBean ds : dataSourceMap.values())
-                ds.setStatementExecutionCollector(statementExecutionCollector);
-        }
+//        if (statementExecutionCollector != null) {
+//            statementExecutionCollector.cancelStatementExecution(statementUUID);
+//        }
     }
 
     //***************************************************************************************************************//

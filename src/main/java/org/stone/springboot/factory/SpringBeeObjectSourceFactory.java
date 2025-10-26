@@ -21,7 +21,7 @@ import org.stone.beeop.BeeObjectSourceConfig;
 import org.stone.springboot.ObjectSourceBeanManager;
 import org.stone.springboot.exception.ObjectSourceException;
 
-import static org.stone.beecp.pool.ConnectionPoolStatics.CONFIG_CONFIG_PRINT_EXCLUSION_LIST;
+import static org.stone.beecp.pool.ConnectionPoolStatics.CONFIG_EXCLUSION_LIST_OF_PRINT;
 import static org.stone.beeop.pool.ObjectPoolStatics.*;
 import static org.stone.springboot.Constants.Config_ThreadLocal_Enable;
 import static org.stone.springboot.Constants.Config_Virtual_Thread;
@@ -46,11 +46,11 @@ public class SpringBeeObjectSourceFactory<K, V> {
     }
 
     private void setConfigPrintExclusionList(BeeObjectSourceConfig<K, V> config, String osPrefix, Environment environment) {
-        String exclusionListText = osManager.getConfigValue(osPrefix, CONFIG_CONFIG_PRINT_EXCLUSION_LIST, environment);
+        String exclusionListText = osManager.getConfigValue(osPrefix, CONFIG_EXCLUSION_LIST_OF_PRINT, environment);
         if (isNotBlank(exclusionListText)) {
-            config.clearAllConfigPrintExclusion();//remove existed exclusion
+            config.clearExclusionListOfPrint();//remove existed exclusion
             for (String exclusion : exclusionListText.trim().split(",")) {
-                config.addConfigPrintExclusion(exclusion);
+                config.addExclusionNameOfPrint(exclusion);
             }
         }
     }
@@ -64,7 +64,7 @@ public class SpringBeeObjectSourceFactory<K, V> {
         String threadLocalEnable = osManager.getConfigValue(osPrefix, Config_ThreadLocal_Enable, environment);
         if (threadLocalEnable == null) {
             boolean enableVirtualThread = Boolean.parseBoolean(environment.getProperty(Config_Virtual_Thread, "false"));
-            config.setEnableThreadLocal(!enableVirtualThread);
+            config.setUseThreadLocal(!enableVirtualThread);
         }
 
         return new BeeObjectSource<>(config);

@@ -47,12 +47,12 @@ public class ObjectSourcePoolMonitorVo implements BeeObjectPoolMonitorVo {
         return vo.getSemaphoreWaitingSize();
     }
 
-    public int getCreatingTimeoutCount() {
-        return vo.getCreatingTimeoutCount();
+    public int getCreatingTimeoutSize() {
+        return vo.getCreatingTimeoutSize();
     }
 
-    public int getCreatingCount() {
-        return vo.getCreatingCount();
+    public int getCreatingSize() {
+        return vo.getCreatingSize();
     }
 
     public int getBorrowedSize() {

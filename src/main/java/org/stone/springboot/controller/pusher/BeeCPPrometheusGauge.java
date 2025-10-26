@@ -71,12 +71,12 @@ public class BeeCPPrometheusGauge {
 
 
     public void fill(BeeConnectionPoolMonitorVo vo) {
-        poolMaxSize.set(vo.getPoolMaxSize());
+        poolMaxSize.set(vo.getMaxSize());
         poolIdleSize.set(vo.getIdleSize());
         poolBorrowedSize.set(vo.getBorrowedSize());
         poolSemaphoreWaitingSize.set(vo.getSemaphoreWaitingSize());
         poolTransferWaitingSize.set(vo.getTransferWaitingSize());
-        poolCreatingCount.set(vo.getCreatingCount());
-        poolCreatingTimeoutCount.set(vo.getCreatingTimeoutCount());
+        poolCreatingCount.set(vo.getCreatingSize());
+        poolCreatingTimeoutCount.set(vo.getCreatingTimeoutSize());
     }
 }

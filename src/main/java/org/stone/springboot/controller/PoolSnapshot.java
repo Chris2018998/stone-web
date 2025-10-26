@@ -16,8 +16,8 @@
 package org.stone.springboot.controller;
 
 import org.stone.beecp.BeeConnectionPoolMonitorVo;
+import org.stone.beecp.BeeMethodExecutionLog;
 import org.stone.beeop.BeeObjectPoolMonitorVo;
-import org.stone.springboot.jdbc.StatementExecution;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -34,7 +34,7 @@ public final class PoolSnapshot implements Serializable {
     private final String appContextUrl;
     private String cacheTime;
     private Collection<BeeConnectionPoolMonitorVo> dsPoolList;
-    private Collection<StatementExecution> dsSqlList;
+    private Collection<BeeMethodExecutionLog> dsSqlList;
     private Collection<BeeObjectPoolMonitorVo> osPoolList;
 
     public PoolSnapshot(String appContextUrl) {
@@ -61,11 +61,11 @@ public final class PoolSnapshot implements Serializable {
         this.dsPoolList = dsPoolList;
     }
 
-    public Collection<StatementExecution> getDsSqlList() {
+    public Collection<BeeMethodExecutionLog> getDsSqlList() {
         return dsSqlList;
     }
 
-    public void setDsSqlList(Collection<StatementExecution> dsSqlList) {
+    public void setDsSqlList(Collection<BeeMethodExecutionLog> dsSqlList) {
         this.dsSqlList = dsSqlList;
     }
 
