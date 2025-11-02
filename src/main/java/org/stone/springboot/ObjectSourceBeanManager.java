@@ -54,12 +54,12 @@ public class ObjectSourceBeanManager<K, V> extends SpringConfigurationLoader {
         return osMap.get(osId);
     }
 
-    public void clearOsPool(String osId, boolean forceRecycleBorrowed) throws Exception {
+    public void restart(String osId, boolean forceRecycleBorrowed) throws Exception {
         ObjectSourceBean<K, V> os = osMap.get(osId);
         if (os != null) os.restart(forceRecycleBorrowed);
     }
 
-    public void clearOsPool(String osId, boolean forceRecycleBorrowed, BeeObjectSourceConfig<K, V> config) throws Exception {
+    public void restart(String osId, boolean forceRecycleBorrowed, BeeObjectSourceConfig<K, V> config) throws Exception {
         ObjectSourceBean<K, V> os = osMap.get(osId);
         if (os != null) os.restart(forceRecycleBorrowed, config);
     }

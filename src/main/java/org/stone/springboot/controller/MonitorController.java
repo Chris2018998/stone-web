@@ -156,10 +156,10 @@ public class MonitorController {
 
     @ResponseBody
     @PostMapping(Os_Pool_Clear_URL)
-    public MonitorControllerResponse clearOsPool(@RequestBody Map<String, String> parameterMap) {
+    public MonitorControllerResponse restart(@RequestBody Map<String, String> parameterMap) {
         try {
             String osId = parameterMap != null ? parameterMap.get("osId") : null;
-            osManager.clearOsPool(osId, false);
+            osManager.restart(osId, false);
             return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, null, "OK");
         } catch (Throwable e) {
             return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to restart object source pool");
