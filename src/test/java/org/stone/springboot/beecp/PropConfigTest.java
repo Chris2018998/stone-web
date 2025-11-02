@@ -61,7 +61,6 @@ public class PropConfigTest {
 //    }
 
 
-
 //
 //    @Test
 //    public void test6SqlError() throws Exception {

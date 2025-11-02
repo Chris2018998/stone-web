@@ -31,10 +31,10 @@ public class DataSourceUtil {
     public static final int Type_CallableStatement = 3;
 
     public static Map<String, Boolean> getInitSQLMap() {
-        Map<String, Boolean> sqlMap = new HashMap<>(10);
-        sqlMap.put("drop table TEST_USER", Boolean.TRUE);
-        sqlMap.put("drop table TEST_USER2", Boolean.TRUE);
-        sqlMap.put("drop PROCEDURE BEECP_HELLO", Boolean.TRUE);
+        Map<String, Boolean> sqlMap = new HashMap<>(3);
+//        sqlMap.put("drop table TEST_USER", Boolean.TRUE);
+//        sqlMap.put("drop table TEST_USER2", Boolean.TRUE);
+//        sqlMap.put("drop PROCEDURE BEECP_HELLO", Boolean.TRUE);
 
         String sqlBuilder3 = "CREATE PROCEDURE BEECP_HELLO()" +
                 "PARAMETER STYLE JAVA READS SQL DATA LANGUAGE JAVA EXTERNAL NAME" +

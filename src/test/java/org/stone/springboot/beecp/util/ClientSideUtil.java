@@ -51,17 +51,14 @@ public class ClientSideUtil {
         Object response = getRest(mockMvc, getSqlListUrl, null, "post");
         List<Map<String, Object>> sqlList = (List<Map<String, Object>>) response;
 
-        System.out.println("log size:"+sqlList.size());
-
-
         if (testType == 0) {//normal
             for (Map map : sqlList) {
-                String pDsId = map.get("dsId").toString();
+                String poolName = map.get("poolName").toString();
                 String exeSql = map.get("sql").toString();
-                boolean execInd = map.get("executeEndTime") != null;
-                if (dsId.equals(pDsId) && execInd && sql.equals(exeSql)) {
-                    String tookTimeMs = map.get("elapsedTime").toString();
-                    log.info("ds:{},Time:{}ms,SQL:{}", pDsId, tookTimeMs, exeSql);
+                boolean execInd = map.get("endTime") != null;
+                if (poolName.equals(dsId) && execInd && sql.equals(exeSql)) {
+                    long tookTimeMs = (Long)map.get("endTime") - (Long)map.get("startTime");
+                    log.info("ds:{},Time:{}ms,SQL:{}", dsId, tookTimeMs, exeSql);
                     return true;
                 }
             }
