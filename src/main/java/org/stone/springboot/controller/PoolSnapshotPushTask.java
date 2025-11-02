@@ -22,9 +22,6 @@ import org.stone.springboot.ObjectSourceBeanManager;
 import org.stone.springboot.extension.CacheClient;
 import org.stone.springboot.extension.CacheClientProvider;
 import org.stone.springboot.extension.JackSonUtil;
-import org.stone.springboot.jdbc.StatementJdbcUtil;
-
-import java.util.Date;
 
 /**
  * Timer task to write monitoring data to cache
@@ -57,10 +54,10 @@ public final class PoolSnapshotPushTask implements Runnable {
 
     public void run() {
         try {
-            snapshot.setDsPoolList(dsManager.getDsPoolMonitorVoList());
-            snapshot.setDsSqlList(dsManager.getSqlExecutionList());
-            snapshot.setOsPoolList(osManager.getOsPoolMonitorVoList());
-            snapshot.setCacheTime(StatementJdbcUtil.formatDate(new Date()));
+//            snapshot.setDsPoolList(dsManager.getAllDsPoolMonitorVos());
+//            snapshot.setDsSqlList(dsManager.getSqlExecutionLogList());
+//            snapshot.setOsPoolList(osManager.getOsPoolMonitorVoList());
+//            snapshot.setCacheTime(StatementJdbcUtil.formatDate(new Date()));
 
             CacheClient client = provider.get();
             if (client != null) {

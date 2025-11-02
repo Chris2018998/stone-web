@@ -49,12 +49,12 @@ public class SpringBeeDataSourceFactory implements SpringDataSourceFactory {
     private final DataSourceBeanManager dsManager = DataSourceBeanManager.getInstance();
 
     private void setConnectPropertiesConfig(BeeDataSourceConfig config, String dsPrefix, Environment environment) {
-        config.addConnectionProviderProperty(dsManager.getConfigValue(dsPrefix, CONFIG_PROVIDER_PROP, environment));
-        String connectPropertiesCount = dsManager.getConfigValue(dsPrefix, CONFIG_PROVIDER_PROP_SIZE, environment);
+        config.addConnectionFactoryProperty(dsManager.getConfigValue(dsPrefix, CONFIG_FACTORY_PROP, environment));
+        String connectPropertiesCount = dsManager.getConfigValue(dsPrefix, CONFIG_FACTORY_PROP_SIZE, environment);
         if (isNotBlank(connectPropertiesCount)) {
             int count = Integer.parseInt(connectPropertiesCount.trim());
             for (int i = 1; i <= count; i++)
-                config.addConnectionProviderProperty(dsManager.getConfigValue(dsPrefix, CONFIG_PROVIDER_PROP_KEY_PREFIX + i, environment));
+                config.addConnectionFactoryProperty(dsManager.getConfigValue(dsPrefix, CONFIG_FACTORY_PROP_KEY_PREFIX + i, environment));
         }
     }
 

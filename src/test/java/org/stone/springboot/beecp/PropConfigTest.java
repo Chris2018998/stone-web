@@ -22,15 +22,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.stone.springboot.beecp.controller.MultiDsController;
+import org.stone.springboot.beecp.controller.DataSourceController;
 import org.stone.springboot.beecp.util.ClientSideUtil;
 
-@SpringBootTest(classes = MultiDsController.class)
+@SpringBootTest(classes = DataSourceController.class)
 @ActiveProfiles("prop_conf")
 @AutoConfigureMockMvc
 public class PropConfigTest {
     private final String connTakeTestURL = "/testGetConnection";
-    private final String executeSQLUrl = "/testSQL";
+    private final String executeSQLUrl = "/executeSQL";
 
     @Autowired
     private MockMvc mockMvc;

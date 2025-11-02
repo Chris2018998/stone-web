@@ -22,7 +22,7 @@ import org.stone.beecp.BeeConnectionPoolMonitorVo;
  *
  * @author Chris Liao
  */
-public class DataSourcePoolMonitorVo implements BeeConnectionPoolMonitorVo {
+public final class DataSourcePoolMonitorVo implements BeeConnectionPoolMonitorVo {
     private final String dsId;
     private final String dsUUID;
     private BeeConnectionPoolMonitorVo vo;
@@ -52,12 +52,20 @@ public class DataSourcePoolMonitorVo implements BeeConnectionPoolMonitorVo {
         return vo.getPoolMode();
     }
 
-    public int getMaxSize() {
-        return vo.getMaxSize();
+    public boolean isClosed() {
+        return vo.isClosed();
     }
 
-    public int getPoolState() {
-        return vo.getPoolState();
+    public boolean isReady() {
+        return vo.isReady();
+    }
+
+    public boolean isStarting() {
+        return vo.isStarting();
+    }
+
+    public int getMaxSize() {
+        return vo.getMaxSize();
     }
 
     public int getIdleSize() {
@@ -68,19 +76,35 @@ public class DataSourcePoolMonitorVo implements BeeConnectionPoolMonitorVo {
         return vo.getBorrowedSize();
     }
 
-    public int getSemaphoreWaitingSize() {
-        return vo.getSemaphoreWaitingSize();
-    }
-
-    public int getTransferWaitingSize() {
-        return vo.getTransferWaitingSize();
-    }
-
     public int getCreatingSize() {
         return vo.getCreatingSize();
     }
 
     public int getCreatingTimeoutSize() {
         return vo.getCreatingTimeoutSize();
+    }
+
+    public int getSemaphoreSize() {
+        return vo.getSemaphoreSize();
+    }
+
+    public int getSemaphoreAcquiredSize() {
+        return vo.getSemaphoreAcquiredSize();
+    }
+
+    public int getSemaphoreWaitingSize() {
+        return vo.getSemaphoreWaitingSize();
+    }
+
+    public int getTransferWaitingSize() {
+        return vo.getSemaphoreWaitingSize();
+    }
+
+    public boolean isEnabledLogPrint() {
+        return vo.isEnabledLogPrint();
+    }
+
+    public boolean isEnabledMethodExecutionLogCache() {
+        return vo.isEnabledMethodExecutionLogCache();
     }
 }

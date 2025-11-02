@@ -25,8 +25,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.stone.springboot.annotation.EnableBeeDs;
 import org.stone.springboot.controller.MonitorControllerRegister;
-import org.stone.springboot.dynamic.DynamicAspect;
-import org.stone.springboot.dynamic.DynamicDataSource;
 import org.stone.springboot.exception.ConfigurationException;
 import org.stone.springboot.exception.DataSourceException;
 
@@ -51,6 +49,7 @@ import static org.stone.tools.CommonUtil.isNotBlank;
  * spring.datasource.ds1.fairMode=true
  * spring.datasource.ds1.initialSize=10
  * spring.datasource.ds1.maxActive=10
+ * spring.datasource.ds1.enableMethodExecutionLogCache=true
  * ......
  *
  * #ds2
@@ -63,20 +62,13 @@ import static org.stone.tools.CommonUtil.isNotBlank;
  * spring.datasource.ds2.fairMode=true
  * spring.datasource.ds2.initialSize=10
  * spring.datasource.ds2.maxActive=10
+ * spring.datasource.ds2.enableMethodExecutionLogCache=true
  * ......
  *
  * #ds3
  * spring.datasource.ds3.primary=false
  * spring.datasource.ds3.jndiName=DsJndi
  *
- * #sql execution trace configuration
- * spring.datasource.sql-trace=true
- * spring.datasource.sql-show=true
- * spring.datasource.sql-queue-max-size=100
- * spring.datasource.sql-slow-threshold-time=5000
- * spring.datasource.sql-expiration-time=18000
- * spring.datasource.sql-queue-scan-period-time=18000
- * spring.datasource.sql-alert-action=xxxxx
  *
  * @author Chris Liao
  */
@@ -103,19 +95,13 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
         //1: read configured id list of datasource
         List<String> dsIdList = getDsIdList(environment, registry);
 
-        //2: load configuration for dynamic datasource
-        Properties dynamicSourceProperties = this.getDynamicDsInfo(dsIdList, environment, registry);
-
-        //3: create datasource with configuration
+        //2: create datasource with configuration
         Map<String, DataSourceBean> dsMap = this.createDataSourceBean(dsIdList, environment);
 
-        //4: register datasource to spring container
-        this.registerDataSourceBean(dsMap, dynamicSourceProperties, registry);
+        //3: register datasource to spring container
+        this.registerDataSourceBean(dsMap, registry);
 
-        //5:Setup statement execution collector to data source manager if exists its configuration
-        //dsBeanManager.setupStatementExecutionCollector(environment);
-
-        //6: attempt to register monitor
+        //4: attempt to register monitor
         Map<String, Object> attributes = classMetadata.getAnnotationAttributes(EnableBeeDs.class.getName(), false);
         if ((boolean) attributes.get(Annotation_Monitor_Attribute_Name)) {
             new MonitorControllerRegister().registerBeanDefinitions(classMetadata, registry, environment);
@@ -214,33 +200,10 @@ public class DataSourceBeansRegister implements EnvironmentAware, ImportBeanDefi
      *
      * @param dsMap datasource list
      */
-    private void registerDataSourceBean(Map<String, DataSourceBean> dsMap, Properties combineProperties, BeanDefinitionRegistry registry) {
-        String dynDsId = combineProperties.getProperty(Config_Dyn_DS_Id);
-        String primaryDsId = combineProperties.getProperty(Config_Dyn_DS_PrimaryId);
-
+    private void registerDataSourceBean(Map<String, DataSourceBean> dsMap, BeanDefinitionRegistry registry) {
         for (DataSourceBean ds : dsMap.values())
             registerDataSourceBean(ds, registry);
 
-        //register combine DataSource
-        if (isNotBlank(dynDsId) && isNotBlank(primaryDsId)) {
-            ThreadLocal<DataSourceBean> dsThreadLocal = new ThreadLocal<>();
-
-            GenericBeanDefinition define = new GenericBeanDefinition();
-            define.setBeanClass(DynamicDataSource.class);
-            define.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(new DynamicDataSource(dsThreadLocal)));
-            registry.registerBeanDefinition(dynDsId, define);
-            log.info("Registered a dynamic object source(type:{})with bean Id '{}'", define.getBeanClassName(), dynDsId);
-
-            String dsIdSetterId = "beeDs_" + DynamicAspect.class.getName();
-            GenericBeanDefinition dsIdSetDefine = new GenericBeanDefinition();
-            dsIdSetDefine.setBeanClass(DynamicAspect.class);
-
-            DynamicAspect<?, ?> dynamicAspect = new DynamicAspect<>();
-            dynamicAspect.setDynDsThreadLocal(primaryDsId, dsThreadLocal);
-            dsIdSetDefine.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(dynamicAspect));
-            registry.registerBeanDefinition(dsIdSetterId, dsIdSetDefine);
-            log.info("Registered an aspect component(type:{})for dynamic data source with bean Id '{}'", dsIdSetDefine.getBeanClassName(), dsIdSetterId);
-        }
     }
 
     //4.1:register dataSource to Spring bean container

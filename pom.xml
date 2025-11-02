@@ -16,11 +16,10 @@
         <project.source.encoding>UTF-8</project.source.encoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <stone.version>2.0.2</stone.version>
+        <stone.version>2.0.4</stone.version>
         <derby.version>10.16.1.1</derby.version>
         <redisson.version>3.49.0</redisson.version>
         <spring.boot.version>3.5.0</spring.boot.version>
-        <mysql-connector.version>9.3.0</mysql-connector.version>
         <prometheus.version>0.16.0</prometheus.version>
     </properties>
 
@@ -105,11 +104,6 @@
             <artifactId>derby</artifactId>
             <version>${derby.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.github.chris2018998</groupId>
-            <artifactId>stone</artifactId>
-            <version>2.0.2</version>
         </dependency>
     </dependencies>
 

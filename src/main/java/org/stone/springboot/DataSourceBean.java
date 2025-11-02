@@ -15,12 +15,11 @@
  */
 package org.stone.springboot;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.stone.beecp.BeeConnectionPoolMonitorVo;
 import org.stone.beecp.BeeDataSource;
+import org.stone.beecp.BeeMethodExecutionListener;
+import org.stone.beecp.BeeMethodExecutionLog;
 import org.stone.beecp.jta.BeeJtaDataSource;
-import org.stone.beecp.pool.exception.PoolNotCreatedException;
 
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
@@ -29,6 +28,8 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -37,32 +38,66 @@ import java.util.UUID;
  * @author Chris Liao
  */
 public final class DataSourceBean implements DataSource, XADataSource {
-    private final DataSource ds;
-    private final XADataSource xaDs;
-
     private final String dsId;
     private final boolean jndiDs;
     private final boolean primary;
+
+    private final boolean isDs;
+    private final boolean isXaDs;
+    private final DataSource ds;
+    private final XADataSource xaDs;
+
     private final boolean isBeeDs;
     private final boolean isBeeJtaDs;
-    private final DataSourcePoolMonitorVo voWrapper;
-    private final Logger log = LoggerFactory.getLogger(DataSourceBean.class);
+    private final BeeDataSource beeDs;
+    private final BeeJtaDataSource beeJtaDs;
+    private final DataSourcePoolMonitorVo poolMonitorVo;
 
-    public DataSourceBean(String dsId, boolean jndiDs, boolean primary, Object ds) {
-        if (ds == null) throw new IllegalArgumentException("Data source can't be null");
+    public DataSourceBean(String dsId, boolean jndiDs, boolean primary, Object ids) {
         this.dsId = dsId;
         this.jndiDs = jndiDs;
         this.primary = primary;
 
-        this.ds = ds instanceof DataSource ? (DataSource) ds : null;
-        this.xaDs = ds instanceof XADataSource ? (XADataSource) ds : null;
-        this.isBeeDs = ds instanceof BeeDataSource;
-        this.isBeeJtaDs = ds instanceof BeeJtaDataSource;
-        this.voWrapper = new DataSourcePoolMonitorVo(dsId, UUID.randomUUID().toString());
+        boolean isDs = false;
+        boolean isXaDs = false;
+        boolean isBeeDs = false;
+        boolean isBeeJtaDs = false;
+
+        DataSource ds = null;
+        XADataSource xaDs = null;
+        BeeDataSource beeDs = null;
+        BeeJtaDataSource beeJtaDs = null;
+
+        if (ids instanceof DataSource) {
+            isDs = true;
+            ds = (DataSource) ids;
+        } else {
+            isXaDs = true;
+            xaDs = (XADataSource) ids;
+        }
+
+        if (ds instanceof BeeDataSource) {
+            isBeeDs = true;
+            beeDs = (BeeDataSource) ds;
+        } else if (ds instanceof BeeJtaDataSource) {
+            isBeeJtaDs = true;
+            beeJtaDs = (BeeJtaDataSource) ds;
+        }
+
+        this.isDs = isDs;
+        this.isXaDs = isXaDs;
+        this.beeDs = beeDs;
+        this.beeJtaDs = beeJtaDs;
+        this.isBeeDs = isBeeDs;
+
+        this.ds = ds;
+        this.xaDs = xaDs;
+        this.isBeeJtaDs = isBeeJtaDs;
+        this.poolMonitorVo = new DataSourcePoolMonitorVo(dsId, UUID.randomUUID().toString());
     }
 
     //***************************************************************************************************************//
-    //                                     1: base properties (3)                                                    //
+    //                                     1: Base properties (3)                                                    //
     //***************************************************************************************************************//
     public String getDsId() {
         return dsId;
@@ -72,77 +107,161 @@ public final class DataSourceBean implements DataSource, XADataSource {
         return primary;
     }
 
+    public String getDsUUID() {
+        return poolMonitorVo.getDsUUID();
+    }
+
     //***************************************************************************************************************//
-    //                                     2: methods of getting connection(4)                                       //
+    //                                     2: Connection get(4)                                                      //
     //***************************************************************************************************************//
     public Connection getConnection() throws SQLException {
-        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide features of dataSource");
-        return ds.getConnection();
+        if (isDs) {
+            return ds.getConnection();
+        } else {
+            return this.getXAConnection().getConnection();
+        }
     }
 
     public Connection getConnection(String username, String password) throws SQLException {
-        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide features of dataSource");
-        return ds.getConnection();
+        if (isDs) {
+            return ds.getConnection(username, password);
+        } else {
+            return this.getXAConnection(username, password).getConnection();
+        }
     }
 
     public XAConnection getXAConnection() throws SQLException {
-        if (xaDs == null) throw new SQLFeatureNotSupportedException("Not provide features of XADataSource");
+        if (!isXaDs) throw new SQLFeatureNotSupportedException("Current data source is a not XADataSource");
         return xaDs.getXAConnection();
     }
 
     public XAConnection getXAConnection(String username, String password) throws SQLException {
-        if (xaDs == null) throw new SQLFeatureNotSupportedException("Not provide features of XADataSource");
-        return xaDs.getXAConnection(username, password);
+        if (!isXaDs) throw new SQLFeatureNotSupportedException("Current data source is a not XADataSource");
+        return this.xaDs.getXAConnection(username, password);
     }
 
     //***************************************************************************************************************//
-    //                                     3: implementation methods of bee data source(3)                           //
+    //                                     3: Data Source Monitor VO                                                 //
     //***************************************************************************************************************//
-    void close() throws SQLException {
+    public BeeConnectionPoolMonitorVo getPoolMonitorVo() throws SQLException {
+        if (isBeeDs) {
+            poolMonitorVo.setVo(beeDs.getPoolMonitorVo());
+        } else if (isBeeJtaDs) {
+            poolMonitorVo.setVo(beeJtaDs.getPoolMonitorVo());
+        }
+        return poolMonitorVo;
+    }
+
+    //***************************************************************************************************************//
+    //                                     4: Data source close and start(3)                                         //
+    //***************************************************************************************************************//
+    public void close() throws SQLException {
         if (jndiDs) return;
-        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide feature of dataSource");
 
         if (isBeeDs) {
-            ((BeeDataSource) ds).close();
+            beeDs.close();
         } else if (isBeeJtaDs) {
-            ((BeeJtaDataSource) ds).close();
+            beeJtaDs.close();
         }
     }
 
-    void clear(boolean force) throws SQLException {
-        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide feature of dataSource");
+    public void restart(boolean force) throws SQLException {
         if (isBeeDs) {
             ((BeeDataSource) ds).restart(force);
         } else if (isBeeJtaDs) {
-            ((BeeJtaDataSource) ds).clear(force);
+            beeJtaDs.restart(force);
         }
     }
 
-    BeeConnectionPoolMonitorVo getPoolMonitorVo() throws SQLException {
-        if (ds == null) throw new SQLFeatureNotSupportedException("Not provide feature of dataSource");
-        try {
-            if (isBeeDs) {
-                voWrapper.setVo(((BeeDataSource) ds).getPoolMonitorVo());
-            } else if (isBeeJtaDs) {
-                voWrapper.setVo(((BeeJtaDataSource) ds).getPoolMonitorVo());
-            }
-        } catch (Throwable e) {
-            if (!(e instanceof PoolNotCreatedException))
-                log.warn("Failed to execute dataSource 'getPoolMonitorVo' method", e);
-            return null;
+    public boolean isClosed() throws SQLException {
+        if (isBeeDs) {
+            return beeDs.isClosed();
+        } else if (isBeeJtaDs) {
+            return beeJtaDs.isClosed();
+        } else {//jndi datasource
+            return false;
         }
-        return voWrapper;
     }
 
     //***************************************************************************************************************//
-    //                                    4: Other implementation methods (7)                                        //
+    //                                     5: Log print(2)                                                              //
+    //***************************************************************************************************************//
+    public boolean isEnabledLogPrint() throws SQLException {
+        if (isBeeDs) {
+            return beeDs.isEnabledLogPrint();
+        } else if (isBeeJtaDs) {
+            return beeJtaDs.isEnabledLogPrint();
+        } else {
+            return false;
+        }
+    }
+
+    public void enableLogPrint(boolean printRuntimeLog) throws SQLException {
+        if (isBeeDs) {
+            beeDs.enableLogPrint(printRuntimeLog);
+        } else if (isBeeJtaDs) {
+            beeJtaDs.enableLogPrint(printRuntimeLog);
+        }
+    }
+
+    //***************************************************************************************************************//
+    //                                     6: Method execution Log(5)                                                //
+    //***************************************************************************************************************//
+    public boolean isEnabledMethodExecutionLogCache() throws SQLException {
+        if (isBeeDs) {
+            return this.beeDs.isEnabledMethodExecutionLogCache();
+        } else if (isBeeJtaDs) {
+            return this.beeJtaDs.isEnabledMethodExecutionLogCache();
+        } else {
+            return false;
+        }
+    }
+
+    public void enableMethodExecutionLogCache(boolean enable) throws SQLException {
+        if (isBeeDs) {
+            this.beeDs.enableMethodExecutionLogCache(enable);
+        } else if (isBeeJtaDs) {
+            this.beeJtaDs.enableMethodExecutionLogCache(enable);
+        }
+    }
+
+    public List<BeeMethodExecutionLog> getMethodExecutionLog(int type) throws SQLException {
+        if (isBeeDs) {
+            return beeDs.getMethodExecutionLog(type);
+        } else if (isBeeJtaDs) {
+            return beeJtaDs.getMethodExecutionLog(type);
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    public boolean cancelStatement(String logId) throws SQLException {
+        if (isBeeDs) {
+            return beeDs.cancelStatement(logId);
+        } else if (isBeeJtaDs) {
+            return beeJtaDs.cancelStatement(logId);
+        } else {
+            return false;
+        }
+    }
+
+    public void setMethodExecutionListener(BeeMethodExecutionListener listener) throws SQLException {
+        if (isBeeDs) {
+            this.beeDs.setMethodExecutionListener(listener);
+        } else if (isBeeJtaDs) {
+            this.beeJtaDs.setMethodExecutionListener(listener);
+        }
+    }
+
+    //***************************************************************************************************************//
+    //                                    7: Other implementation methods (7)                                        //
     //***************************************************************************************************************//
     public PrintWriter getLogWriter() throws SQLException {
-        return ds != null ? ds.getLogWriter() : xaDs.getLogWriter();
+        return isDs ? ds.getLogWriter() : xaDs.getLogWriter();
     }
 
     public void setLogWriter(PrintWriter out) throws SQLException {
-        if (ds != null) {
+        if (isDs) {
             ds.setLogWriter(out);
         } else {
             xaDs.setLogWriter(out);
@@ -150,11 +269,11 @@ public final class DataSourceBean implements DataSource, XADataSource {
     }
 
     public int getLoginTimeout() throws SQLException {
-        return ds != null ? ds.getLoginTimeout() : xaDs.getLoginTimeout();
+        return isDs ? ds.getLoginTimeout() : xaDs.getLoginTimeout();
     }
 
     public void setLoginTimeout(int seconds) throws SQLException {
-        if (ds != null) {
+        if (isDs) {
             ds.setLoginTimeout(seconds);
         } else {
             xaDs.setLoginTimeout(seconds);
@@ -162,7 +281,7 @@ public final class DataSourceBean implements DataSource, XADataSource {
     }
 
     public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return ds != null ? ds.getParentLogger() : xaDs.getParentLogger();
+        return isDs ? ds.getParentLogger() : xaDs.getParentLogger();
     }
 
     public boolean isWrapperFor(Class<?> clazz) {

@@ -35,7 +35,7 @@ public class Constants {
     //Spring boot virtual threads
     public static final String Config_Virtual_Thread = "spring.threads.virtual.enabled";
     //thread local enable
-    public static final String Config_ThreadLocal_Enable = "enableThreadLocal";
+    public static final String Config_ThreadLocal_Enable = "useThreadLocal";
 
     //***************************************************************************************************************//
     //                                     3: Data Source                                                            //

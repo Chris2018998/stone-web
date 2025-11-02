@@ -23,6 +23,8 @@ import org.stone.beeop.BeeObjectSource;
 import org.stone.beeop.BeeObjectSourceConfig;
 import org.stone.beeop.pool.exception.PoolNotCreatedException;
 
+import java.util.List;
+
 /**
  * A wrapper around Object source(only support BeeObjectSource)
  *
@@ -52,6 +54,10 @@ public class ObjectSourceBean<K, V> extends BeeObjectSource<K, V> {
 
     public boolean isPrimary() {
         return primary;
+    }
+
+    public String getOsUUID() {
+        return voWrapper.getOsUUID();
     }
 
     //***************************************************************************************************************//
@@ -123,7 +129,7 @@ public class ObjectSourceBean<K, V> extends BeeObjectSource<K, V> {
         return os.getMonitorVo(key);
     }
 
-    public Thread[] interruptWaitingThreads(K key, boolean interruptTimeout) throws Exception {
-        return os.interruptWaitingThreads(key, interruptTimeout);
+    public List<Thread> interruptWaitingThreads(K key) throws Exception {
+        return os.interruptWaitingThreads(key);
     }
 }

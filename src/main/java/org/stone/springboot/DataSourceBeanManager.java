@@ -43,8 +43,6 @@ import static org.stone.tools.CommonUtil.isNotBlank;
  */
 public final class DataSourceBeanManager extends SpringConfigurationLoader {
     private static final DataSourceBeanManager single = new DataSourceBeanManager();
-
-    //Data source map
     private final Map<String, DataSourceBean> dataSourceMap = new ConcurrentHashMap<>(1);
 
     public static DataSourceBeanManager getInstance() {
@@ -71,16 +69,20 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
         return dataSourceMap.get(dsId);
     }
 
-    public void addDataSource(DataSourceBean ds) {
+    void addDataSource(DataSourceBean ds) {
         dataSourceMap.put(ds.getDsId(), ds);
     }
 
-    public void clearDsPool(String dsId, boolean force) throws SQLException {
+    public void restart(String dsId, boolean force) throws SQLException {
         DataSourceBean ds = dataSourceMap.get(dsId);
-        if (ds != null) ds.clear(force);
+        if (ds == null) throw new DataSourceException("Data source not found with id:" + dsId);
+        ds.restart(force);
     }
 
-    public List<BeeConnectionPoolMonitorVo> getDsPoolMonitorVoList() throws SQLException {
+    //***************************************************************************************************************//
+    //                                     2: Monitor methods (2)                                                    //
+    //***************************************************************************************************************//
+    public List<BeeConnectionPoolMonitorVo> getAllDsPoolMonitorVos() throws SQLException {
         List<BeeConnectionPoolMonitorVo> poolMonitorVoList = new ArrayList<>(dataSourceMap.size());
         Iterator<DataSourceBean> iterator = dataSourceMap.values().iterator();
 
@@ -88,7 +90,7 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
             DataSourceBean ds = iterator.next();
             BeeConnectionPoolMonitorVo vo = ds.getPoolMonitorVo();
             if (vo == null) continue;
-            if (vo.isClosed()) {//POOL_CLEARING,POOL_CLOSED
+            if (vo.isClosed()) {
                 iterator.remove();
             } else {
                 poolMonitorVoList.add(vo);
@@ -97,23 +99,27 @@ public final class DataSourceBeanManager extends SpringConfigurationLoader {
         return poolMonitorVoList;
     }
 
-    //***************************************************************************************************************//
-    //                                     2: sql-trace (1)                                                          //
-    //***************************************************************************************************************//
-    public Collection<BeeMethodExecutionLog> getSqlExecutionList() {
-        return null;
-    }
-
-    public void cancelStatementExecution(String statementUUID) throws SQLException {
-//        if (statementExecutionCollector != null) {
-//            statementExecutionCollector.cancelStatementExecution(statementUUID);
-//        }
+    public Collection<BeeMethodExecutionLog> getAllDsSqlExecutionLogs() throws SQLException {
+        List<BeeMethodExecutionLog> logList = new ArrayList<>(dataSourceMap.size());
+        for (DataSourceBean ds : dataSourceMap.values()) {
+            logList.addAll(ds.getMethodExecutionLog(BeeMethodExecutionLog.Type_SQL_Execution));
+        }
+        return logList;
     }
 
     //***************************************************************************************************************//
-    //                                     3: Create Data source Bean                                                //
+    //                                     3: Statement cancellation (1)                                             //
     //***************************************************************************************************************//
-    public DataSourceBean createDataSourceBean(String prefix, String dsId, Environment environment) {
+    public boolean cancelStatement(String dsId, String logID) throws SQLException {
+        DataSourceBean ds = dataSourceMap.get(dsId);
+        if (ds == null) throw new DataSourceException("Data source not found with id:" + dsId);
+        return ds.cancelStatement(logID);
+    }
+
+    //***************************************************************************************************************//
+    //                                     4: Create Data source Bean(2)                                             //
+    //***************************************************************************************************************//
+    DataSourceBean createDataSourceBean(String prefix, String dsId, Environment environment) {
         String jndiNameTex = getConfigValue(prefix, Config_DS_Jndi, environment);
         String primaryText = getConfigValue(prefix, Config_DS_Primary, environment);
         boolean isPrimary = isNotBlank(primaryText) && Boolean.valueOf(primaryText).booleanValue();

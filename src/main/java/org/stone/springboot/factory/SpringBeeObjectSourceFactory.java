@@ -36,12 +36,12 @@ public class SpringBeeObjectSourceFactory<K, V> {
     private final ObjectSourceBeanManager<K, V> osManager = ObjectSourceBeanManager.getInstance();
 
     private void setFactoryPropertiesConfig(BeeObjectSourceConfig<K, V> config, String prefix, Environment environment) {
-        config.addFactoryProperty(osManager.getConfigValue(prefix, CONFIG_FACTORY_PROP, environment));
+        config.addObjectFactoryProperty(osManager.getConfigValue(prefix, CONFIG_FACTORY_PROP, environment));
         String factoryPropertiesCount = osManager.getConfigValue(prefix, CONFIG_FACTORY_PROP_SIZE, environment);
         if (isNotBlank(factoryPropertiesCount)) {
             int count = Integer.parseInt(factoryPropertiesCount.trim());
             for (int i = 1; i <= count; i++)
-                config.addFactoryProperty(osManager.getConfigValue(prefix, CONFIG_FACTORY_PROP_KEY_PREFIX + i, environment));
+                config.addObjectFactoryProperty(osManager.getConfigValue(prefix, CONFIG_FACTORY_PROP_KEY_PREFIX + i, environment));
         }
     }
 

@@ -17,6 +17,8 @@ package org.stone.springboot;
 
 import org.stone.beeop.BeeObjectPoolMonitorVo;
 
+import java.util.UUID;
+
 /*
  * monitor vo
  *
@@ -24,19 +26,24 @@ import org.stone.beeop.BeeObjectPoolMonitorVo;
  */
 public class ObjectSourcePoolMonitorVo implements BeeObjectPoolMonitorVo {
     private final String osId;
+    private final String osUUID;
     private BeeObjectPoolMonitorVo vo;
 
     ObjectSourcePoolMonitorVo(String osId) {
         this.osId = osId;
+        this.osUUID = UUID.randomUUID().toString();
     }
 
     public void setVo(BeeObjectPoolMonitorVo vo) {
         this.vo = vo;
     }
 
-
     public String getOsId() {
         return osId;
+    }
+
+    public String getOsUUID() {
+        return osUUID;
     }
 
     public int getTransferWaitingSize() {

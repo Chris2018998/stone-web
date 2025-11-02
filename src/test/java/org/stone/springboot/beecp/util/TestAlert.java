@@ -15,13 +15,40 @@
  */
 package org.stone.springboot.beecp.util;
 
-import org.stone.springboot.jdbc.StatementExecution;
-import org.stone.springboot.jdbc.StatementSqlAlert;
+import org.stone.beecp.BeeMethodExecutionListener;
+import org.stone.beecp.BeeMethodExecutionLog;
 
+import java.sql.SQLException;
 import java.util.List;
 
-public class TestAlert extends StatementSqlAlert {
-    public void alert(List<StatementExecution> alertList) {
-        System.out.println("....test alert siz:" + alertList.size());
+public class TestAlert implements BeeMethodExecutionListener {
+
+    /**
+     * Plugin method: Handles a log of method call.
+     *
+     * @param log to be handled
+     * @throws SQLException when failure during onMethodStart call
+     */
+    public void onMethodStart(BeeMethodExecutionLog log) throws SQLException {
+
+    }
+
+    /**
+     * Plugin method: Handles a log of method call.
+     *
+     * @param log to be handled
+     * @throws SQLException when failure during onMethodEnd call
+     */
+    public void onMethodEnd(BeeMethodExecutionLog log) throws SQLException {
+
+    }
+
+    /**
+     * Handle a list of long-running logs
+     *
+     * @param logList to be handled
+     */
+    public void onLongRunningDetected(List<BeeMethodExecutionLog> logList) {
+
     }
 }

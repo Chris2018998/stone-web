@@ -93,7 +93,7 @@ public class MonitorController {
     @PostMapping(Ds_Pool_List_URL)
     public MonitorControllerResponse getDsPoolList() {
         try {
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, dsManager.getDsPoolMonitorVoList(), "OK");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, dsManager.getAllDsPoolMonitorVos(), "OK");
         } catch (Throwable e) {
             e.printStackTrace();
             return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to get datasource pool info");
@@ -104,7 +104,7 @@ public class MonitorController {
     @PostMapping(Ds_Sql_List_URL)
     public MonitorControllerResponse getDsSqlList() {
         try {
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, dsManager.getSqlExecutionList(), "OK");
+            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, dsManager.getAllDsSqlExecutionLogs(), "OK");
         } catch (Throwable e) {
             return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to get traced sql list");
         }
@@ -115,7 +115,7 @@ public class MonitorController {
     public MonitorControllerResponse clearDsPool(@RequestBody Map<String, String> parameterMap) {
         try {
             String dsId = parameterMap != null ? parameterMap.get("dsId") : null;
-            dsManager.clearDsPool(dsId, false);
+            dsManager.restart(dsId, false);
             return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, null, "OK");
         } catch (Throwable e) {
             return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to clear datasource pool");
@@ -125,9 +125,16 @@ public class MonitorController {
     @ResponseBody
     @PostMapping(Ds_Sql_Cancel_URL)
     public MonitorControllerResponse cancelStatement(@RequestBody Map<String, String> parameterMap) {
+        if (parameterMap == null || parameterMap.isEmpty())
+            throw new IllegalArgumentException("Cancellation parameter can't be null or empty");
+
+        String dsId = parameterMap.get("dsId");
+        String logId = parameterMap.get("logId");
+        if (isBlank(dsId) || isBlank(logId))
+            throw new IllegalArgumentException("Data source id and log id can't be null or empty");
+
         try {
-            String statementUUID = parameterMap != null ? parameterMap.get("uuid") : null;
-            dsManager.cancelStatementExecution(statementUUID);
+            dsManager.cancelStatement(dsId, logId);
             return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, null, "OK");
         } catch (Throwable e) {
             return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to cancel statement");
