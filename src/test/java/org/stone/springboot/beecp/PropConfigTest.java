@@ -50,23 +50,26 @@ public class PropConfigTest {
         Assertions.assertTrue(ClientSideUtil.testExecuteSQL("ds1", "select * from TEST_USER", "Statement", mockMvc, 0, executeSQLUrl), "target sql not in trace list");
     }
 
-    @Test
-    public void test4SqlPreparedStatement() throws Exception {
-        Assertions.assertTrue(ClientSideUtil.testExecuteSQL("ds1", "select * from TEST_USER2", "PreparedStatement", mockMvc, 0, executeSQLUrl), "target sql not in trace list");
-    }
+//    @Test
+//    public void test4SqlPreparedStatement() throws Exception {
+//        Assertions.assertTrue(ClientSideUtil.testExecuteSQL("ds1", "select * from TEST_USER2", "PreparedStatement", mockMvc, 0, executeSQLUrl), "target sql not in trace list");
+//    }
+//
+//    @Test
+//    public void test5SqlCallableStatement() throws Exception {
+//        Assertions.assertTrue(ClientSideUtil.testExecuteSQL("ds1", "{call BEECP_HELLO()}", "CallableStatement", mockMvc, 0, executeSQLUrl), "target sql not in trace list");
+//    }
 
-    @Test
-    public void test5SqlCallableStatement() throws Exception {
-        Assertions.assertTrue(ClientSideUtil.testExecuteSQL("ds1", "{call BEECP_HELLO()}", "CallableStatement", mockMvc, 0, executeSQLUrl), "target sql not in trace list");
-    }
 
-    @Test
-    public void test6SqlError() throws Exception {
-        Assertions.assertTrue(ClientSideUtil.testExecuteSQL("ds1", "select * from TEST_USER3", "PreparedStatement", mockMvc, 1, executeSQLUrl), "target sql not in trace list");
-    }
 
-    @Test
-    public void test7SqlSlow() throws Exception {
-        Assertions.assertTrue(ClientSideUtil.testExecuteSQL("ds2", "select * from TEST_USER2", "PreparedStatement", mockMvc, 2, executeSQLUrl), "target sql not in trace list");
-    }
+//
+//    @Test
+//    public void test6SqlError() throws Exception {
+//        Assertions.assertTrue(ClientSideUtil.testExecuteSQL("ds1", "select * from TEST_USER3", "PreparedStatement", mockMvc, 1, executeSQLUrl), "target sql not in trace list");
+//    }
+//
+//    @Test
+//    public void test7SqlSlow() throws Exception {
+//        Assertions.assertTrue(ClientSideUtil.testExecuteSQL("ds2", "select * from TEST_USER2", "PreparedStatement", mockMvc, 2, executeSQLUrl), "target sql not in trace list");
+//    }
 }

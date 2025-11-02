@@ -80,7 +80,7 @@ public class DataSourceController {
     }
 
     @PostMapping("/executeSQL")
-    public MonitorControllerResponse testSQL(@RequestBody Map<String, String> map) {
+    public MonitorControllerResponse executeSQL(@RequestBody Map<String, String> map) {
         try {
             String dsId = map.get("dsId");
             String sql = map.get("sql");

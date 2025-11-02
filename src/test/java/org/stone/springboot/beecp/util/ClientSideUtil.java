@@ -51,6 +51,9 @@ public class ClientSideUtil {
         Object response = getRest(mockMvc, getSqlListUrl, null, "post");
         List<Map<String, Object>> sqlList = (List<Map<String, Object>>) response;
 
+        System.out.println("log size:"+sqlList.size());
+
+
         if (testType == 0) {//normal
             for (Map map : sqlList) {
                 String pDsId = map.get("dsId").toString();
