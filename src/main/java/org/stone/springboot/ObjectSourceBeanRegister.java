@@ -24,12 +24,14 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
+import org.stone.beeop.BeeObjectSource;
 import org.stone.springboot.annotation.EnableBeeOs;
-import org.stone.springboot.controller.MonitorControllerRegister;
+import org.stone.springboot.builder.SpringBeeObjectSourceBuilder;
 import org.stone.springboot.dynamic.DynamicAspect;
 import org.stone.springboot.dynamic.DynamicObjectSource;
 import org.stone.springboot.exception.ConfigurationException;
 import org.stone.springboot.exception.ObjectSourceException;
+import org.stone.springboot.monitor.MonitorBeansRegister;
 
 import java.util.*;
 
@@ -55,12 +57,12 @@ import static org.stone.tools.CommonUtil.isNotBlank;
  *
  * @author Chris Liao
  */
-public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, ImportBeanDefinitionRegistrar {
+public class ObjectSourceBeanRegister<K, V> implements EnvironmentAware, ImportBeanDefinitionRegistrar {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final ObjectSourceBeanManager<K, V> osBeanManager;
     private Environment environment;
 
-    public ObjectSourceBeansRegister() {
+    public ObjectSourceBeanRegister() {
         this.osBeanManager = ObjectSourceBeanManager.getInstance();
     }
 
@@ -92,8 +94,8 @@ public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, Import
 
         //6: attempt to register monitor
         Map<String, Object> attributes = classMetadata.getAnnotationAttributes(EnableBeeOs.class.getName(), false);
-        if ((boolean) attributes.get(Annotation_Monitor_Attribute_Name)) {
-            new MonitorControllerRegister().registerBeanDefinitions(classMetadata, registry, environment);
+        if ((boolean) attributes.get(Annotation_Console_Attribute_Name)) {
+            new MonitorBeansRegister().registerBeanDefinitions(classMetadata, registry, environment);
         }
     }
 
@@ -105,7 +107,7 @@ public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, Import
      * @return ObjectSource name list
      */
     private List<String> getOsIdList(Environment environment, BeanDefinitionRegistry registry) {
-        String osIdsText = osBeanManager.getConfigValue(Config_OS_Prefix, Config_OS_Id, environment);
+        String osIdsText = SpringBootEnvironmentUtil.getConfigValue(Config_OS_Prefix, Config_OS_Id, environment);
         if (isBlank(osIdsText))
             throw new ConfigurationException("Missed or not found config item '" + Config_OS_Prefix + "." + Config_OS_Id + "'");
 
@@ -114,7 +116,7 @@ public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, Import
         for (String id : osIds) {
             if (isBlank(id) || osIdList.contains(id)) continue;
             id = id.trim();
-            if (SpringConfigurationLoader.existsBeanDefinition(id, registry))
+            if (SpringBootEnvironmentUtil.existsBeanDefinition(id, registry))
                 throw new ConfigurationException("Existed a registered bean with id '" + id + "'");
 
             //ObjectSource id(" + id + ")has been registered by another bean
@@ -135,8 +137,8 @@ public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, Import
      * @return ObjectSource name list
      */
     private Properties getDynamicOsInfo(List<String> osIdList, Environment environment, BeanDefinitionRegistry registry) {
-        String dynId = osBeanManager.getConfigValue(Config_OS_Prefix, Config_Dyn_OS_Id, environment);
-        String primaryDs = osBeanManager.getConfigValue(Config_OS_Prefix, Config_Dyn_OS_PrimaryId, environment);
+        String dynId = SpringBootEnvironmentUtil.getConfigValue(Config_OS_Prefix, Config_Dyn_OS_Id, environment);
+        String primaryDs = SpringBootEnvironmentUtil.getConfigValue(Config_OS_Prefix, Config_Dyn_OS_PrimaryId, environment);
 
         dynId = (dynId == null) ? "" : dynId;
         primaryDs = (primaryDs == null) ? "" : primaryDs;
@@ -144,7 +146,7 @@ public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, Import
         if (isNotBlank(dynId)) {
             if (osIdList.contains(dynId))
                 throw new ConfigurationException("Dynamic object source id '" + dynId + "' can't be in os-id list");
-            if (SpringConfigurationLoader.existsBeanDefinition(dynId, registry))
+            if (SpringBootEnvironmentUtil.existsBeanDefinition(dynId, registry))
                 throw new ConfigurationException("Dynamic object source id '" + dynId + "' has been registered by another bean");
 
             if (isBlank(primaryDs))
@@ -171,7 +173,7 @@ public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, Import
         try {
             for (String osId : osIdList) {
                 String osPrefix = Config_OS_Prefix + "." + osId;
-                osMap.put(osId, osBeanManager.createObjectSourceBean(osPrefix, osId, environment));
+                osMap.put(osId, createObjectSourceBean(osPrefix, osId, environment));
             }
             return osMap;
         } catch (Throwable e) {//failed then close all created object source
@@ -204,7 +206,7 @@ public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, Import
 
             GenericBeanDefinition define = new GenericBeanDefinition();
             define.setBeanClass(DynamicObjectSource.class);
-            define.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(new DynamicObjectSource<>(dynOsId, osThreadLocal)));
+            define.setInstanceSupplier(SpringBootEnvironmentUtil.createSpringSupplier(new DynamicObjectSource<>(dynOsId, osThreadLocal)));
             registry.registerBeanDefinition(dynOsId, define);
             log.info("Registered a dynamic object source(type:{})with bean Id '{}'", define.getBeanClassName(), dynOsId);
 
@@ -214,7 +216,7 @@ public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, Import
 
             DynamicAspect<K, V> dynamicAspect = new DynamicAspect<>();
             dynamicAspect.setDynOsThreadLocal(primaryOsId, osThreadLocal);
-            osIdSetDefine.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(dynamicAspect));
+            osIdSetDefine.setInstanceSupplier(SpringBootEnvironmentUtil.createSpringSupplier(dynamicAspect));
             registry.registerBeanDefinition(aspectBeanId, osIdSetDefine);
             log.info("Registered an aspect component(type:{})for dynamic object source with bean Id '{}'", define.getBeanClassName(), aspectBeanId);
         }
@@ -225,9 +227,19 @@ public class ObjectSourceBeansRegister<K, V> implements EnvironmentAware, Import
         GenericBeanDefinition define = new GenericBeanDefinition();
         define.setPrimary(springOs.isPrimary());
         define.setBeanClass(springOs.getClass());
-        define.setInstanceSupplier(SpringConfigurationLoader.createSpringSupplier(springOs));
+        define.setInstanceSupplier(SpringBootEnvironmentUtil.createSpringSupplier(springOs));
         registry.registerBeanDefinition(springOs.getOsId(), define);
         log.info("Registered a object source(type:{})with bean Id '{}'", define.getBeanClassName(), springOs.getOsId());
         osBeanManager.addObjectSource(springOs);
+    }
+
+    //***************************************************************************************************************//
+    //                                     2: Create Object source Bean                                              //
+    //***************************************************************************************************************//
+    public ObjectSourceBean<K, V> createObjectSourceBean(String prefix, String osId, Environment environment) {
+        String primaryText = SpringBootEnvironmentUtil.getConfigValue(prefix, Config_OS_Primary, environment);
+        boolean isPrimary = isNotBlank(primaryText) && Boolean.valueOf(primaryText).booleanValue();
+        BeeObjectSource<K, V> objectSource = new SpringBeeObjectSourceBuilder().createDataSource(prefix, osId, environment);
+        return new ObjectSourceBean<>(osId, isPrimary, objectSource);
     }
 }

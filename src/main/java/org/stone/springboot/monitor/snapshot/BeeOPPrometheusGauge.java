@@ -7,7 +7,7 @@
  *
  * Project Licensed under Apache License v2.0.
  */
-package org.stone.springboot.controller.pusher;
+package org.stone.springboot.monitor.snapshot;
 
 import io.prometheus.client.Gauge;
 import org.stone.beeop.BeeObjectPoolMonitorVo;

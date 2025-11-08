@@ -15,26 +15,21 @@
  */
 package org.stone.springboot;
 
-import org.springframework.core.env.Environment;
 import org.stone.beeop.BeeObjectPoolMonitorVo;
-import org.stone.beeop.BeeObjectSource;
 import org.stone.beeop.BeeObjectSourceConfig;
-import org.stone.springboot.factory.SpringBeeObjectSourceFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.stone.beeop.pool.ObjectPoolStatics.POOL_CLOSED;
 import static org.stone.beeop.pool.ObjectPoolStatics.POOL_CLOSING;
-import static org.stone.springboot.Constants.Config_OS_Primary;
-import static org.stone.tools.CommonUtil.isNotBlank;
 
 /**
  * A manager to maintain a set of bee object sources registered in spring container.
  *
  * @author Chris Liao
  */
-public class ObjectSourceBeanManager<K, V> extends SpringConfigurationLoader {
+public class ObjectSourceBeanManager<K, V> {
     private static final ObjectSourceBeanManager single = new ObjectSourceBeanManager();
     private final Map<String, ObjectSourceBean<K, V>> osMap;
 
@@ -81,15 +76,5 @@ public class ObjectSourceBeanManager<K, V> extends SpringConfigurationLoader {
             }
         }
         return poolMonitorVoList;
-    }
-
-    //***************************************************************************************************************//
-    //                                     2: Create Object source Bean                                              //
-    //***************************************************************************************************************//
-    public ObjectSourceBean<K, V> createObjectSourceBean(String prefix, String osId, Environment environment) {
-        String primaryText = getConfigValue(prefix, Config_OS_Primary, environment);
-        boolean isPrimary = isNotBlank(primaryText) && Boolean.valueOf(primaryText).booleanValue();
-        BeeObjectSource<K, V> objectSource = new SpringBeeObjectSourceFactory().createDataSource(prefix, osId, environment);
-        return new ObjectSourceBean<>(osId, isPrimary, objectSource);
     }
 }

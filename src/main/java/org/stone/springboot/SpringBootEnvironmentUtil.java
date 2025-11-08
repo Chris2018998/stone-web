@@ -36,9 +36,9 @@ import static org.stone.tools.CommonUtil.isNotBlank;
  *
  * @author Chris Liao
  */
-public class SpringConfigurationLoader {
+public class SpringBootEnvironmentUtil {
     //Logger
-    private final Logger log = LoggerFactory.getLogger(SpringConfigurationLoader.class);
+    private static final Logger log = LoggerFactory.getLogger(SpringBootEnvironmentUtil.class);
 
     public static Supplier<?> createSpringSupplier(Object bean) {
         return new SpringRegSupplier(bean);
@@ -46,6 +46,29 @@ public class SpringConfigurationLoader {
 
     public static boolean existsBeanDefinition(String beanName, BeanDefinitionRegistry registry) {
         return registry.containsBeanDefinition(beanName);
+    }
+
+    public static String getConfigValue(String prefix, final String propertyName, Environment environment) {
+        String value = readConfig(environment, prefix + "." + propertyName);
+        if (value != null) return value;
+
+        String newPropertyName = propertyName.substring(0, 1).toLowerCase(Locale.US) + propertyName.substring(1);
+        value = readConfig(environment, prefix + "." + newPropertyName);
+        if (value != null) return value;
+
+        value = readConfig(environment, prefix + "." + propertyNameToFieldId(newPropertyName, Separator_MiddleLine));
+        if (value != null) return value;
+
+        return readConfig(environment, prefix + "." + propertyNameToFieldId(newPropertyName, Separator_UnderLine));
+    }
+
+    private static String readConfig(Environment environment, String key) {
+        String value = environment.getProperty(key);
+        if (isNotBlank(value)) {
+            value = value.trim();
+            log.info("{}={}", key, value);
+        }
+        return value;
     }
 
     public static Object createDataSourceByClassName(String dsId, Class<?> dsClass) {
@@ -56,7 +79,7 @@ public class SpringConfigurationLoader {
         }
     }
 
-    public void setConfigPropertiesValue(Object bean, String prefix, String id, Environment environment) throws DataSourceException {
+    public static void setConfigPropertiesValue(Object bean, String prefix, String id, Environment environment) throws DataSourceException {
         try {
             //1:get all set methods
             Map<String, Method> setMethodMap = getClassSetMethodMap(bean.getClass());
@@ -74,29 +97,6 @@ public class SpringConfigurationLoader {
         } catch (Throwable e) {
             throw new DataSourceException("DataSource(" + id + ")-Failed to set properties", e);
         }
-    }
-
-    public String getConfigValue(String prefix, final String propertyName, Environment environment) {
-        String value = readConfig(environment, prefix + "." + propertyName);
-        if (value != null) return value;
-
-        String newPropertyName = propertyName.substring(0, 1).toLowerCase(Locale.US) + propertyName.substring(1);
-        value = readConfig(environment, prefix + "." + newPropertyName);
-        if (value != null) return value;
-
-        value = readConfig(environment, prefix + "." + propertyNameToFieldId(newPropertyName, Separator_MiddleLine));
-        if (value != null) return value;
-
-        return readConfig(environment, prefix + "." + propertyNameToFieldId(newPropertyName, Separator_UnderLine));
-    }
-
-    private String readConfig(Environment environment, String key) {
-        String value = environment.getProperty(key);
-        if (isNotBlank(value)) {
-            value = value.trim();
-            log.info("{}={}", key, value);
-        }
-        return value;
     }
 
     private record SpringRegSupplier(Object ds) implements Supplier<Object> {

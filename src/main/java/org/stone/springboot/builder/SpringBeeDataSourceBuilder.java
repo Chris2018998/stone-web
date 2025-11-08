@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.factory;
+package org.stone.springboot.builder;
 
 import jakarta.transaction.TransactionManager;
 import org.springframework.core.env.Environment;
@@ -21,7 +21,7 @@ import org.stone.beecp.BeeDataSource;
 import org.stone.beecp.BeeDataSourceConfig;
 import org.stone.beecp.BeeDataSourceConfigException;
 import org.stone.beecp.jta.BeeJtaDataSource;
-import org.stone.springboot.DataSourceBeanManager;
+import org.stone.springboot.SpringBootEnvironmentUtil;
 import org.stone.springboot.exception.DataSourceException;
 
 import javax.naming.Context;
@@ -45,22 +45,21 @@ import static org.stone.tools.CommonUtil.isNotBlank;
  *
  *  @author Chris liao
  */
-public class SpringBeeDataSourceFactory implements SpringDataSourceFactory {
-    private final DataSourceBeanManager dsManager = DataSourceBeanManager.getInstance();
+public class SpringBeeDataSourceBuilder implements SpringDataSourceBuilder {
 
     private void setConnectPropertiesConfig(BeeDataSourceConfig config, String dsPrefix, Environment environment) {
-        config.addConnectionFactoryProperty(dsManager.getConfigValue(dsPrefix, CONFIG_FACTORY_PROP, environment));
-        String connectPropertiesCount = dsManager.getConfigValue(dsPrefix, CONFIG_FACTORY_PROP_SIZE, environment);
+        config.addConnectionFactoryProperty(SpringBootEnvironmentUtil.getConfigValue(dsPrefix, CONFIG_FACTORY_PROP, environment));
+        String connectPropertiesCount = SpringBootEnvironmentUtil.getConfigValue(dsPrefix, CONFIG_FACTORY_PROP_SIZE, environment);
         if (isNotBlank(connectPropertiesCount)) {
             int count = Integer.parseInt(connectPropertiesCount.trim());
             for (int i = 1; i <= count; i++)
-                config.addConnectionFactoryProperty(dsManager.getConfigValue(dsPrefix, CONFIG_FACTORY_PROP_KEY_PREFIX + i, environment));
+                config.addConnectionFactoryProperty(SpringBootEnvironmentUtil.getConfigValue(dsPrefix, CONFIG_FACTORY_PROP_KEY_PREFIX + i, environment));
         }
     }
 
     private void setSqlExceptionFatalConfig(BeeDataSourceConfig config, String dsPrefix, Environment environment) {
-        String sqlExceptionCode = dsManager.getConfigValue(dsPrefix, CONFIG_SQL_EXCEPTION_CODE, environment);
-        String sqlExceptionState = dsManager.getConfigValue(dsPrefix, CONFIG_SQL_EXCEPTION_STATE, environment);
+        String sqlExceptionCode = SpringBootEnvironmentUtil.getConfigValue(dsPrefix, CONFIG_SQL_EXCEPTION_CODE, environment);
+        String sqlExceptionState = SpringBootEnvironmentUtil.getConfigValue(dsPrefix, CONFIG_SQL_EXCEPTION_STATE, environment);
 
         if (isNotBlank(sqlExceptionCode)) {
             for (String code : sqlExceptionCode.trim().split(",")) {
@@ -80,7 +79,7 @@ public class SpringBeeDataSourceFactory implements SpringDataSourceFactory {
     }
 
     private void setConfigPrintExclusionList(BeeDataSourceConfig config, String dsPrefix, Environment environment) {
-        String exclusionListText = dsManager.getConfigValue(dsPrefix, CONFIG_EXCLUSION_LIST_OF_PRINT, environment);
+        String exclusionListText = SpringBootEnvironmentUtil.getConfigValue(dsPrefix, CONFIG_EXCLUSION_LIST_OF_PRINT, environment);
         if (isNotBlank(exclusionListText)) {
             config.clearExclusionListOfPrint();//remove existed exclusion
             for (String exclusion : exclusionListText.trim().split(",")) {
@@ -89,17 +88,17 @@ public class SpringBeeDataSourceFactory implements SpringDataSourceFactory {
         }
     }
 
-    public DataSource createDataSource(String dsPrefix, String dsId, Environment environment) throws DataSourceException {
+    public DataSource create(String dsPrefix, String dsId, Environment environment) throws DataSourceException {
         //1:read spring configuration and inject to datasource's config object
         BeeDataSourceConfig config = new BeeDataSourceConfig();
-        dsManager.setConfigPropertiesValue(config, dsPrefix, dsId, environment);
+        SpringBootEnvironmentUtil.setConfigPropertiesValue(config, dsPrefix, dsId, environment);
         setConnectPropertiesConfig(config, dsPrefix, environment);
         setSqlExceptionFatalConfig(config, dsPrefix, environment);
         setConfigPrintExclusionList(config, dsPrefix, environment);
 
         //2:try to lookup TransactionManager by jndi
         TransactionManager tm = null;
-        String tmJndiName = dsManager.getConfigValue(dsPrefix, CONFIG_TM_JNDI, environment);
+        String tmJndiName = SpringBootEnvironmentUtil.getConfigValue(dsPrefix, CONFIG_TM_JNDI, environment);
         if (isNotBlank(tmJndiName)) {
             try {
                 Context nameCtx = new InitialContext();
@@ -113,7 +112,7 @@ public class SpringBeeDataSourceFactory implements SpringDataSourceFactory {
         BeeDataSource ds = new BeeDataSource(config);
 
         //4:disable threadLocal if exists virtual thread config item
-        String threadLocalEnable = dsManager.getConfigValue(dsPrefix, Config_ThreadLocal_Enable, environment);
+        String threadLocalEnable = SpringBootEnvironmentUtil.getConfigValue(dsPrefix, Config_ThreadLocal_Enable, environment);
         if (threadLocalEnable == null) {
             boolean enableVirtualThread = Boolean.parseBoolean(environment.getProperty(Config_Virtual_Thread, "false"));
             ds.setUseThreadLocal(!enableVirtualThread);

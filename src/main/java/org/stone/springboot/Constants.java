@@ -23,12 +23,12 @@ package org.stone.springboot;
 public class Constants {
 
     //***************************************************************************************************************//
-    //                                     1: Monitor                                                                //
+    //                                     1: Monitor console                                                         //
     //***************************************************************************************************************//
     //attribute name define in annotation
-    public static final String Annotation_Monitor_Attribute_Name = "runMonitor";
+    public static final String Annotation_Console_Attribute_Name = "console";
     //configuration prefix of spring bee monitor
-    public static final String Config_Monitor_Prefix = "spring.bee.monitor";
+    public static final String Config_Console_Prefix = "spring.bee.console";
     //***************************************************************************************************************//
     //                                     2: virtual Thread                                                         //
     //***************************************************************************************************************//

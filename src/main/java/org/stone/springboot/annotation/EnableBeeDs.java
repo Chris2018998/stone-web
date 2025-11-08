@@ -16,20 +16,20 @@
 package org.stone.springboot.annotation;
 
 import org.springframework.context.annotation.Import;
-import org.stone.springboot.DataSourceBeansRegister;
+import org.stone.springboot.DataSourceBeanRegister;
 
 import java.lang.annotation.*;
 
 /*
- * Multi-DataSource annotation
+ * DataSource enabled annotation
  *
- *  @author Chris Liao
+ * @author Chris Liao
  */
 
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Target(ElementType.TYPE)
-@Import(value = {DataSourceBeansRegister.class})
+@Import(value = {DataSourceBeanRegister.class})
 public @interface EnableBeeDs {
-    boolean runMonitor() default true;
+    boolean console() default true;
 }

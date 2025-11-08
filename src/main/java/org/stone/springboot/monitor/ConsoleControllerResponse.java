@@ -13,19 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.annotation;
+package org.stone.springboot.monitor;
 
-import java.lang.annotation.*;
-
-/*
- * DataSourceId annotation to support dynamic source
+/**
+ * Controller response object
  *
  * @author Chris Liao
- * @version 1.0
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Target(ElementType.METHOD)
-public @interface BeeDsId {
-    String value() default "";
+public record ConsoleControllerResponse(int code, Object result, String message) {
+    public static final int CODE_SUCCESS = 1;
+    public static final int CODE_FAILED = 2;
+    public static final int CODE_SECURITY = 3;
 }

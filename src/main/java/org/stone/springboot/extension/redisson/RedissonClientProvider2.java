@@ -16,9 +16,9 @@
 package org.stone.springboot.extension.redisson;
 
 import org.redisson.api.RedissonClient;
-import org.stone.springboot.controller.MonitorConfig;
 import org.stone.springboot.extension.CacheClient;
 import org.stone.springboot.extension.CacheClientProvider;
+import org.stone.springboot.monitor.MonitorConfig;
 
 /**
  * Redisson Client Provider.

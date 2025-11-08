@@ -16,7 +16,7 @@
 package org.stone.springboot.exception;
 
 /*
- * Throws this exception when {@link SpringDataSourceFactory} fail to a data source.
+ * Throws this exception when {@link SpringDataSourceBuilder} fail to a data source.
  *
  *  @author Chris Liao
  */

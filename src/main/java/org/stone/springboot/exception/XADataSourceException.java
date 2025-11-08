@@ -16,7 +16,7 @@
 package org.stone.springboot.exception;
 
 /*
- * Throws this exception when {@link SpringXADataSourceFactory} fail to a XA data source.
+ * Throws this exception when {@link SpringXADataSourceBuilder} fail to a XA data source.
  *
  *  @author Chris Liao
  */

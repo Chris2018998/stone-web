@@ -7,25 +7,22 @@
  *
  * Project Licensed under Apache License v2.0.
  */
-package org.stone.springboot.controller.pusher;
-
-import org.stone.springboot.controller.PoolSnapshot;
-import org.stone.springboot.controller.PoolSnapshotPusher;
+package org.stone.springboot.monitor.snapshot;
 
 /**
- * pusher implementation for Prometheus gateway server
+ * pusher implementation for redis
  *
  * @author Chris Liao
  */
-public class PrometheusPusher implements PoolSnapshotPusher {
+public class RedisPusher implements PoolSnapshotPusher {
 
     /**
-     * push snapshot of pools to Prometheus
+     * push snapshot of pools to redis server
      *
      * @param snapshot is runtime monitor object
      * @throws Exception when push fail
      */
-    public void push(PoolSnapshot snapshot) throws Exception {
+    public void push(LocalSnapshotPackage snapshot) throws Exception {
 
     }
 }

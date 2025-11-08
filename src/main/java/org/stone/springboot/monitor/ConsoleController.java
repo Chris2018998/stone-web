@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.controller;
+package org.stone.springboot.monitor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +30,7 @@ import org.stone.springboot.ObjectSourceBeanManager;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.stone.springboot.controller.MonitorControllerRequestFilter.*;
+import static org.stone.springboot.monitor.SecurityRequestFilter.*;
 import static org.stone.tools.CommonUtil.isBlank;
 
 /**
@@ -37,15 +39,26 @@ import static org.stone.tools.CommonUtil.isBlank;
  * @author Chris Liao
  */
 @Controller
-public class MonitorController {
+public class ConsoleController {
     private final MonitorConfig config;
     private final DataSourceBeanManager dsManager;
     private final ObjectSourceBeanManager osManager;
+    @Autowired
+    public ObjectMapper objectMapper;
+    private boolean ignoreSet;
 
-    public MonitorController() {
+    public ConsoleController() {
         this.config = MonitorConfig.getInstance();
         this.dsManager = DataSourceBeanManager.getInstance();
         this.osManager = ObjectSourceBeanManager.getInstance();
+    }
+
+    private synchronized void ignoreResultJson() {
+        if (!ignoreSet) {
+            objectMapper.addMixIn(org.stone.beecp.BeeMethodExecutionLog.class, MethodExecutionLogMixIn.class);
+            objectMapper.addMixIn(org.stone.beeop.BeeMethodExecutionLog.class, MethodExecutionLogMixIn.class);
+            this.ignoreSet = true;
+        }
     }
 
     //***************************************************************************************************************//
@@ -66,23 +79,23 @@ public class MonitorController {
     //***************************************************************************************************************//
     @ResponseBody
     @PostMapping(Login_URL)
-    public MonitorControllerResponse login(@RequestBody Map<String, String> paramMap, HttpServletRequest req) {
+    public ConsoleControllerResponse login(@RequestBody Map<String, String> paramMap, HttpServletRequest req) {
         HttpSession session = req.getSession();
         if ("Y".equals(session.getAttribute(config.getLoggedFlag())))//has login
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, null, "Login Success");
+            return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_SUCCESS, null, "Login Success");
         if (isBlank(config.getUsername()))
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, null, "Login Success");
+            return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_SUCCESS, null, "Login Success");
 
         try {
             String inputtedUserName = paramMap.get("username");
             String inputtedPassword = paramMap.get("password");
             if (Objects.equals(config.getUsername(), inputtedUserName) && Objects.equals(config.getPassword(), inputtedPassword)) {//checked pass
                 session.setAttribute(config.getLoggedFlag(), "Y");
-                return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, null, "Login Success");
+                return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_SUCCESS, null, "Login Success");
             } else
-                return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, null, "Login Failed");
+                return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_FAILED, null, "Login Failed");
         } catch (Throwable e) {
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Login Failed");
+            return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_FAILED, e, "Login Failed");
         }
     }
 
@@ -91,40 +104,42 @@ public class MonitorController {
     //***************************************************************************************************************//
     @ResponseBody
     @PostMapping(Ds_Pool_List_URL)
-    public MonitorControllerResponse getDsPoolList() {
+    public ConsoleControllerResponse getDsPoolList() {
         try {
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, dsManager.getAllDsPoolMonitorVos(), "OK");
+            return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_SUCCESS, dsManager.getAllDsPoolMonitorVos(), "OK");
         } catch (Throwable e) {
             e.printStackTrace();
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to get datasource pool info");
+            return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_FAILED, e, "Failed to get datasource pool info");
         }
     }
 
     @ResponseBody
     @PostMapping(Ds_Sql_List_URL)
-    public MonitorControllerResponse getDsSqlList() {
+    public ConsoleControllerResponse getDsSqlList() {
+        if (!ignoreSet) ignoreResultJson();
+
         try {
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, dsManager.getAllDsSqlExecutionLogs(), "OK");
+            return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_SUCCESS, dsManager.getAllDsSqlExecutionLogs(), "OK");
         } catch (Throwable e) {
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to get traced sql list");
+            return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_FAILED, e, "Failed to get traced sql list");
         }
     }
 
     @ResponseBody
     @PostMapping(Ds_Pool_Clear_URL)
-    public MonitorControllerResponse clearDsPool(@RequestBody Map<String, String> parameterMap) {
+    public ConsoleControllerResponse clearDsPool(@RequestBody Map<String, String> parameterMap) {
         try {
             String dsId = parameterMap != null ? parameterMap.get("dsId") : null;
             dsManager.restart(dsId, false);
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, null, "OK");
+            return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_SUCCESS, null, "OK");
         } catch (Throwable e) {
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to clear datasource pool");
+            return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_FAILED, e, "Failed to clear datasource pool");
         }
     }
 
     @ResponseBody
     @PostMapping(Ds_Sql_Cancel_URL)
-    public MonitorControllerResponse cancelStatement(@RequestBody Map<String, String> parameterMap) {
+    public ConsoleControllerResponse cancelStatement(@RequestBody Map<String, String> parameterMap) {
         if (parameterMap == null || parameterMap.isEmpty())
             throw new IllegalArgumentException("Cancellation parameter can't be null or empty");
 
@@ -135,9 +150,9 @@ public class MonitorController {
 
         try {
             dsManager.cancelStatement(dsId, logId);
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, null, "OK");
+            return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_SUCCESS, null, "OK");
         } catch (Throwable e) {
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to cancel statement");
+            return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_FAILED, e, "Failed to cancel statement");
         }
     }
 
@@ -146,23 +161,23 @@ public class MonitorController {
     //***************************************************************************************************************//
     @ResponseBody
     @PostMapping(Os_Pool_List_URL)
-    public MonitorControllerResponse getOsPoolList() {
+    public ConsoleControllerResponse getOsPoolList() {
         try {
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, osManager.getOsPoolMonitorVoList(), "OK");
+            return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_SUCCESS, osManager.getOsPoolMonitorVoList(), "OK");
         } catch (Throwable e) {
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to get object source pool info");
+            return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_FAILED, e, "Failed to get object source pool info");
         }
     }
 
     @ResponseBody
     @PostMapping(Os_Pool_Clear_URL)
-    public MonitorControllerResponse restart(@RequestBody Map<String, String> parameterMap) {
+    public ConsoleControllerResponse restart(@RequestBody Map<String, String> parameterMap) {
         try {
             String osId = parameterMap != null ? parameterMap.get("osId") : null;
             osManager.restart(osId, false);
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_SUCCESS, null, "OK");
+            return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_SUCCESS, null, "OK");
         } catch (Throwable e) {
-            return new MonitorControllerResponse(MonitorControllerResponse.CODE_FAILED, e, "Failed to restart object source pool");
+            return new ConsoleControllerResponse(ConsoleControllerResponse.CODE_FAILED, e, "Failed to restart object source pool");
         }
     }
 }

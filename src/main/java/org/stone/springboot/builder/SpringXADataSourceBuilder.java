@@ -13,29 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.factory;
+package org.stone.springboot.builder;
 
 import org.springframework.core.env.Environment;
-import org.stone.springboot.exception.DataSourceException;
+import org.stone.springboot.exception.XADataSourceException;
 
-import javax.sql.DataSource;
+import javax.sql.XADataSource;
 
 /*
- * Data source factory interface.
+ * XAData source factory interface.
  *
  *  @author Chris Liao
  */
-public interface SpringDataSourceFactory {
+public interface SpringXADataSourceBuilder {
 
     /**
-     * Create a datasource with configuration in spring boot.
+     * Create a Xa datasource with configuration in spring boot.
      *
      * @param environment SpringBoot environment
      * @param dsId        configured data source id
      * @param prefix      configured prefix name
      * @return data source instance
-     * @throws DataSourceException when fail to set
+     * @throws XADataSourceException when fail to set
      */
-    DataSource createDataSource(String prefix, String dsId, Environment environment) throws DataSourceException;
+    XADataSource create(String prefix, String dsId, Environment environment) throws XADataSourceException;
 
 }

@@ -16,19 +16,20 @@
 package org.stone.springboot.annotation;
 
 import org.springframework.context.annotation.Import;
-import org.stone.springboot.ObjectSourceBeansRegister;
+import org.stone.springboot.ObjectSourceBeanRegister;
 
 import java.lang.annotation.*;
 
 /*
- *  Multi-DataSource annotation
+ * Object source enabled annotation
+ *
  *  @author Chris Liao
  */
 
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Target(ElementType.TYPE)
-@Import(value = {ObjectSourceBeansRegister.class})
+@Import(value = {ObjectSourceBeanRegister.class})
 public @interface EnableBeeOs {
-    boolean runMonitor() default true;
+    boolean console() default true;
 }

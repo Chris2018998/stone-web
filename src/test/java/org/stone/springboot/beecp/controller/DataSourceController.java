@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.stone.springboot.annotation.EnableBeeDs;
 import org.stone.springboot.beecp.util.DataSourceUtil;
-import org.stone.springboot.controller.MonitorControllerResponse;
+import org.stone.springboot.monitor.ConsoleControllerResponse;
 import org.stone.springboot.exception.DataSourceException;
 
 import javax.sql.DataSource;
@@ -34,8 +34,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.stone.springboot.beecp.util.DataSourceUtil.*;
-import static org.stone.springboot.controller.MonitorControllerResponse.CODE_FAILED;
-import static org.stone.springboot.controller.MonitorControllerResponse.CODE_SUCCESS;
+import static org.stone.springboot.monitor.ConsoleControllerResponse.CODE_FAILED;
+import static org.stone.springboot.monitor.ConsoleControllerResponse.CODE_SUCCESS;
 import static org.stone.tools.CommonUtil.isBlank;
 
 /*
@@ -45,7 +45,7 @@ import static org.stone.tools.CommonUtil.isBlank;
  */
 @RestController
 @SpringBootApplication
-@EnableBeeDs(runMonitor = true)
+@EnableBeeDs
 public class DataSourceController {
     @Autowired
     @Qualifier("ds1")
@@ -62,7 +62,7 @@ public class DataSourceController {
     }
 
     @PostMapping("/testGetConnection")
-    public MonitorControllerResponse testGetConnection(@RequestBody Map<String, String> map) {
+    public ConsoleControllerResponse testGetConnection(@RequestBody Map<String, String> map) {
         try {
             String dsId = map != null ? map.get("dsId") : null;
             if (isBlank(dsId))
@@ -72,15 +72,15 @@ public class DataSourceController {
 
             DataSource ds = "ds1".equals(dsId) ? ds1 : ds2;
             try (Connection ignored = ds.getConnection()) {
-                return new MonitorControllerResponse(CODE_SUCCESS, "OK", "OK");
+                return new ConsoleControllerResponse(CODE_SUCCESS, "OK", "OK");
             }
         } catch (Throwable e) {
-            return new MonitorControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
+            return new ConsoleControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
         }
     }
 
     @PostMapping("/executeSQL")
-    public MonitorControllerResponse executeSQL(@RequestBody Map<String, String> map) {
+    public ConsoleControllerResponse executeSQL(@RequestBody Map<String, String> map) {
         try {
             String dsId = map.get("dsId");
             String sql = map.get("sql");
@@ -110,61 +110,61 @@ public class DataSourceController {
             Map<String, Boolean> sqlMap = new HashMap<>(1);
             sqlMap.put(sql, Boolean.FALSE);
             DataSourceUtil.executeSQLMap(ds, sqlMap, sqlExecutionType);
-            return new MonitorControllerResponse(CODE_SUCCESS, "OK", "OK");
+            return new ConsoleControllerResponse(CODE_SUCCESS, "OK", "OK");
         } catch (Throwable e) {
-            return new MonitorControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
+            return new ConsoleControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
         }
     }
 
 
 //    @PostMapping("/testGetConnection1")
 //    @BeeDsId("ds1")
-//    public MonitorControllerResponse testCombineDs1() {
+//    public ConsoleControllerResponse testCombineDs1() {
 //        try {
-//            return new MonitorControllerResponse(CODE_SUCCESS, ServerSideUtil.testGetConnection(combineDs), "OK");
+//            return new ConsoleControllerResponse(CODE_SUCCESS, ServerSideUtil.testGetConnection(combineDs), "OK");
 //        } catch (Throwable e) {
 //            e.printStackTrace();
-//            return new MonitorControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
+//            return new ConsoleControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
 //        }
 //    }
 //
 //    @PostMapping("/testGetConnection2")
 //    @BeeDsId("ds2")
-//    public MonitorControllerResponse testCombineDs2() {
+//    public ConsoleControllerResponse testCombineDs2() {
 //        try {
-//            return new MonitorControllerResponse(CODE_SUCCESS, ServerSideUtil.testGetConnection(combineDs), "OK");
+//            return new ConsoleControllerResponse(CODE_SUCCESS, ServerSideUtil.testGetConnection(combineDs), "OK");
 //        } catch (Throwable e) {
 //            e.printStackTrace();
-//            return new MonitorControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
+//            return new ConsoleControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
 //        }
 //    }
 
 //    @PostMapping("/testExecSQL1")
 //    @BeeDsId("ds1")
-//    public MonitorControllerResponse testExecSQL1(@RequestBody Map<String, String> map) {
+//    public ConsoleControllerResponse testExecSQL1(@RequestBody Map<String, String> map) {
 //        try {
 //            String sql = map.get("sql");
 //            String type = map.get("type");
 //            String slowInd = map.get("slowInd");
 //
-//            return new MonitorControllerResponse(CODE_SUCCESS, ServerSideUtil.testSQL(sql, type, slowInd), "OK");
+//            return new ConsoleControllerResponse(CODE_SUCCESS, ServerSideUtil.testSQL(sql, type, slowInd), "OK");
 //        } catch (Throwable e) {
 //            e.printStackTrace();
-//            return new MonitorControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
+//            return new ConsoleControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
 //        }
 //    }
 
 //    @PostMapping("/testExecSQL2")
 //    @BeeDsId("ds2")
-//    public MonitorControllerResponse testExecSQL2(@RequestBody Map<String, String> map) {
+//    public ConsoleControllerResponse testExecSQL2(@RequestBody Map<String, String> map) {
 //        try {
 //            String sql = map.get("sql");
 //            String type = map.get("type");
 //            String slowInd = map.get("slowInd");
-//            return new MonitorControllerResponse(CODE_SUCCESS, ServerSideUtil.testSQL(sql, type, slowInd), "OK");
+//            return new ConsoleControllerResponse(CODE_SUCCESS, ServerSideUtil.testSQL(sql, type, slowInd), "OK");
 //        } catch (Throwable e) {
 //            e.printStackTrace();
-//            return new MonitorControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
+//            return new ConsoleControllerResponse(CODE_FAILED, e.getMessage(), "Failed");
 //        }
 //    }
 }

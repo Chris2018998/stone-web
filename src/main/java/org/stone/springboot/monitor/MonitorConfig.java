@@ -13,52 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.controller;
+package org.stone.springboot.monitor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
-import org.stone.springboot.SpringConfigurationLoader;
+import org.stone.springboot.SpringBootEnvironmentUtil;
 import org.stone.springboot.extension.CacheClientProvider;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.stone.springboot.Constants.Config_Monitor_Prefix;
+import static org.stone.springboot.Constants.Config_Console_Prefix;
 import static org.stone.tools.CommonUtil.isBlank;
 import static org.stone.tools.CommonUtil.isNotBlank;
 
 /**
- * #1: configuration for UI
- * spring.bee.monitor.username=admin
- * spring.bee.monitor.password=admin
- * spring.bee.monitor.logged-flag=bee-logged-success
+ * #1: Console configuration
+ * spring.bee.console.username=admin
+ * spring.bee.console.password=admin
+ * spring.bee.console.logged-flag=bee-logged-success
  * <p>
- * #2: configuration for cache
- * spring.bee.monitor.cacheInterval=18000
- * spring.bee.monitor.cacheKeyPrefix=spring-bee-
- * spring.bee.monitor.cacheClientProvider=org.stone.springboot.extension.redisson.RedissonClientProvider2
- * spring.bee.monitor.jsonTool=org.stone.springboot.extension.JackSonImpl
- * <p>
- * #3: comments out
- * #spring.bee.redis-host=192.168.1.1
- * #spring.bee.redis-port=6379
- * #spring.bee.redis-password=redis
- * #spring.bee.redis-send-period=18000
- * #spring.bee.redis-read-period=1800
+ * #2: Distribution monitor center(Support pull mode and push mode)
+ * spring.bee.center.url=xxxx
+ * spring.bee.center.username=xxxx
+ * spring.bee.center.password=xxxx
+ * spring.bee.center.pushInterval=18000
  *
  * @author Chris Liao
  */
-public final class MonitorConfig extends SpringConfigurationLoader {
+public final class MonitorConfig {
     private static final MonitorConfig single = new MonitorConfig();
     private final Logger log = LoggerFactory.getLogger(MonitorConfig.class);
 
     //1: spring.bee.monitor.x
     private String username = "admin";
     private String password = "admin";
-    private String loggedFlag = MonitorController.class.getName();
+    private String loggedFlag = ConsoleController.class.getName();
 
     //2: spring.bee.monitor.x
     private CacheClientProvider cacheClientProvider;
@@ -139,7 +132,7 @@ public final class MonitorConfig extends SpringConfigurationLoader {
     //***************************************************************************************************************//
     public void load(Environment environment) {
         //1: load Monitoring configuration
-        setConfigPropertiesValue(this, Config_Monitor_Prefix, null, environment);
+        SpringBootEnvironmentUtil.setConfigPropertiesValue(this, Config_Console_Prefix, null, environment);
         //2: create provider
         this.hostWebUrl = buildAppContextInfo(environment);
     }
@@ -155,8 +148,8 @@ public final class MonitorConfig extends SpringConfigurationLoader {
         }
 
         if (isBlank(hostIP)) throw new InternalError("Failed to resolve app host IP");
-        String serverPort = getConfigValue("server", "port", environment);
-        String contextPath = getConfigValue("server", "servlet.context-path", environment);
+        String serverPort = SpringBootEnvironmentUtil.getConfigValue("server", "port", environment);
+        String contextPath = SpringBootEnvironmentUtil.getConfigValue("server", "servlet.context-path", environment);
         if (isBlank(serverPort)) throw new InternalError("Not configured [server.port] in application file");
         if (isBlank(contextPath))
             throw new InternalError("Not configured [server.servlet.context-path] in application file");

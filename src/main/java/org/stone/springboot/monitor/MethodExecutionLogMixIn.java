@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.annotation;
+package org.stone.springboot.monitor;
 
-import java.lang.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-/*
- * DataSourceId annotation to support dynamic source
+/**
+ * Ignores result field when json serialize.
  *
  * @author Chris Liao
- * @version 1.0
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Target(ElementType.METHOD)
-public @interface BeeDsId {
-    String value() default "";
+
+public interface MethodExecutionLogMixIn {
+
+    @JsonIgnore
+    Object getResult();
 }

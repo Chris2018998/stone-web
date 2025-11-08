@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.controller;
+package org.stone.springboot.monitor.snapshot;
 
 import org.stone.beecp.BeeConnectionPoolMonitorVo;
 import org.stone.beecp.BeeMethodExecutionLog;
@@ -23,21 +23,19 @@ import java.io.Serializable;
 import java.util.Collection;
 
 /**
- * 1: push monitoring data of application to redis by timer task
- * 2: Web monitor UI provide a list to display all monitoring data in cache
- * 3: User can choose a record of list to view its runtime monitoring info
+ * Local snapshot data Package
  *
  * @author Chris Liao
  */
 
-public final class PoolSnapshot implements Serializable {
+public final class LocalSnapshotPackage implements Serializable {
     private final String appContextUrl;
     private String cacheTime;
     private Collection<BeeConnectionPoolMonitorVo> dsPoolList;
     private Collection<BeeMethodExecutionLog> dsSqlList;
     private Collection<BeeObjectPoolMonitorVo> osPoolList;
 
-    public PoolSnapshot(String appContextUrl) {
+    public LocalSnapshotPackage(String appContextUrl) {
         this.appContextUrl = appContextUrl;
     }
 

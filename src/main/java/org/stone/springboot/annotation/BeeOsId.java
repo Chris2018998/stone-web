@@ -18,7 +18,7 @@ package org.stone.springboot.annotation;
 import java.lang.annotation.*;
 
 /*
- *  object SourceId annotation to support dynamic object source
+ * Object SourceId annotation to support dynamic object source
  *
  *  @author Chris Liao
  */

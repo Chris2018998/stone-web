@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.factory;
+package org.stone.springboot.builder;
 
 import org.springframework.core.env.Environment;
 import org.stone.beeop.BeeObjectSource;
 import org.stone.beeop.BeeObjectSourceConfig;
 import org.stone.springboot.ObjectSourceBeanManager;
+import org.stone.springboot.SpringBootEnvironmentUtil;
 import org.stone.springboot.exception.ObjectSourceException;
 
 import static org.stone.beecp.pool.ConnectionPoolStatics.CONFIG_EXCLUSION_LIST_OF_PRINT;
@@ -32,21 +33,21 @@ import static org.stone.tools.CommonUtil.isNotBlank;
  *
  *  @author Chris liao
  */
-public class SpringBeeObjectSourceFactory<K, V> {
+public class SpringBeeObjectSourceBuilder<K, V> {
     private final ObjectSourceBeanManager<K, V> osManager = ObjectSourceBeanManager.getInstance();
 
     private void setFactoryPropertiesConfig(BeeObjectSourceConfig<K, V> config, String prefix, Environment environment) {
-        config.addObjectFactoryProperty(osManager.getConfigValue(prefix, CONFIG_FACTORY_PROP, environment));
-        String factoryPropertiesCount = osManager.getConfigValue(prefix, CONFIG_FACTORY_PROP_SIZE, environment);
+        config.addObjectFactoryProperty(SpringBootEnvironmentUtil.getConfigValue(prefix, CONFIG_FACTORY_PROP, environment));
+        String factoryPropertiesCount = SpringBootEnvironmentUtil.getConfigValue(prefix, CONFIG_FACTORY_PROP_SIZE, environment);
         if (isNotBlank(factoryPropertiesCount)) {
             int count = Integer.parseInt(factoryPropertiesCount.trim());
             for (int i = 1; i <= count; i++)
-                config.addObjectFactoryProperty(osManager.getConfigValue(prefix, CONFIG_FACTORY_PROP_KEY_PREFIX + i, environment));
+                config.addObjectFactoryProperty(SpringBootEnvironmentUtil.getConfigValue(prefix, CONFIG_FACTORY_PROP_KEY_PREFIX + i, environment));
         }
     }
 
     private void setConfigPrintExclusionList(BeeObjectSourceConfig<K, V> config, String osPrefix, Environment environment) {
-        String exclusionListText = osManager.getConfigValue(osPrefix, CONFIG_EXCLUSION_LIST_OF_PRINT, environment);
+        String exclusionListText = SpringBootEnvironmentUtil.getConfigValue(osPrefix, CONFIG_EXCLUSION_LIST_OF_PRINT, environment);
         if (isNotBlank(exclusionListText)) {
             config.clearExclusionListOfPrint();//remove existed exclusion
             for (String exclusion : exclusionListText.trim().split(",")) {
@@ -61,7 +62,7 @@ public class SpringBeeObjectSourceFactory<K, V> {
         setFactoryPropertiesConfig(config, osPrefix, environment);
         setConfigPrintExclusionList(config, osPrefix, environment);
 
-        String threadLocalEnable = osManager.getConfigValue(osPrefix, Config_ThreadLocal_Enable, environment);
+        String threadLocalEnable = SpringBootEnvironmentUtil.getConfigValue(osPrefix, Config_ThreadLocal_Enable, environment);
         if (threadLocalEnable == null) {
             boolean enableVirtualThread = Boolean.parseBoolean(environment.getProperty(Config_Virtual_Thread, "false"));
             config.setUseThreadLocal(!enableVirtualThread);

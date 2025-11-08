@@ -7,7 +7,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.stone.springboot.controller.MonitorControllerResponse;
+import org.stone.springboot.monitor.ConsoleControllerResponse;
 
 import java.util.HashMap;
 import java.util.List;
@@ -104,7 +104,7 @@ public class ClientSideUtil {
                 //.andExpect(MockMvcResultMatchers.jsonPath("$.code").value(1))
                 .andReturn();
 
-        return string2Obj(mvcResult.getResponse().getContentAsString(), MonitorControllerResponse.class).getResult();
+        return string2Obj(mvcResult.getResponse().getContentAsString(), ConsoleControllerResponse.class).result();
     }
 
     private static <T> T string2Obj(String str, Class<T> clazz) throws Exception {

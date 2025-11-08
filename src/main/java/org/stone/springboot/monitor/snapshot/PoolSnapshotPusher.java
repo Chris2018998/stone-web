@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.stone.springboot.controller;
+package org.stone.springboot.monitor.snapshot;
 
 /**
- * an interface to push runtime info of cp,op to remote server(for example：Redis server,prometheus gateWay server
+ *
  *
  * @author Chris Liao
  */
@@ -29,6 +29,6 @@ public interface PoolSnapshotPusher {
      * @param snapshot is runtime monitor object
      * @throws Exception when push fail
      */
-    void push(PoolSnapshot snapshot) throws Exception;
+    void push(LocalSnapshotPackage snapshot) throws Exception;
 
 }
